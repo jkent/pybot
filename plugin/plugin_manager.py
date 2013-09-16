@@ -8,12 +8,12 @@ plugins = plugin.plugins
 
 
 class Plugin(BasePlugin):
-    @command
+    @trigger
     def plugin_list(self, msg, argstr):
         names = ', '.join(plugins.keys())
         reply('Plugins: %s' % names)
 
-    @command
+    @trigger
     def plugin_load(self, msg, argstr):
         args = argstr.split()
         try:
@@ -27,7 +27,7 @@ class Plugin(BasePlugin):
         else:
             reply('%s failed to load' % args[0])
 
-    @command
+    @trigger
     def plugin_reload(self, msg, argstr):
         args = argstr.split()
         try:
@@ -41,7 +41,7 @@ class Plugin(BasePlugin):
         else:
             reply('%s failed to reload' % args[0])
 
-    @command
+    @trigger
     def plugin_unload(self, msg, argstr):
         args = argstr.split()
         try:

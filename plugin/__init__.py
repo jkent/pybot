@@ -8,13 +8,13 @@ import traceback
 
 from interfaces import PluginInterface
 
-__all__ = ['BasePlugin', 'reply', 'command']
+__all__ = ['BasePlugin', 'reply', 'trigger']
 
 
 class BasePlugin(PluginInterface):
     def __init__(self, client):
         self.client = client
-        collect_commands(self)
+        collect_triggers(self)
 
 
 plugins = {}
@@ -67,7 +67,7 @@ def unload(name):
     module_name = "plugin." + name
     try:
         plugins[name].on_unload()
-        remove_commands(plugins[name])
+        remove_triggers(plugins[name])
         del plugins[name]
         del sys.modules[module_name]
     except:
@@ -89,8 +89,8 @@ def event(_type, *args):
     if _type == 'message':
         msg = args[0]
         if msg['command'] == 'PRIVMSG' and msg['trailing'].startswith('!'):
-            command = msg['trailing'][1:]
-            dispatch_command(msg, command)
+            trigger = msg['trailing'][1:]
+            dispatch_trigger(msg, trigger)
 
 
 def reply(text):
@@ -105,42 +105,42 @@ def reply(text):
 
 
 #####################
-### Command system
+### Trigger system
 
-commands = []
+triggers = []
 
 
-def command(arg=None):
+def trigger(arg=None):
     call = hasattr(arg, '__call__')
     name = arg if not call else None
 
     def decorate(f):
-        command = name if name else f.__name__.replace('_', ' ')
+        trigger = name if name else f.__name__.replace('_', ' ')
         try:
-            f._marks.append(command)
+            f._marks.append(trigger)
         except AttributeError:
-            f._marks = [command]
+            f._marks = [trigger]
         return f
     return decorate(arg) if call else decorate
 
 
-def collect_commands(plugin):
+def collect_triggers(plugin):
     for _, f in inspect.getmembers(plugin, inspect.ismethod):
         try:
             for name in f.__func__._marks:
-                bisect.insort(commands, (name, f)) 
+                bisect.insort(triggers, (name, f)) 
         except AttributeError:
             pass
 
 
-def remove_commands(plugin):
-    commands[:] = [c for c in commands if c[1].__self__ != plugin]
+def remove_triggers(plugin):
+    triggers[:] = [c for c in triggers if c[1].__self__ != plugin]
 
 
-def dispatch_command(msg, command):
-    i = bisect.bisect(commands, (command + ' ',)) - 1
-    name, f = commands[i]
-    if command == name or command.startswith(name + ' '):
-        argstr = command[len(name) + 1:]
+def dispatch_trigger(msg, trigger):
+    i = bisect.bisect(triggers, (trigger + ' ',)) - 1
+    name, f = triggers[i]
+    if trigger == name or trigger.startswith(name + ' '):
+        argstr = trigger[len(name) + 1:]
         f(msg, argstr)
 
