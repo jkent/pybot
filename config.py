@@ -11,5 +11,5 @@ realname = 'Python IRC bot - http://github.com/jkent/jkent-pybot'
 
 autojoin = ['#pybot']
 
-autoload_plugins = ['startup', 'plugin_manager']
+autoload_plugins = ['base', 'plugin_manager']
 
