@@ -7,7 +7,7 @@ ssl = False
 
 nickname = 'pybot'
 username = 'pybot'
-realname = 'Python IRC bot - http://github.com/jkent/jkent-pybot'
+realname = 'Python IRC bot - http://git.io/M1XRlw'
 
 autojoin = ['#pybot']
 
