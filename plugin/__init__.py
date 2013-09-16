@@ -8,7 +8,7 @@ import traceback
 
 from interfaces import PluginInterface
 
-__all__ = ['BasePlugin', 'trigger']
+__all__ = ['BasePlugin', 'plugins', 'trigger']
 
 
 class BasePlugin(PluginInterface):
@@ -106,9 +106,9 @@ def trigger(arg=None):
     def decorate(f):
         trigger = name if name else f.__name__.replace('_', ' ')
         try:
-            f._marks.append(trigger)
+            f._triggers.append(trigger)
         except AttributeError:
-            f._marks = [trigger]
+            f._triggers = [trigger]
         return f
     return decorate(arg) if call else decorate
 
@@ -116,7 +116,7 @@ def trigger(arg=None):
 def collect_triggers(plugin):
     for _, f in inspect.getmembers(plugin, inspect.ismethod):
         try:
-            for name in f.__func__._marks:
+            for name in f.__func__._triggers:
                 bisect.insort(triggers, (name, f)) 
         except AttributeError:
             pass

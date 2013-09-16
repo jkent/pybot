@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
 # vim: set ts=4 et
 
-import core
 import plugin
 from plugin import *
-plugins = plugin.plugins
 
 
 class Plugin(BasePlugin):

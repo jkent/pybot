@@ -8,7 +8,6 @@ import config
 from connection import RemoteServer
 from message import Message
 import plugin
-from plugin import plugins
 
 
 def process_line(line):
