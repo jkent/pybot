@@ -1,9 +1,13 @@
 # -*- coding: utf-8 -*-
 # vim: set ts=4 et
 
+import inspect
 import sys
 import traceback
+
 from interfaces import PluginInterface
+
+__all__ = ['BasePlugin', 'reply']
 
 
 class BasePlugin(PluginInterface):
@@ -86,4 +90,14 @@ def event(_type, *args):
             print "error in plugin %s" % name
             traceback.print_exc()
     
+
+def reply(text):
+    frame = inspect.currentframe()
+    try:
+        back_locals = frame.f_back.f_locals
+        client = back_locals['self'].client
+        msg = back_locals['msg']
+        client.write('PRIVMSG %s :%s' % (msg['reply'], text))
+    except:
+        raise Exception('reply requires self.client and msg in scope')
 
