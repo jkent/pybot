@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 # vim: set ts=4 et
 
-import time
-
 import core
 import plugin
 from plugin import *
@@ -11,12 +9,13 @@ plugins = plugin.plugins
 
 class Plugin(BasePlugin):
     @command
-    def plugin_list(self, msg, args):
+    def plugin_list(self, msg, argstr):
         names = ', '.join(plugins.keys())
         reply('Plugins: %s' % names)
 
     @command
-    def plugin_load(self, msg, args):
+    def plugin_load(self, msg, argstr):
+        args = argstr.split()
         try:
             name = args[0]
         except:
@@ -29,7 +28,8 @@ class Plugin(BasePlugin):
             reply('%s failed to load' % args[0])
 
     @command
-    def plugin_reload(self, msg, args):
+    def plugin_reload(self, msg, argstr):
+        args = argstr.split()
         try:
             name = args[0]
         except:
@@ -42,7 +42,8 @@ class Plugin(BasePlugin):
             reply('%s failed to reload' % args[0])
 
     @command
-    def plugin_unload(self, msg, args):
+    def plugin_unload(self, msg, argstr):
+        args = argstr.split()
         try:
             name = args[0]
         except:

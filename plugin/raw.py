@@ -5,8 +5,7 @@ from plugin import *
 
 
 class Plugin(BasePlugin):
-    def on_message(self, msg):
-        if msg['command'] == 'PRIVMSG':
-            if msg['trailing'].startswith('!raw '):
-                self.client.write(msg['trailing'][5:])
+    @command
+    def raw(self, msg, argstr):
+        self.client.write(argstr)
 

@@ -141,6 +141,6 @@ def dispatch_command(msg, command):
     i = bisect.bisect(commands, (command + ' ',)) - 1
     name, f = commands[i]
     if command == name or command.startswith(name + ' '):
-        args = command[len(name):].strip().split()
-        f(msg, args)
+        argstr = command[len(name) + 1:]
+        f(msg, argstr)
 
