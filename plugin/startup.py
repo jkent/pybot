@@ -2,6 +2,8 @@
 # vim: set ts=4 et
 
 import time
+
+import config
 import core
 from plugin import BasePlugin
 
@@ -13,8 +15,8 @@ class Plugin(BasePlugin):
 
     def on_connect(self):
         self.connected = True
-        self.client.write('NICK pybot')
-        self.client.write('USER pybot * 0 :pybot')
+        self.client.write('NICK %s' % config.nickname)
+        self.client.write('USER %s * 0 :%s' % (config.username, config.realname))
 
     def on_disconnect(self):
         self.connected = False
@@ -39,5 +41,6 @@ class Plugin(BasePlugin):
         if parts['command'] == 'PING':
             self.client.write('PONG :%s' % parts['trailing'])
         elif parts['command'] == '001':
-            self.client.write('JOIN #wtf')
+            for channel in config.autojoin:
+                self.client.write('JOIN %s' % channel)
 

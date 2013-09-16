@@ -126,7 +126,7 @@ def run():
             running = False
 
 
-def shutdown(reason):
+def shutdown(reason=''):
     global client
     global running, in_shutdown
 
