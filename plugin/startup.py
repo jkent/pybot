@@ -37,10 +37,10 @@ class Plugin(BasePlugin):
             except:
                 self.schedule_reconnect()
 
-    def on_message(self, parts):
-        if parts['command'] == 'PING':
-            self.client.write('PONG :%s' % parts['trailing'])
-        elif parts['command'] == '001':
+    def on_message(self, msg):
+        if msg['command'] == 'PING':
+            self.client.write('PONG :%s' % msg['trailing'])
+        elif msg['command'] == '001':
             for channel in config.autojoin:
                 self.client.write('JOIN %s' % channel)
 

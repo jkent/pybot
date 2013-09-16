@@ -39,26 +39,33 @@ prefix_re =  re.compile(
 )
 
 
-def process_message(message):
-    parts = {
-        'message': message,
+def process_line(line):
+    msg = {
+        'raw': line,
         'prefix': None, 'command': None, 'params': None, 'trailing': None,
-        'servername': None, 'nickname': None, 'user': None, 'host': None
+        'servername': None, 'nickname': None, 'user': None, 'host': None,
+        'reply': None
     }
 
-    m = message_re.match(message)
-    if m:
-        parts.update(m.groupdict())
+    match = message_re.match(line)
+    if match:
+        msg.update(match.groupdict())
 
-    if parts['prefix']:
-        m = prefix_re.match(parts['prefix'])
-        if m:
-            parts.update(m.groupdict())
+    if msg['prefix']:
+        match = prefix_re.match(msg['prefix'])
+        if match:
+            msg.update(match.groupdict())
 
-    if parts['params']:
-        parts['params'] = parts['params'].split(' ')
+    if msg['params']:
+        msg['params'] = msg['params'].split(' ')
 
-    plugin.event('message', parts)
+    if msg['command'] in ['PRIVMSG', 'NOTICE']:
+        if msg['params'][0].startswith(('&', '#', '+', '!')):
+            msg['reply'] = msg['params'][0]
+        else:
+            msg['reply'] = msg['nickname']   
+
+    plugin.event('message', msg)
 
 
 def tick():
@@ -98,7 +105,7 @@ def run():
     global time_last
 
     client = RemoteServer(config.host, config.ssl)
-    client.process_line = process_message
+    client.process_line = process_line
 
     for name in config.autoload_plugins:
         plugin.load(name, client)

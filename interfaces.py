@@ -32,7 +32,7 @@ class PluginInterface(object):
     def on_tick(self, time_now):
         pass
 
-    def on_message(self, parts):
+    def on_message(self, msg):
         pass
 
     def on_connect(self):
