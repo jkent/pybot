@@ -7,5 +7,5 @@ from plugin import *
 class Plugin(BasePlugin):
     @trigger
     def raw(self, msg, argstr):
-        self.client.write(argstr)
+        self.client.send(argstr)
 

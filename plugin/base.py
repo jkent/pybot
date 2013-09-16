@@ -15,8 +15,8 @@ class Plugin(BasePlugin):
 
     def on_connect(self):
         self.connected = True
-        self.client.write('NICK %s' % config.nickname)
-        self.client.write('USER %s * 0 :%s' % (config.username, config.realname))
+        self.client.send('NICK %s' % config.nickname)
+        self.client.send('USER %s * 0 :%s' % (config.username, config.realname))
 
     def on_disconnect(self):
         self.connected = False
@@ -38,9 +38,9 @@ class Plugin(BasePlugin):
                 self.schedule_reconnect()
 
     def on_message(self, msg):
-        if msg['command'] == 'PING':
-            self.client.write('PONG :%s' % msg['trailing'])
-        elif msg['command'] == '001':
+        if msg.cmd == 'PING':
+            self.client.send('PONG :%s' % msg.param[-1])
+        elif msg.cmd == '001':
             for channel in config.autojoin:
-                self.client.write('JOIN %s' % channel)
+                self.client.send('JOIN %s' % channel)
 

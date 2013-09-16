@@ -1,70 +1,18 @@
 # -*- coding: utf-8 -*-
 # vim: set ts=4 et
 
-import re, sys
 import select
 import time
-import traceback
+
 import config
 from connection import RemoteServer
+from message import Message
 import plugin
 from plugin import plugins
 
 
-message_re = re.compile(
-  '^(?:'
-    ':(?P<prefix>\\S+) '        +
-  ')?'                          +
-  '(?P<command>\\S+)'           +
-  '(?:'                         +
-    ' (?!:)(?P<params>.+?)'     +
-  ')?'                          +
-  '(?:'                         +
-    ' :(?P<trailing>.+)'        +
-  ')?$'
-)
-
-prefix_re =  re.compile(
-  '^(?:'                        +
-    '(?:'                       +
-      '(?P<nickname>[^.]+?)'    +
-        '(?:'                   +
-          '(?:'                 +
-            '!(?P<user>.+?)'    +
-          ')?'                  +
-        '@(?P<host>.+)'         +
-      ')?'                      +
-    ')|(?P<servername>.+)'      +
-  ')$'
-)
-
-
 def process_line(line):
-    msg = {
-        'raw': line,
-        'prefix': None, 'command': None, 'params': None, 'trailing': None,
-        'servername': None, 'nickname': None, 'user': None, 'host': None,
-        'reply': None
-    }
-
-    match = message_re.match(line)
-    if match:
-        msg.update(match.groupdict())
-
-    if msg['prefix']:
-        match = prefix_re.match(msg['prefix'])
-        if match:
-            msg.update(match.groupdict())
-
-    if msg['params']:
-        msg['params'] = msg['params'].split(' ')
-
-    if msg['command'] in ['PRIVMSG', 'NOTICE']:
-        if msg['params'][0].startswith(('&', '#', '+', '!')):
-            msg['reply'] = msg['params'][0]
-        else:
-            msg['reply'] = msg['nickname']   
-
+    msg = Message(line, client)
     plugin.event('message', msg)
 
 
@@ -138,7 +86,7 @@ def shutdown(reason=''):
     global running, in_shutdown
 
     if client.connected:
-        client.write('QUIT :%s' % reason)
+        client.send('QUIT :%s' % reason)
         client.do_write()
 
     if in_shutdown:

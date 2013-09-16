@@ -88,7 +88,7 @@ class RemoteServer(SelectableInterface):
                 traceback.print_exc()
 
 
-    def write(self, line):
+    def send(self, line):
         print "<< %s" % line
         self.writebuf += '%s\r\n' % line
 

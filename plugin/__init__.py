@@ -8,7 +8,7 @@ import traceback
 
 from interfaces import PluginInterface
 
-__all__ = ['BasePlugin', 'reply', 'trigger']
+__all__ = ['BasePlugin', 'trigger']
 
 
 class BasePlugin(PluginInterface):
@@ -88,20 +88,9 @@ def event(_type, *args):
 
     if _type == 'message':
         msg = args[0]
-        if msg['command'] == 'PRIVMSG' and msg['trailing'].startswith('!'):
-            trigger = msg['trailing'][1:]
+        if msg.cmd == 'PRIVMSG' and msg.param[-1].startswith('!'):
+            trigger = msg.param[-1][1:]
             dispatch_trigger(msg, trigger)
-
-
-def reply(text):
-    frame = inspect.currentframe()
-    try:
-        back_locals = frame.f_back.f_locals
-        client = back_locals['self'].client
-        msg = back_locals['msg']
-        client.write('PRIVMSG %s :%s' % (msg['reply'], text))
-    except:
-        raise Exception('reply requires self.client and msg in scope')
 
 
 #####################
