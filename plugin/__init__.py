@@ -22,6 +22,7 @@ plugins = {}
 def load(name, client):
     if name in plugins:
         print "%s is already loaded" % name
+        return False
 
     module_name = "plugin." + name
     modules_backup = dict(sys.modules)
@@ -116,9 +117,9 @@ def command(arg=None):
     def decorate(f):
         command = name if name else f.__name__.replace('_', ' ')
         try:
-            f._marks.add(command)
+            f._marks.append(command)
         except AttributeError:
-            f._marks = {command}
+            f._marks = [command]
         return f
     return decorate(arg) if call else decorate
 
