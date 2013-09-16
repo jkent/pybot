@@ -29,7 +29,7 @@ def load(name, client):
     try:
         module = __import__(module_name, globals(), locals(), ['Plugin'], 0)
         plugins[name] = module.Plugin(client)
-        plugins[name].on_load()
+        plugins[name].on_load(False)
     except:
         sys.modules = modules_backup
         traceback.print_exc()
@@ -48,9 +48,9 @@ def reload(name):
     client = plugins[name].client
     try:
         _reload(sys.modules[module_name])
-        plugins[name].on_unload()
+        plugins[name].on_unload(True)
         plugins[name] = sys.modules[module_name].Plugin(client)
-        plugins[name].on_load()
+        plugins[name].on_load(True)
     except:
         print "error reloading %s" % name
         traceback.print_exc()
@@ -66,7 +66,7 @@ def unload(name):
 
     module_name = "plugin." + name
     try:
-        plugins[name].on_unload()
+        plugins[name].on_unload(False)
         remove_triggers(plugins[name])
         del plugins[name]
         del sys.modules[module_name]

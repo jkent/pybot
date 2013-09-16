@@ -23,10 +23,10 @@ class SelectableInterface(object):
 
 
 class PluginInterface(object):
-    def on_load(self):
+    def on_load(self, reloading=False):
         pass
 
-    def on_unload(self):
+    def on_unload(self, reloading=False):
         pass
 
     def on_tick(self, time_now):
