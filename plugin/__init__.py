@@ -49,6 +49,7 @@ def reload(name):
     try:
         _reload(sys.modules[module_name])
         plugins[name].on_unload(True)
+        remove_triggers(plugins[name])
         plugins[name] = sys.modules[module_name].Plugin(client)
         plugins[name].on_load(True)
     except:
