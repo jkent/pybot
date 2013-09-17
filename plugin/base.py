@@ -9,6 +9,8 @@ from plugin import BasePlugin
 
 
 class Plugin(BasePlugin):
+    priority = 5
+
     def __init__(self, *args):
         BasePlugin.__init__(self, *args)
         self.connected = False

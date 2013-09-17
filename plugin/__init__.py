@@ -97,40 +97,57 @@ def event(_type, *args):
 #####################
 ### Trigger system
 
+from sets import Set
+
 triggers = []
+trigger_max_parts = 0
 
 
-def trigger(arg=None):
-    call = hasattr(arg, '__call__')
-    name = arg if not call else None
-
+def trigger(*args):
+    call = len(args) == 1 and hasattr(args[0], '__call__')
+    names = list(args) if not call else []
     def decorate(f):
-        trigger = name if name else f.__name__.replace('_', ' ')
+        if not names:
+            name = f.__name__.replace('_', ' ')
+            names.append(name)
         try:
-            f._triggers.append(trigger)
+            f._triggers.update(names)
         except AttributeError:
-            f._triggers = [trigger]
+            f._triggers = Set(names)
         return f
-    return decorate(arg) if call else decorate
+    return decorate(args[0]) if call else decorate
 
 
 def collect_triggers(plugin):
-    for _, f in inspect.getmembers(plugin, inspect.ismethod):
+    global trigger_max_parts
+
+    priority = getattr(plugin, 'priority', 100)
+    for _, m in inspect.getmembers(plugin, inspect.ismethod):
         try:
-            for name in f.__func__._triggers:
-                bisect.insort(triggers, (name, f)) 
+            for name in m.__func__._triggers:
+                parts = tuple(name.split())
+                trigger_max_parts = max(trigger_max_parts, len(parts))
+                bisect.insort(triggers, (len(parts), parts, priority, m)) 
         except AttributeError:
             pass
 
 
 def remove_triggers(plugin):
-    triggers[:] = [c for c in triggers if c[1].__self__ != plugin]
+    triggers[:] = [t for t in triggers if t[3].__self__ != plugin]
 
 
 def dispatch_trigger(msg, trigger):
-    i = bisect.bisect(triggers, (trigger + ' ',)) - 1
-    name, f = triggers[i]
-    if trigger == name or trigger.startswith(name + ' '):
-        argstr = trigger[len(name) + 1:]
-        f(msg, argstr)
+    for depth in range(trigger_max_parts, 0, -1):
+        parts = tuple(trigger.split(None, depth))
+        leading = parts[:depth]
+        i = bisect.bisect_right(triggers, (depth, leading,)) 
+        j = bisect.bisect_left(triggers, (depth, leading + ('',),))
+        if i == j:
+            continue
+
+        argstr = parts[depth] if len(parts) > depth else ''
+        args = (' '.join(leading),) + tuple(argstr.split())
+        for _, _, _, m in triggers[i:j]:
+            nargs = m.__func__.func_code.co_argcount - 1
+            m(*(msg, args, argstr)[:nargs])
 

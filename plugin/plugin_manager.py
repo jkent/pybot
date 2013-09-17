@@ -7,49 +7,46 @@ from plugin import *
 
 class Plugin(BasePlugin):
     @trigger
-    def plugin_list(self, msg, argstr):
+    def plugin_list(self, msg):
         names = ', '.join(plugins.keys())
         msg.reply('Plugins: %s' % names)
 
     @trigger
-    def plugin_load(self, msg, argstr):
-        args = argstr.split()
+    def plugin_load(self, msg, args):
         try:
-            name = args[0]
+            name = args[1]
         except:
             msg.reply('plugin name required')
             return
 
-        if plugin.load(args[0], self.client):
-            msg.reply('%s loaded' % args[0])
+        if plugin.load(name, self.client):
+            msg.reply('%s loaded' % name)
         else:
-            msg.reply('%s failed to load' % args[0])
+            msg.reply('%s failed to load' % name)
 
     @trigger
-    def plugin_reload(self, msg, argstr):
-        args = argstr.split()
+    def plugin_reload(self, msg, args):
         try:
-            name = args[0]
+            name = args[1]
         except:
             msg.reply('plugin name required')
             return
 
-        if plugin.reload(args[0]):
-            msg.reply('%s reloaded' % args[0])
+        if plugin.reload(name):
+            msg.reply('%s reloaded' % name)
         else:
-            msg.reply('%s failed to reload' % args[0])
+            msg.reply('%s failed to reload' % name)
 
     @trigger
-    def plugin_unload(self, msg, argstr):
-        args = argstr.split()
+    def plugin_unload(self, msg, args):
         try:
-            name = args[0]
+            name = args[1]
         except:
             msg.reply('plugin name required')
             return
 
-        if plugin.unload(args[0]):
-            msg.reply('%s unloaded' % args[0])
+        if plugin.unload(name):
+            msg.reply('%s unloaded' % name)
         else:
-            msg.reply('%s failed to unload' % args[0])
+            msg.reply('%s failed to unload' % name)
 

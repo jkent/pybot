@@ -6,6 +6,6 @@ from plugin import *
 
 class Plugin(BasePlugin):
     @trigger
-    def raw(self, msg, argstr):
+    def raw(self, msg, args, argstr):
         self.client.send(argstr)
 
