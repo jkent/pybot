@@ -15,6 +15,11 @@ class Plugin(BasePlugin):
         BasePlugin.__init__(self, *args)
         self.connected = False
 
+    def on_unload(self, reloading):
+        if not reloading:
+            return False
+        return BasePlugin.on_unload(self, reloading)
+
     @event
     def connect(self):
         self.connected = True

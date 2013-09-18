@@ -18,11 +18,12 @@ class BasePlugin(object):
     def __init__(self, client):
         self.client = client
 
-    def on_load(self, reloading=False):
+    def on_load(self, reloading):
         hooks.collect(self)
 
-    def on_unload(self, reloading=False):
+    def on_unload(self, reloading):
         hooks.remove_by_instance(self)
+        return True
 
 
 plugins = {}
@@ -58,7 +59,7 @@ def load(name, client):
 
 
 _reload = reload
-def reload(name):
+def reload(name, force=False):
     if debug:
         print 'plugin reload: %s' % name
 
@@ -70,7 +71,9 @@ def reload(name):
     client = plugins[name].client
     try:
         _reload(sys.modules[module_name])
-        plugins[name].on_unload(True)
+        if not force and not plugins[name].on_unload(True):
+            print 'plugin "%s" cannot be reloaded'
+            return False
         del plugins[name]
         plugins[name] = sys.modules[module_name].Plugin(client)
         plugins[name].on_load(True)
@@ -85,7 +88,7 @@ def reload(name):
     return True
 
 
-def unload(name):
+def unload(name, force=False):
     if debug:
         print 'plugin unload: %s' % name
 
@@ -95,7 +98,9 @@ def unload(name):
 
     module_name = 'plugin.' + name
     try:
-        plugins[name].on_unload(False)
+        if not force and not plugins[name].on_unload(False):
+            print 'plugin "%s" cannot be removed'
+            return False
         del plugins[name]
         del sys.modules[module_name]
     except:

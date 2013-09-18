@@ -76,7 +76,7 @@ def run():
             running = False
 
     for name in plugin.plugins.keys():
-        plugin.unload(name)
+        plugin.unload(name, True)
 
 
 def shutdown(reason=''):
