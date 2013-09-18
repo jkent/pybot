@@ -25,7 +25,7 @@ def add_hook(_type, desc, method, priority=100):
     bisect.insort(hooks, hook)
 
 def remove_instance_hooks(instance):
-    hooks[:] = [hook for hook in hooks if hook[2].__self__ != instance]
+    hooks[:] = [hook for hook in hooks if hook[3].__self__ != instance]
 
 def find_hooks(_type, desc):
     if type(desc) != tuple:
