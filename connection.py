@@ -6,7 +6,11 @@ import socket
 import ssl
 import time
 import traceback
+
 from interfaces import SelectableInterface
+import config
+
+debug = 'connection' in config.debug
 
 
 class RemoteServer(SelectableInterface):
@@ -81,7 +85,8 @@ class RemoteServer(SelectableInterface):
         parts = self.readbuf.split('\r\n')
         lines, self.readbuf = parts[:-1], parts[-1]
         for line in lines:
-            print ">> %s" % line
+            if debug:
+                print ">> %s" % line
             try:
                 self.process_line(line)
             except:
@@ -89,7 +94,8 @@ class RemoteServer(SelectableInterface):
 
 
     def send(self, line):
-        print "<< %s" % line
+        if debug:
+            print "<< %s" % line
         self.writebuf += '%s\r\n' % line
 
     def join(self, channel):

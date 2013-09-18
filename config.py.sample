@@ -13,3 +13,6 @@ autojoin = ['#pybot']
 
 autoload_plugins = ['base', 'plugin_manager']
 
+# debug options: connection, hooks, plugins
+debug = ['connection']
+

@@ -75,6 +75,9 @@ def run():
         if in_shutdown and not connected:
             running = False
 
+    for name in plugin.plugins.keys():
+        plugin.unload(name)
+
 
 def shutdown(reason=''):
     global client
