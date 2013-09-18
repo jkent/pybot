@@ -8,15 +8,20 @@ import traceback
 
 import hooks
 from hooks import event, command, trigger
-from interfaces import PluginInterface
 
 __all__ = ['BasePlugin', 'command', 'event', 'plugins', 'trigger']
 
 
-class BasePlugin(PluginInterface):
+class BasePlugin(object):
     def __init__(self, client):
         self.client = client
         hooks.collect_hooks(self)
+
+    def on_load(self, reloading=False):
+        pass
+
+    def on_unload(self, reloading=False):
+        pass
 
 
 plugins = {}

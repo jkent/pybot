@@ -21,23 +21,3 @@ class SelectableInterface(object):
     def do_write(self):
         return
 
-
-class PluginInterface(object):
-    def on_load(self, reloading=False):
-        pass
-
-    def on_unload(self, reloading=False):
-        pass
-
-    def on_tick(self, time_now):
-        pass
-
-    def on_message(self, msg):
-        pass
-
-    def on_connect(self):
-        pass
-
-    def on_disconnect(self):
-        pass
-
