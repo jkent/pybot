@@ -92,3 +92,15 @@ class RemoteServer(SelectableInterface):
         print "<< %s" % line
         self.writebuf += '%s\r\n' % line
 
+    def join(self, channel):
+        self.send('JOIN %s' % channel)
+
+    def notice(self, target, text):
+        self.send('NOTICE %s :%s' % (target, text))
+
+    def part(self, channel):
+        self.send('PART %s' % channel)
+
+    def privmsg(self, target, text):
+        self.send('PRIVMSG %s :%s' % (target, text))
+
