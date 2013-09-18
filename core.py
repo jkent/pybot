@@ -6,13 +6,9 @@ import time
 
 import config
 from connection import RemoteServer
+import hooks
 from message import Message
 import plugin
-
-
-def process_line(line):
-    msg = Message(line, client)
-    plugin.event('message', msg)
 
 
 def tick():
@@ -24,7 +20,7 @@ def tick():
         time_last = time_now
         for obj in selectables:
             obj.on_tick(time_now)
-        plugin.event('tick', time_now)
+        hooks.call_event('tick', time_now)
 
     try_read = []
     try_write = []
@@ -52,7 +48,7 @@ def run():
     global time_last
 
     client = RemoteServer(config.host, config.ssl)
-    client.process_line = process_line
+    client.process_line = lambda line: hooks.call_event('line', client, line)
 
     for name in config.autoload_plugins:
         plugin.load(name, client)
@@ -71,10 +67,10 @@ def run():
         except KeyboardInterrupt:
             shutdown('KeyboardInterrupt')
         if client.connected and not connected:
-            plugin.event('connect')
+            hooks.call_event('connect')
             connected = True
         if not client.connected and connected:
-            plugin.event('disconnect')
+            hooks.call_event('disconnect')
             connected = False
         if in_shutdown and not connected:
             running = False
