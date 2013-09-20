@@ -1,94 +1,65 @@
 # -*- coding: utf-8 -*-
 # vim: set ts=4 et
 
-import select
-import time
+from select import select
+from time import time
 
-import config
-from connection import RemoteServer
-import hooks
-from message import Message
-import plugin
+from bot import Bot
 
 
-def tick():
-    global selectables
-    global time_last
+class Core(object):
+    def __init__(self):
+        self.selectable = []
+        self.running = False
+        self.in_shutdown = False
+        self.time_last = time()
 
-    time_now = time.time()
-    if time_last + 1 <= time_now:
-        time_last = time_now
-        for obj in selectables:
-            obj.on_tick(time_now)
-        hooks.call_event('tick', time_now)
+    def add_bot(self):
+        bot = Bot(self)
+        self.selectable.append(bot)
 
-    try_read = []
-    try_write = []
+    def run(self):
+        self.running = True
+        while self.running:
+            try:
+                self.tick()
+            except KeyboardInterrupt:
+                self.shutdown('KeyboardInterrupt')
+            if self.in_shutdown:
+                shutdown = True
+                for obj in self.selectable:
+                    if obj.connected:
+                        shutdown = False
+                        break
+                if shutdown:
+                    self.running = False
 
-    for obj in selectables:
-        if obj.fileno() == None:
-            continue
-        if obj.can_read():
-            try_read.append(obj)
-        if obj.can_write():
-            try_write.append(obj)
+    def tick(self):
+        time_now = time()
+        if self.time_last + 1 <= time_now:
+            for obj in self.selectable:
+                obj.do_tick(time_now)
+            self.time_last = time_now
 
-    readable, writeable, _ = select.select(try_read, try_write, [], 0.5)
+        read_objs = (obj for obj in self.selectable if obj.can_read())
+        write_objs = (obj for obj in self.selectable if obj.can_write())
 
-    for obj in writeable:
-        obj.do_write()
-    for obj in readable:
-        obj.do_read()
+        readable, writeable, _ = select(read_objs, write_objs, [], 0.5)
 
+        for obj in readable:
+            obj.do_read()
 
-def run():
-    global client
-    global selectables
-    global connected, running, in_shutdown
-    global time_last
+        for obj in writeable:
+            obj.do_write()
 
-    client = RemoteServer(config.host, config.ssl)
-    client.process_line = lambda line: hooks.call_event('line', client, line)
+    def shutdown(self, reason=''):
+        if self.in_shutdown:
+            self.running = False
+            return
 
-    for name in config.autoload_plugins:
-        plugin.load(name, client)
-
-    client.connect()
-
-    selectables = [client]
-    time_last = time.time()
-
-    in_shutdown = False
-    running = True
-    connected = False
-    while running:
-        try:
-            tick()
-        except KeyboardInterrupt:
-            shutdown('KeyboardInterrupt')
-        if client.connected and not connected:
-            hooks.call_event('connect')
-            connected = True
-        if not client.connected and connected:
-            hooks.call_event('disconnect')
-            connected = False
-        if in_shutdown and not connected:
-            running = False
-
-    for name in plugin.plugins.keys():
-        plugin.unload(name, True)
-
-
-def shutdown(reason=''):
-    global client
-    global running, in_shutdown
-
-    if client.connected:
-        client.send('QUIT :%s' % reason)
-        client.do_write()
-
-    if in_shutdown:
-        running = False
-
-    in_shutdown = True
+        self.in_shutdown = True
+        
+        for obj in self.selectable:
+            if obj.connected and isinstance(obj, Bot):
+                obj.call_event('shutdown', reason)
 

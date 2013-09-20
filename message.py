@@ -31,10 +31,9 @@ prefix_re =  re.compile(
   ')$'
 )
 
-
 class Message(object):
-    def __init__(self, line, client=None):
-        self.client = client
+    def __init__(self, line, bot=None):
+        self.bot = bot
         self.raw = line
         self.prefix = None
         self.cmd = None
@@ -74,10 +73,9 @@ class Message(object):
             else:
                 self.reply_to = self.nick
 
-
     def reply(self, text, direct=False):
-        if not self.client:
-            raise Exception('No client object bound')
+        if not self.bot:
+            raise Exception('No bot object bound')
 
         if not self.reply_to and not self.nick:
             raise Exception('Nobody to reply to')
@@ -85,5 +83,5 @@ class Message(object):
         direct |= not bool(self.reply_to)
         recipient = self.nick if direct else self.reply_to
 
-        self.client.send('PRIVMSG %s :%s' % (recipient, text))
+        self.bot.send('PRIVMSG %s :%s' % (recipient, text))
 

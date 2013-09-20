@@ -4,7 +4,6 @@
 import time
 
 import config
-import core
 from plugin import *
 
 
@@ -17,15 +16,15 @@ class Plugin(BasePlugin):
 
     def on_unload(self, reloading):
         if not reloading:
-            return False
+            return True
         return BasePlugin.on_unload(self, reloading)
 
-    @event
+    @event_hook
     def connect(self):
-        self.client.send('NICK %s' % config.nickname)
-        self.client.send('USER %s * 0 :%s' % (config.username, config.realname))
+        self.bot.send('NICK %s' % config.nickname)
+        self.bot.send('USER %s * 0 :%s' % (config.username, config.realname))
 
-    @event
+    @event_hook
     def disconnect(self):
         self.schedule_reconnect()
 
@@ -37,29 +36,25 @@ class Plugin(BasePlugin):
         self.next_attempt = time.time() + 60 * min(self.reconnect_attempt, 5)
         self.reconnect_attempt += 1
 
-    @event
+    @event_hook
     def tick(self, time_now):
-        if self.client.connected:
+        if self.bot.connected:
             return
 
         if time_now > self.next_attempt:
             try:
-                self.client.connect()
+                self.bot.connect()
             except:
                 self.schedule_reconnect()
 
-    @command('error')
-    def cmd_error(self, msg):
+    @command_hook
+    def error(self, msg):
         if 'ban' in msg.param[-1]:
-            core.shutdown()
+            self.bot.core.shutdown('Shutdown due to ban')
 
-    @command('ping')
-    def cmd_ping(self, msg):
-        self.client.send('PONG :%s' % msg.param[-1])
-
-    @command('001')
-    def cmd_001(self, msg):
+    @command_hook('001')
+    def _001(self, msg):
         self.connecting = False
         for channel in config.autojoin:
-            self.client.send('JOIN %s' % channel)
+            self.bot.send('JOIN %s' % channel)
 

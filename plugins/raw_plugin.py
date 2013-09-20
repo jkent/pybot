@@ -5,7 +5,7 @@ from plugin import *
 
 
 class Plugin(BasePlugin):
-    @trigger
+    @trigger_hook
     def raw(self, msg, args, argstr):
-        self.client.send(argstr)
+        self.bot.send(argstr)
 

@@ -7,7 +7,7 @@ from plugin import *
 
 
 class Plugin(BasePlugin):
-    @trigger
+    @trigger_hook
     def choose(self, msg, args, argstr):
         argstr = argstr.replace(' or ', ',').replace(',or ', ',')
         choices = [x for x in map(str.strip, argstr.split(',')) if x]
