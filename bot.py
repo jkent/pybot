@@ -97,12 +97,15 @@ class Bot(Client):
             else:
                 self.send('JOIN %s' % channels)
 
-    def part(self, channels):
+    def part(self, channels, message=None):
         if type(channels) == str:
             channels = (channels,)
         if channels:
             channels = ','.join(channels)
-            self.send('PART %s' % channels)
+            if message:
+                self.send('PART %s :%s' % (channels, message))
+            else:
+                self.send('PART %s' % channels)
 
     @event_hook
     def shutdown(self, reason):
