@@ -55,6 +55,5 @@ class Plugin(BasePlugin):
     @command_hook('001')
     def _001(self, msg):
         self.connecting = False
-        for channel in config.autojoin:
-            self.bot.send('JOIN %s' % channel)
+        self.bot.join(config.autojoin)
 

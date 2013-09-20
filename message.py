@@ -83,5 +83,5 @@ class Message(object):
         direct |= not bool(self.reply_to)
         recipient = self.nick if direct else self.reply_to
 
-        self.bot.send('PRIVMSG %s :%s' % (recipient, text))
+        self.bot.privmsg(recipient, text)
 

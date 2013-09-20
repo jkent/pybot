@@ -80,6 +80,30 @@ class Bot(Client):
             targs = (' '.join(parts[:depth]),) + tuple(targstr.split())
             Hooks.call(hooks, msg, targs, targstr)
 
+    def privmsg(self, target, text):
+        self.send('PRIVMSG %s :%s' % (target, text))
+
+    def notice(self, target, text):
+        self.send('NOTICE %s :%s' % (target, text))
+
+    def join(self, channels, keys=None):
+        if type(channels) == str:
+            channels = (channels,)
+        if channels:
+            channels = ','.join(channels)
+            if keys:
+                keys = ','.join(keys)
+                self.send('JOIN %s %s' % (channels, keys))
+            else:
+                self.send('JOIN %s' % channels)
+
+    def part(self, channels):
+        if type(channels) == str:
+            channels = (channels,)
+        if channels:
+            channels = ','.join(channels)
+            self.send('PART %s' % channels)
+
     @event_hook
     def shutdown(self, reason):
         self.send('QUIT :%s' % reason)
