@@ -45,7 +45,9 @@ class Plugins(object):
             return None, error
 
         try:
-            module.refcnt = module.refcnt
+            if module.refcnt == 0:
+                module, error = self._reload_module(name)
+                if error: return None, error
         except:
             if debug:
                 print '%s plugin: loaded %s module' % (name, modname)
