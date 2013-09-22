@@ -7,8 +7,8 @@ from plugin import *
 
 
 class Plugin(BasePlugin):
-    @trigger_hook
-    def choose(self, msg, args, argstr):
+    @hook
+    def choose_trigger(self, msg, args, argstr):
         argstr = argstr.replace(' or ', ',').replace(',or ', ',')
         choices = [x for x in map(str.strip, argstr.split(',')) if x]
         if not choices:

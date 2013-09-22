@@ -5,13 +5,13 @@ from plugin import *
 
 
 class Plugin(BasePlugin):
-    @trigger_hook
-    def plugin_list(self, msg):
+    @hook
+    def plugin_list_trigger(self, msg):
         names = ', '.join(self.bot.plugins.list())
         msg.reply('Loaded plugins: %s' % names)
 
-    @trigger_hook
-    def plugin_load(self, msg, args):
+    @hook
+    def plugin_load_trigger(self, msg, args):
         try:
             name = args[1]
         except:
@@ -24,8 +24,8 @@ class Plugin(BasePlugin):
         else:
             msg.reply('%s plugin loaded' % name)
 
-    @trigger_hook
-    def plugin_reload(self, msg, args):
+    @hook
+    def plugin_reload_trigger(self, msg, args):
         try:
             name = args[1]
         except:
@@ -38,8 +38,8 @@ class Plugin(BasePlugin):
         else:
             msg.reply('%s plugin reloaded' % name)
 
-    @trigger_hook
-    def plugin_unload(self, msg, args):
+    @hook
+    def plugin_unload_trigger(self, msg, args):
         try:
             name = args[1]
         except:

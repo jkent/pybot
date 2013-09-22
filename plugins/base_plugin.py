@@ -19,13 +19,13 @@ class Plugin(BasePlugin):
             return True
         return BasePlugin.on_unload(self, reloading)
 
-    @event_hook
-    def connect(self):
+    @hook
+    def connect_event(self):
         self.bot.send('NICK %s' % config.nickname)
         self.bot.send('USER %s * 0 :%s' % (config.username, config.realname))
 
-    @event_hook
-    def disconnect(self):
+    @hook
+    def disconnect_event(self):
         self.schedule_reconnect()
 
     def schedule_reconnect(self):
@@ -36,8 +36,8 @@ class Plugin(BasePlugin):
         self.next_attempt = time.time() + 60 * min(self.reconnect_attempt, 5)
         self.reconnect_attempt += 1
 
-    @event_hook
-    def tick(self, time_now):
+    @hook
+    def tick_event(self, time_now):
         if self.bot.connected:
             return
 
@@ -47,13 +47,13 @@ class Plugin(BasePlugin):
             except:
                 self.schedule_reconnect()
 
-    @command_hook
-    def error(self, msg):
+    @hook
+    def error_command(self, msg):
         if 'ban' in msg.param[-1]:
             self.bot.core.shutdown('Shutdown due to ban')
 
-    @command_hook('001')
-    def _001(self, msg):
+    @hook
+    def _001_command(self, msg):
         self.connecting = False
         self.bot.join(config.autojoin)
 

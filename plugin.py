@@ -4,11 +4,10 @@
 import sys
 import traceback
 
-from bot import event_hook, command_hook, trigger_hook
 import config
-from hook import Hooks
+from hook import Hooks, hook
 
-__all__ = ['BasePlugin', 'event_hook', 'command_hook', 'trigger_hook']
+__all__ = ['BasePlugin', 'hook']
 
 debug = 'plugin' in config.debug
 

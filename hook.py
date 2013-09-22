@@ -29,18 +29,7 @@ class Hooks:
                 traceback.print_exc()
 
     @staticmethod
-    def decorator(_type, transform=lambda x:x):
-        def factory(*args):
-            call = len(args) == 1 and hasattr(args[0], '__call__')
-            def decorate(f):
-                names = args if args and not call else (transform(f.__name__),)
-                hooks = ((_type, name) for name in names)
-                try:
-                    f._hooks.update(hooks)
-                except AttributeError:
-                    f._hooks = Set(hooks)
-                return f
-            return decorate(args[0]) if call else decorate
+    def decorator():
         return factory
 
     def add(self, _type, desc, method, priority=100):
@@ -73,4 +62,43 @@ class Hooks:
         i = bisect.bisect_right(self.hooks, (_type, (desc,)))
         j = bisect.bisect_left(self.hooks, (_type, (desc, None)))
         return self.hooks[i:j]
+
+def hook(*args):
+    call = len(args) == 1 and hasattr(args[0], '__call__')
+    def decorate(f):
+        if call or not args:
+            try:
+                name, _type = f.__name__.lstrip('_').rsplit('_', 1)
+            except:
+                raise ValueError("function name must follow <hookname>_<hooktype> convention")
+            hooks = ((_type, name.replace('_', ' ')),)
+        elif len(args) == 1:
+            try:
+                _, _type = f.__name__.rsplit('_', 1)
+            except:
+                raise ValueError("function name must follow anything_<hooktype> convention")
+            if isinstance(arg[0], basestring):
+                hooks = ((_type, arg[0]),)
+            elif all(isinstance(s, basestring) for s in arg[0]):
+                hooks = ((_type, s) for s in arg[0])
+            else:
+                raise TypeError("name is not a string or iterable of strings")
+        elif len(args) == 2:
+            if not isinstance(arg[0], basestring):
+                raise TypeError("type is not a string")
+            _type = arg[0]
+            if isinstance(arg[1], basestring):
+                hooks = ((_type, arg[1]),)
+            elif all(isinstance(s, basestring) for s in arg[1]):
+                hooks = ((_type, s) for s in arg[1])
+            else:
+                raise TypeError("name is not a string or iterable of strings")
+        else:
+            raise TypeError("too many arguments provided")
+        try:
+            f._hooks.update(hooks)
+        except AttributeError:
+            f._hooks = Set(hooks)
+        return f
+    return decorate(args[0]) if call else decorate
 

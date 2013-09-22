@@ -5,13 +5,8 @@ import inspect
 
 import config
 from client import Client
-from hook import Hooks
+from hook import Hooks, hook
 from message import Message
-
-event_hook = Hooks.decorator('event')
-command_hook = Hooks.decorator('command')
-trigger_hook = Hooks.decorator('trigger', lambda s:s.replace('_', ' '))
-
 from plugin import Plugins
 
 
@@ -107,13 +102,13 @@ class Bot(Client):
             else:
                 self.send('PART %s' % channels)
 
-    @event_hook
-    def shutdown(self, reason):
+    @hook
+    def shutdown_event(self, reason):
         self.send('QUIT :%s' % reason)
         for name in self.plugins.list():
             self.plugins.unload(name, True)
         
-    @command_hook
-    def ping(self, msg):
+    @hook
+    def ping_command(self, msg):
         self.send('PONG :%s' % msg.param[-1])
 
