@@ -28,10 +28,6 @@ class Hooks:
                 print '%s hook error:' % hook[0]
                 traceback.print_exc()
 
-    @staticmethod
-    def decorator():
-        return factory
-
     def add(self, _type, desc, method, priority=100):
         #desc = tupleize_desc(desc)
         if not inspect.ismethod(method):
