@@ -29,7 +29,6 @@ class Hooks:
                 traceback.print_exc()
 
     def add(self, _type, desc, method, priority=100):
-        #desc = tupleize_desc(desc)
         if not inspect.ismethod(method):
             raise Exception("Only instance methods may be hooked")
         hook = (_type, (desc,), priority, method)
@@ -54,7 +53,6 @@ class Hooks:
         self.hooks = [h for h in self.hooks if h[3].__self__ != instance]
 
     def find(self, _type, desc):
-        #desc = tupleize_desc(desc)
         i = bisect.bisect_right(self.hooks, (_type, (desc,)))
         j = bisect.bisect_left(self.hooks, (_type, (desc, None)))
         return self.hooks[i:j]
