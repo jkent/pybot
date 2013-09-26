@@ -2,6 +2,7 @@
 # vim: set ts=4 et
 
 import random
+import re
 
 from plugin import *
 
@@ -46,3 +47,30 @@ class Plugin(BasePlugin):
         choice = random.choice(choices) if choices else None
         msg.reply(response.format(msg.nick, choice))
 
+    @hook
+    def privmsg_command(self, msg):
+        if not msg.param[0].startswith('#'):
+            return
+
+        m = re.match('^should i .*\?$', msg.param[-1], re.I)
+        if not m:
+            return
+
+        m = re.match(' or ', msg.param[-1], re.I)
+        if m:
+            return
+
+        responses = [
+            "Sure!",
+            "Of course.",
+            "Why not.",
+            "Yes.",
+            "Nah.",
+            "Better not.",
+            "Nope.",
+            "No way!",
+        ]
+
+        response = random.choice(responses)
+        msg.reply(response)
+    
