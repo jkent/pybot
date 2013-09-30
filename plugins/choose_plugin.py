@@ -63,8 +63,10 @@ class Plugin(BasePlugin):
         responses = [
             "Sure!",
             "Of course.",
-            "Why not.",
+            "Why not?",
             "Yes.",
+            "Maybe.",
+            "Are you sure thats a good idea?",
             "Nah.",
             "Better not.",
             "Nope.",
