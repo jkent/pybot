@@ -12,6 +12,8 @@ autojoin = ['#pybot']
 
 autoload_plugins = ['base', 'plugin', 'choose']
 
+directed_triggers = True
+
 # debug options: client, hook, plugin
 debug = ['client']
 

@@ -25,6 +25,8 @@ class Bot(Client):
         for name in config.autoload_plugins:
             self.plugins.load(name)
 
+        self.nick = None
+
         self.connect()
 
     def collect_hooks(self, instance):
@@ -57,10 +59,17 @@ class Bot(Client):
         hooks = self.hooks.find('command', command.upper())
         Hooks.call(hooks, *args)
         if command == 'PRIVMSG':
-            msg = args[0]
-            if msg.param[-1].startswith('!'):
-                trigger = msg.param[-1][1:]
-                self.call_trigger(trigger, msg)
+            self.detect_trigger(args[0])
+
+    def detect_trigger(self, msg):
+        if config.directed_triggers:
+            prefix = self.nick + ','
+        else:
+            prefix = '!'
+
+        if msg.param[-1].lower().startswith(prefix):
+            trigger = msg.param[-1][len(prefix):]
+            self.call_trigger(trigger, msg)
 
     def call_trigger(self, trigger, *args):
         msg = args[0]
@@ -107,7 +116,16 @@ class Bot(Client):
         self.send('QUIT :%s' % reason)
         for name in self.plugins.list():
             self.plugins.unload(name, True)
-        
+
+    @hook
+    def _001_command(self, msg):
+        self.nick = msg.param[0]
+
+    @hook
+    def nick_command(self, msg):
+        if msg.nick == self.nick:
+            self.nick = msg.param[0]
+
     @hook
     def ping_command(self, msg):
         self.send('PONG :%s' % msg.param[-1])
