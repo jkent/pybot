@@ -49,7 +49,7 @@ class Plugin(BasePlugin):
 
     @hook
     def privmsg_command(self, msg):
-        if not msg.param[0].startswith('#'):
+        if not msg.channel:
             return
 
         m = re.match('^should i .*\?$', msg.param[-1], re.I)

@@ -43,7 +43,8 @@ class Message(object):
         self.nick = None
         self.user = None
         self.host = None
-        self.reply_to = None        
+        self.channel = None
+        self.reply_to = None
 
         match = message_re.match(self.raw)
         if match:
@@ -69,6 +70,7 @@ class Message(object):
 
         if self.cmd in ['PRIVMSG', 'NOTICE']:
             if self.param[0].startswith(('&', '#', '+', '!')):
+                self.channel = self.param[0]
                 self.reply_to = self.param[0]
             else:
                 self.reply_to = self.nick

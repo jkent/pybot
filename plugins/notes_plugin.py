@@ -21,7 +21,7 @@ class Plugin(BasePlugin):
 
     @hook
     def note_trigger(self, msg, args, argstr):
-        if not msg.param[0].startswith('#'):
+        if not msg.channel:
             return
 
         data = {'channel': msg.param[0], 'sender': msg.nick}
@@ -33,7 +33,7 @@ class Plugin(BasePlugin):
 
     @hook
     def privmsg_command(self, msg):
-        if not msg.param[0].startswith('#'):
+        if not msg.channel:
             return
 
         c = self.db.cursor()
