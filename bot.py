@@ -70,7 +70,7 @@ class Bot(Client):
 
         if config.directed_triggers:
             if msg.channel:
-                if text.lower().startswith(self.nick):
+                if text.lower().startswith(self.nick.lower()):
                     nicklen = len(self.nick)
                     if text[nicklen] in [',', ':']:
                         trigger = text[nicklen + 1:]
