@@ -59,20 +59,28 @@ class Bot(Client):
         hooks = self.hooks.find('command', command.upper())
         Hooks.call(hooks, *args)
         if command == 'PRIVMSG':
-            self.detect_trigger(args[0])
+            msg = args[0]
+            trigger = self.detect_trigger(msg)
+            if trigger:
+                self.call_trigger(trigger, msg)
 
     def detect_trigger(self, msg):
-        if config.directed_triggers:
-            prefixes = (self.nick + ',', self.nick + ':')
-        else:
-            prefixes = ('!',)
-
         text = msg.param[-1]
-        for prefix in prefixes:
-            if text.lower().startswith(prefix.lower()):
-                trigger = text[len(prefix):]
-                self.call_trigger(trigger, msg)
-                break
+        trigger = None
+
+        if config.directed_triggers:
+            if msg.channel:
+                if text.lower().startswith(self.nick):
+                    nicklen = len(self.nick)
+                    if text[nicklen] in [',', ':']:
+                        trigger = text[nicklen + 1:]
+            else:
+                trigger = text
+        else:
+            if text.startswith('!'):
+                trigger = text[1:]
+
+        return trigger
 
     def call_trigger(self, trigger, *args):
         msg = args[0]
