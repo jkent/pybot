@@ -63,13 +63,16 @@ class Bot(Client):
 
     def detect_trigger(self, msg):
         if config.directed_triggers:
-            prefix = self.nick + ','
+            prefixes = (self.nick + ',', self.nick + ':')
         else:
-            prefix = '!'
+            prefixes = ('!',)
 
-        if msg.param[-1].lower().startswith(prefix):
-            trigger = msg.param[-1][len(prefix):]
-            self.call_trigger(trigger, msg)
+        text = msg.param[-1]
+        for prefix in prefixes:
+            if text.lower().startswith(prefix.lower()):
+                trigger = text[len(prefix):]
+                self.call_trigger(trigger, msg)
+                break
 
     def call_trigger(self, trigger, *args):
         msg = args[0]
