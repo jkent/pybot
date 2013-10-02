@@ -6,12 +6,12 @@ from plugin import *
 
 class Plugin(BasePlugin):
     @hook
-    def plugin_list_trigger(self, msg):
+    def list_plugins_trigger(self, msg):
         names = ', '.join(self.bot.plugins.list())
-        msg.reply('Loaded plugins: %s' % names)
+        msg.reply(names)
 
     @hook
-    def plugin_load_trigger(self, msg, args):
+    def load_trigger(self, msg, args):
         try:
             name = args[1]
         except:
@@ -25,7 +25,7 @@ class Plugin(BasePlugin):
             msg.reply('%s plugin loaded' % name)
 
     @hook
-    def plugin_reload_trigger(self, msg, args):
+    def reload_trigger(self, msg, args):
         try:
             name = args[1]
         except:
@@ -39,7 +39,7 @@ class Plugin(BasePlugin):
             msg.reply('%s plugin reloaded' % name)
 
     @hook
-    def plugin_unload_trigger(self, msg, args):
+    def unload_trigger(self, msg, args):
         try:
             name = args[1]
         except:
