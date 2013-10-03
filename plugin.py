@@ -13,17 +13,18 @@ debug = 'plugin' in config.debug
 
 PLUGIN_MODULE = 'plugins.%s_plugin'
 PLUGIN_ERROR = '%s plugin: %s'
+PLUGIN_DEBUG = '%s plugin: %s'
 
 
 class BasePlugin(object):
     def __init__(self, bot):
         self.bot = bot
 
-    def on_load(self, is_reload):
-        self.bot.collect_hooks(self)
+    def on_load(self, reloading):
+        pass
 
-    def on_unload(self, is_reload):
-        self.bot.remove_hooks(self)
+    def on_unload(self, reloading):
+        pass
 
 
 class Plugins(object):
@@ -31,156 +32,161 @@ class Plugins(object):
         self.bot = bot
         self.plugins = {}
 
+    def _error(self, name, message, show_traceback=False):
+        print PLUGIN_ERROR % (name, message)
+        if show_traceback:
+            traceback.print_exc()
+        return message
+
     def _load_module(self, name):
         modname = PLUGIN_MODULE % name
-        sys_modules = dict(sys.modules)
+        was_loaded = modname in sys.modules
+
+        backup_modules = dict(sys.modules)
         try:
             module = __import__(modname, globals(), locals(), ['Plugin'], 0)
         except:
-            sys.modules = sys_modules
-            error = 'load failure'
-            print '%s plugin: %s' % (name, error)
-            traceback.print_exc()
-            return None, error
+            sys.modules = backup_modules
+            return None, self._error(name, 'module load failure', True)
 
-        try:
-            if module.refcnt == 0:
-                module, error = self._reload_module(name)
-                if error: return None, error
-        except:
-            if debug:
-                print '%s plugin: loaded %s module' % (name, modname)
-            module.refcnt = 0
+        if debug and not was_loaded:
+            print PLUGIN_DEBUG % (name, 'loaded module')
 
         return module, None
 
     def _reload_module(self, name):
         modname = PLUGIN_MODULE % name
-        try:
-            module = sys.modules[modname]
-        except:
-            error = 'module not loaded'
-            print PLUGIN_ERROR % (name, error)
-            return None, error
+        module, error = self._load_module(name)
+        if error: return None, error
 
-        refcnt = module.refcnt
         try:
             reload(module)
-            if debug:
-                print '%s plugin: reloaded %s module' % (name, modname)
         except:
-            error = 'module reload failed'
-            print PLUGIN_ERROR % (name, error)
-            traceback.print_exc()
-            return None, error
+            return None, self._error(name, 'module reload failure', True)
 
-        module.refcnt = refcnt
-        return module, None        
+        if debug:
+            print PLUGIN_DEBUG % (name, 'reloaded module')
+
+        return module, None
 
     def _unload_module(self, name):
         modname = PLUGIN_MODULE % name
-        try:
-            module = sys.modules[modname]
-        except:
-            error = 'module not loaded'
-            print PLUGIN_ERROR % (name, error)
-            return error
+        if modname not in sys.modules:
+            return
 
-        module.refcnt = min(module.refcnt-1, 0)
-        if not module.refcnt:
+        if modname in sys.modules:
+            del sys.modules['plugins'].__dict__['%s_plugin' % name]
             del sys.modules[modname]
-            if debug:
-                print '%s plugin: unloaded %s module' % (name, modname)
 
-    def _load(self, module, name, is_reload=False):
-        if name in self.plugins:
-            error = 'already loaded'
-            print PLUGIN_ERROR % (name, error)
-            return None, error
+            if debug:
+                print PLUGIN_DEBUG % (name, 'unloaded module')
+
+        return None
+
+    def _load_plugin(self, name, reloading=False):
+        module, error = self._load_module(name)
+        if error: return None, error
 
         try:
             plugin = module.Plugin(self.bot)
         except:
-            error = '__init__ error'
-            print PLUGIN_ERROR % (name, error)
-            traceback.print_exc()
-            return None, error
+            self._unload_module(name)
+            return None, self._error(name, 'init error', True)
 
         try:
-            plugin.on_load(is_reload)
+            plugin.on_load(reloading)
         except:
-            error = 'on_load error'
-            print PLUGIN_ERROR % (name, error)
-            traceback.print_exc()
-            return None, error
+            self._unload_module(name)
+            return None, self._error(name, 'on_load error', True)
 
-        module.refcnt += 1
-        self.plugins[name] = plugin
+        try:
+            self.bot.collect_hooks(plugin)
+        except:
+            try:
+                plugin.on_unload(True)
+            except:
+                pass
+            self._unload_module(name)
+            return None, self._error(name, 'hook error', True)
+
+        plugin._module = module
+        plugin._name = name
         return plugin, None
 
-    def _unload(self, name, force=False, is_reload=False):
-        if name not in self.plugins:
-            error = 'not loaded'
-            print PLUGIN_ERROR % (name, error)
-            return error
-
+    def _unload_plugin(self, plugin, force=False, reloading=False):
+        name = plugin._name
+        module = plugin._module
         try:
-            plugin = self.plugins[name]
-            abort = plugin.on_unload(is_reload or force)
+            abort = plugin.on_unload(reloading or force)
         except:
-            error = 'on_unload error'
-            print PLUGIN_ERROR % (name, error)
-            traceback.print_exc()
-            return error
+            return self._error(name, 'on_unload error', True)
 
         if not force and abort:
-            error = 'not permitted'
-            print PLUGIN_ERROR % (name, error)
-            return error
+            return self._error(name, 'not permitted')
 
-        del self.plugins[name]
+        try:
+            self.bot.remove_hooks(plugin)
+        except:
+            return self._error(name, 'unhook error', True)
 
     def load(self, name):
         if debug:
-            print '%s plugin: loading' % name
+            print PLUGIN_DEBUG % (name, 'loading')
 
-        module, error = self._load_module(name)
+        if name in self.plugins:
+            return self._error(name, 'already loaded')
+
+        plugin, error = self._load_plugin(name)
         if error: return error
 
-        plugin, error = self._load(module, name)
-        if error: return error
+        self.plugins[name] = plugin
         
         if debug:
-            print '%s plugin: loaded' % name
-
-    def unload(self, name, force=False):
-        if debug:
-            print '%s plugin: unloading' % name
-
-        error = self._unload(name, force)
-        if error: return error
-
-        error = self._unload_module(name)
-        if error: return error
-
-        if debug:
-            print '%s plugin: unloaded' % name
+            print PLUGIN_DEBUG % (name, 'loaded')
 
     def reload(self, name):
         if debug:
-            print '%s plugin: reloading' % name
+            print PLUGIN_DEBUG % (name, 'reloading')
+
+        if name not in self.plugins:
+            return self._error(name, 'not loaded')
 
         module, error = self._reload_module(name)
         if error: return error
 
-        error = self._unload(name, False, True)
+        old_plugin = self.plugins[name]
+
+        new_plugin, error = self._load_plugin(name, True)
         if error: return error
 
-        plugin, error = self._load(module, name, True)
+        error = self._unload_plugin(old_plugin, False, True)
+        if error:
+            self._unload_plugin(new_plugin, True, False)
+            return error
+
+        self.plugins[name] = new_plugin
+
+        if debug:
+            print PLUGIN_DEBUG % (name, 'reloaded')
+
+    def unload(self, name, force=False):
+        if debug:
+            print PLUGIN_DEBUG % (name, 'unloading')
+
+        if name not in self.plugins:
+            return self._error(name, 'not loaded')
+
+        plugin = self.plugins[name]
+        error = self._unload_plugin(plugin, force, False)
+        if error: return error
+
+        del self.plugins[name]
+        
+        error = self._unload_module(name)
         if error: return error
 
         if debug:
-            print '%s plugin: reloaded' % name
+            print PLUGIN_DEBUG % (name, 'unloaded')
 
     def list(self):
         return self.plugins.keys()

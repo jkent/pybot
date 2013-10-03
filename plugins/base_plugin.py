@@ -17,7 +17,6 @@ class Plugin(BasePlugin):
     def on_unload(self, reloading):
         if not reloading:
             return True
-        return BasePlugin.on_unload(self, reloading)
 
     @hook
     def connect_event(self):

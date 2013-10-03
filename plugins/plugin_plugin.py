@@ -20,7 +20,7 @@ class Plugin(BasePlugin):
 
         error = self.bot.plugins.load(name)
         if error:
-            msg.reply('%s plugin load error: %s' % (name, error))
+            msg.reply('%s plugin error: %s' % (name, error))
         else:
             msg.reply('%s plugin loaded' % name)
 
@@ -34,7 +34,7 @@ class Plugin(BasePlugin):
 
         error = self.bot.plugins.reload(name)
         if error:
-            msg.reply('%s plugin reload error: %s' % (name, error))
+            msg.reply('%s plugin error: %s' % (name, error))
         else:
             msg.reply('%s plugin reloaded' % name)
 
@@ -48,7 +48,7 @@ class Plugin(BasePlugin):
 
         error = self.bot.plugins.unload(name)
         if error:
-            msg.reply('%s plugin unload error: %s' % (name, error))
+            msg.reply('%s plugin error: %s' % (name, error))
         else:
             msg.reply('%s plugin unloaded' % name)
 
