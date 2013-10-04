@@ -8,6 +8,7 @@ from client import Client
 from hook import Hooks, hook
 from message import Message
 from plugin import Plugins
+from time import time
 
 
 class Bot(Client):
@@ -94,6 +95,32 @@ class Bot(Client):
             targstr = parts[depth] if len(parts) > depth else ''
             targs = (' '.join(parts[:depth]),) + tuple(targstr.split())
             Hooks.call(hooks, msg, targs, targstr)
+
+    def set_interval(self, method, seconds):
+        desc = time() + seconds
+        hook = self.hooks.add('timestamp', desc, method, data=seconds)
+        return hook
+    
+    def set_timeout(self, method, seconds):
+        desc = time() + seconds
+        hook = self.hooks.add('timestamp', desc, method)
+        return hook
+
+    def set_timer(self, method, timestamp):
+        if timestamp <= time():
+            return
+        desc = timestamp
+        hook = self.hooks.add('timestamp', desc, method)
+
+    def do_tick(self, timestamp):
+        hooks = self.hooks.find('timestamp', 0, timestamp)
+        Hooks.call(hooks, timestamp)
+        for hook in hooks:
+            _, desc, _, _, data = hook
+            if data == None:
+                self.hooks.remove(hook)
+                continue
+            desc[0] = desc[0] + data
 
     def privmsg(self, target, text):
         self.send('PRIVMSG %s :%s' % (target, text))

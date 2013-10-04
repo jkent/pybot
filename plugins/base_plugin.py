@@ -32,19 +32,18 @@ class Plugin(BasePlugin):
             self.connecting = True
             self.reconnect_attempt = 0
 
-        self.next_attempt = time.time() + 60 * min(self.reconnect_attempt, 5)
+        timeout_period = 60 * min(self.reconnect_attempt, 5)
+        self.bot.set_timeout(self.timeout, timeout_period)
         self.reconnect_attempt += 1
 
-    @hook
-    def tick_event(self, time_now):
+    def timeout(self):
         if self.bot.connected:
             return
 
-        if time_now > self.next_attempt:
-            try:
-                self.bot.connect()
-            except:
-                self.schedule_reconnect()
+        try:
+            self.bot.connect()
+        except:
+            self.schedule_reconnect()
 
     @hook
     def error_command(self, msg):

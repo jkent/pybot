@@ -12,7 +12,6 @@ class Core(object):
         self.selectable = []
         self.running = False
         self.in_shutdown = False
-        self.time_last = time()
 
     def add_bot(self):
         bot = Bot(self)
@@ -35,16 +34,14 @@ class Core(object):
                     self.running = False
 
     def tick(self):
-        time_now = time()
-        if self.time_last + 1 <= time_now:
-            for obj in self.selectable:
-                obj.do_tick(time_now)
-            self.time_last = time_now
+        timestamp = time()
+        for obj in self.selectable:
+            obj.do_tick(timestamp)
 
         read_objs = (obj for obj in self.selectable if obj.can_read())
         write_objs = (obj for obj in self.selectable if obj.can_write())
 
-        readable, writeable, _ = select(read_objs, write_objs, [], 0.5)
+        readable, writeable, _ = select(read_objs, write_objs, [], 0.25)
 
         for obj in readable:
             obj.do_read()

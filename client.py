@@ -61,9 +61,6 @@ class Client(SelectableInterface):
                 print ">> %s" % line
             self.call_event('line', line)
 
-    def do_tick(self, time_now):
-        self.call_event('tick', time_now)
-
     def connect(self):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         if self.use_ssl:
@@ -115,10 +112,6 @@ class Client(SelectableInterface):
             raise
 
         return data
-
-    def call_event(self, event, *args):
-        if debug:
-            print "%s event: %s" % (event, args)
 
     def send(self, line):
         if debug:
