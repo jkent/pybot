@@ -45,7 +45,7 @@ class Bot(Client):
                 pass
 
     def remove_hooks(self, instance):
-        self.hooks.remove(instance)
+        self.hooks.remove_instance_hooks(instance)
 
     def call_event(self, event, *args):
         hooks = self.hooks.find('event', event)

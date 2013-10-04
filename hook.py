@@ -37,16 +37,16 @@ class Hooks:
         bisect.insort(self.hooks, hook)
         return hook
 
-    def collect(self, instance):
-        priority = getattr(instance, 'priority', 100)
-        for _, method in inspect.getmembers(instance, inspect.ismethod):
-            try:
-                for _type, desc in method.__func__._hooks:
-                    self.add(_type, desc, method, priority)
-            except AttributeError:
-                pass
+    def remove(self, hook):
+        if debug:
+            print 'removing hook: %s' % repr(hook)
 
-    def remove(self, instance):
+        try:
+            self.hooks.remove(hook)
+        except:
+            pass
+
+    def remove_instance_hooks(self, instance):
         if debug:
             for hook in (h for h in self.hooks if h[3].__self__ == instance):
                 print 'removing hook: %s' % repr(hook)
