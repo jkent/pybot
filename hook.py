@@ -37,6 +37,10 @@ class Hooks:
         bisect.insort(self.hooks, hook)
         return hook
 
+    def resort(self, hook):
+        self.hooks.remove(hook)
+        bisect.insort(self.hooks, hook)
+
     def remove(self, hook):
         if debug:
             print 'removing hook: %s' % repr(hook)

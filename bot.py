@@ -120,7 +120,8 @@ class Bot(Client):
             if data == None:
                 self.hooks.remove(hook)
                 continue
-            desc[0] = desc[0] + data
+            desc[0] += data
+            self.hooks.resort(hook)
 
     def privmsg(self, target, text):
         self.send('PRIVMSG %s :%s' % (target, text))
