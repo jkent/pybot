@@ -28,13 +28,14 @@ class Hooks:
                 print '%s hook error:' % hook[0]
                 traceback.print_exc()
 
-    def add(self, _type, desc, method, priority=100):
+    def add(self, _type, desc, method, priority=100, data=None):
         if not inspect.ismethod(method):
             raise Exception("Only instance methods may be hooked")
-        hook = (_type, (desc,), priority, method)
+        hook = (_type, [desc,], priority, method, data)
         if debug:
             print 'new hook: %s' % repr(hook)
         bisect.insort(self.hooks, hook)
+        return hook
 
     def collect(self, instance):
         priority = getattr(instance, 'priority', 100)
@@ -52,9 +53,11 @@ class Hooks:
 
         self.hooks = [h for h in self.hooks if h[3].__self__ != instance]
 
-    def find(self, _type, desc):
-        i = bisect.bisect_right(self.hooks, (_type, (desc,)))
-        j = bisect.bisect_left(self.hooks, (_type, (desc, None)))
+    def find(self, _type, left, right=None):
+        if right == None:
+            right = left
+        i = bisect.bisect_left(self.hooks, (_type, [left,]))
+        j = bisect.bisect_right(self.hooks, (_type, [right, None]))
         return self.hooks[i:j]
 
 def hook(*args):
