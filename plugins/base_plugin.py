@@ -13,6 +13,7 @@ class Plugin(BasePlugin):
     def __init__(self, *args):
         BasePlugin.__init__(self, *args)
         self.connecting = False
+        self.autojoin = config.autojoin
 
     def on_unload(self, reloading):
         if not reloading:
@@ -25,6 +26,8 @@ class Plugin(BasePlugin):
 
     @hook
     def disconnect_event(self):
+        if not self.autojoin:
+            self.autojoin = self.bot.channels[:]
         self.schedule_reconnect()
 
     def schedule_reconnect(self):
@@ -53,5 +56,6 @@ class Plugin(BasePlugin):
     @hook
     def _001_command(self, msg):
         self.connecting = False
-        self.bot.join(config.autojoin)
+        self.bot.join(self.autojoin)
+        del self.autojoin[:]
 
