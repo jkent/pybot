@@ -27,6 +27,7 @@ class Bot(Client):
             self.plugins.load(name)
 
         self.nick = None
+        self.channels = []
 
         self.connect()
 
@@ -151,6 +152,10 @@ class Bot(Client):
                 self.send('PART %s' % channels)
 
     @hook
+    def disconnect_event(self):
+        del self.channels[:]
+
+    @hook
     def shutdown_event(self, reason):
         self.send('QUIT :%s' % reason)
         for name in self.plugins.list():
@@ -159,6 +164,21 @@ class Bot(Client):
     @hook
     def _001_command(self, msg):
         self.nick = msg.param[0]
+
+    @hook
+    def join_command(self, msg):
+        if msg.nick == self.nick:
+            self.channels.append(msg.param[0])
+
+    @hook
+    def part_command(self, msg):
+        if msg.nick == self.nick:
+            self.channels.remove(msg.param[0])
+
+    @hook
+    def kick_command(self, msg):
+        if msg.param[1] == self.nick:
+            self.channels.remove(msg.param[0])
 
     @hook
     def nick_command(self, msg):
