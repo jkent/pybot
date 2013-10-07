@@ -11,7 +11,7 @@ class Plugin(BasePlugin):
         msg.reply(names)
 
     @hook
-    def load_trigger(self, msg, args):
+    def load_plugin_trigger(self, msg, args):
         try:
             name = args[1]
         except:
@@ -25,7 +25,7 @@ class Plugin(BasePlugin):
             msg.reply('%s plugin loaded' % name)
 
     @hook
-    def reload_trigger(self, msg, args):
+    def reload_plugin_trigger(self, msg, args):
         try:
             name = args[1]
         except:
@@ -39,7 +39,7 @@ class Plugin(BasePlugin):
             msg.reply('%s plugin reloaded' % name)
 
     @hook
-    def unload_trigger(self, msg, args):
+    def unload_plugin_trigger(self, msg, args):
         try:
             name = args[1]
         except:
