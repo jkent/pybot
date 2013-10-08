@@ -26,6 +26,8 @@ class Plugin(BasePlugin):
 
     @hook
     def disconnect_event(self):
+        if self.bot.core.in_shutdown:
+            return
         if not self.autojoin:
             self.autojoin = self.bot.channels[:]
         self.schedule_reconnect()
@@ -36,7 +38,7 @@ class Plugin(BasePlugin):
             self.reconnect_attempt = 0
 
         timeout_period = 60 * min(self.reconnect_attempt, 5)
-        self.bot.set_timeout(self.timeout, timeout_period)
+        self.bot.set_timeout(self, self.timeout, timeout_period)
         self.reconnect_attempt += 1
 
     def timeout(self):

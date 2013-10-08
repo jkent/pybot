@@ -100,7 +100,7 @@ class Plugins(object):
             return None, self._error(name, 'on_load error', True)
 
         try:
-            self.bot.collect_hooks(plugin)
+            self.bot.install_hooks(plugin)
         except:
             try:
                 plugin.on_unload(True)
@@ -125,7 +125,7 @@ class Plugins(object):
             return self._error(name, 'not permitted')
 
         try:
-            self.bot.remove_hooks(plugin)
+            self.bot.uninstall_hooks(plugin)
         except:
             return self._error(name, 'unhook error', True)
 

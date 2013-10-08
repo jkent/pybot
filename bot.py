@@ -21,7 +21,7 @@ class Bot(Client):
         self.plugins = Plugins(self)
 
         self.max_trigger = 0
-        self.collect_hooks(self)
+        self.install_hooks(self)
 
         for name in config.autoload_plugins:
             self.plugins.load(name)
@@ -31,9 +31,19 @@ class Bot(Client):
 
         self.connect()
 
-    def collect_hooks(self, instance):
-        priority = getattr(instance, 'priority', 100)
-        for _, method in inspect.getmembers(instance, inspect.ismethod):
+    def install_hook(self, owner, hook):
+        hooks = owner._hooks = getattr(owner, '_hooks', [])
+        data = hook[4]
+        data['uninstall'] = lambda hook: hooks.remove(hook)
+        self.hooks.install(hook)
+        hooks.append(hook)
+
+    def uninstall_hook(self, hook):
+        self.hooks.uninstall(hook)
+
+    def install_hooks(self, owner):
+        priority = getattr(owner, 'priority', 100)
+        for _, method in inspect.getmembers(owner, inspect.ismethod):
             try:
                 for _type, desc in method.__func__._hooks:
                     if _type == 'command':
@@ -42,12 +52,14 @@ class Bot(Client):
                         parts = tuple(desc.split())
                         self.max_trigger = max(self.max_trigger, len(parts))
                         desc = (len(parts),) + parts
-                    self.hooks.add(_type, desc, method, priority)
+                    hook = self.hooks.create(method, _type, desc, priority)
+                    self.install_hook(owner, hook)
             except AttributeError:
                 pass
 
-    def remove_hooks(self, instance):
-        self.hooks.remove_instance_hooks(instance)
+    def uninstall_hooks(self, owner):
+        for hook in owner._hooks[:]:
+            self.uninstall_hook(hook)
 
     def call_event(self, event, *args):
         hooks = self.hooks.find('event', event)
@@ -97,32 +109,38 @@ class Bot(Client):
             targs = (' '.join(parts[:depth]),) + tuple(targstr.split())
             Hooks.call(hooks, msg, targs, targstr)
 
-    def set_interval(self, method, seconds):
+    def set_interval(self, owner, fn, seconds):
         desc = time() + seconds
-        hook = self.hooks.add('timestamp', desc, method, data=seconds)
-        return hook
-    
-    def set_timeout(self, method, seconds):
-        desc = time() + seconds
-        hook = self.hooks.add('timestamp', desc, method)
+        data = {'seconds': seconds}
+        hook = self.hooks.create(fn, 'timestamp', desc, data=data)
+        self.install_hook(owner, hook)
         return hook
 
-    def set_timer(self, method, timestamp):
+    def set_timeout(self, owner, fn, seconds):
+        desc = time() + seconds
+        hook = self.hooks.create(fn, 'timestamp', desc)
+        self.install_hook(owner, hook)
+        return hook
+
+    def set_timer(self, owner, fn, timestamp):
         if timestamp <= time():
-            return
+            return None
         desc = timestamp
-        hook = self.hooks.add('timestamp', desc, method)
+        hook = self.hooks.create(fn, 'timestamp', desc)
+        self.install_hook(owner, hook)
+        return hook
 
     def do_tick(self, timestamp):
         hooks = self.hooks.find('timestamp', 0, timestamp)
         Hooks.call(hooks, timestamp)
         for hook in hooks:
             _, desc, _, _, data = hook
-            if data == None:
-                self.hooks.remove(hook)
-                continue
-            desc[0] += data
-            self.hooks.resort(hook)
+            seconds = data.get('seconds', None)
+            if seconds:
+                with self.hooks.modify(hook):
+                    desc[0] += seconds
+            else:
+                self.hooks.uninstall(hook)
 
     def privmsg(self, target, text):
         self.send('PRIVMSG %s :%s' % (target, text))

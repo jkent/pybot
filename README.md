@@ -51,20 +51,26 @@ var       |description
 `nick`    |A string identifying the bot's current nickname
 `plugins` |An instance of the Plugins class *(the plugin manager)*
 
-method                         |description
-:------------------------------|:-----------
-`join(channels[, keys])`       |Convenience method for JOIN
-`notice(target, text)`         |Convenience method for NOTICE
-`part(channels[, message])`    |Convenience method for PART
-`privmsg(target, text)`        |Convenience method for PRIVMSG
-`set_interval(method, seconds)`|Call `method` every `seconds`, returns a hook
-`set_timeout(method, seconds)` |Call `method` once after `seconds`, returns a hook
-`set_timer(method, timestamp)` |Call `method` at `timestamp`, returns a hook
+method                           |description
+:--------------------------------|:-----------
+`install_hook(owner, hook)`      |Install `hook` for `owner`
+`join(channels[, keys])`         |Convenience method for JOIN
+`notice(target, text)`           |Convenience method for NOTICE
+`part(channels[, message])`      |Convenience method for PART
+`privmsg(target, text)`          |Convenience method for PRIVMSG
+`set_interval(owner,fn, seconds)`|Install timestamp hook, calls `fn` every `seconds`
+`set_timeout(owner, fn, seconds)`|Install timestamp hook, calls `fn` after `seconds`
+`set_timer(owner, fn, timestamp)`|Install timestamp hook, calls `fn` at `timestamp`
+`uninstall_hook(hook)`           |Uninstall `hook`
 
 ### Hook class *(the hook manager)*
-You rarely need to use the hook class directly.  One common use would be to remove timestamp hooks.  Another use would be to dynamically add and remove hooks without using the `@hook` decorator.
+You normally do not need to use the hook class directly, unless you want to create new hook types or use hooks dynamically.
 
-method                   |description
-:------------------------|:----------
-`add(type, desc, method)`|Add hook of `type` identified by `desc`
-`remove(hook)`           |Remove `hook`
+method                                      |description
+:-------------------------------------------|:----------
+`call(hooks, *args)`                        |Call hooks using as many args as possible
+`create(fn, type, desc[, priority][, data])`|Add hook of `type` identified by `desc`
+`find(type, left[, right])`                 |Search for hooks
+`install(hook)`                             |Install `hook`
+`modify(hook)`                              |Context manager for modifying *installed* hooks
+`uninstall(hook)`                           |Uninstall `hook`

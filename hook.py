@@ -2,6 +2,7 @@
 # vim: set ts=4 et
 
 import bisect
+from contextlib import contextmanager
 import inspect
 from sets import Set
 import traceback
@@ -20,42 +21,51 @@ class Hooks:
         for hook in hooks:
             if debug:
                 print 'calling hook: %s' % repr(hook)
-            method = hook[3]
-            nargs = method.__func__.__code__.co_argcount - 1
+            fn = hook[3]
+            if inspect.ismethod(fn):
+                nargs = fn.__func__.__code__.co_argcount - 1
+            else:
+                nargs = fn.__code__.co_argcount
             try:
-                method(*args[:nargs])
+                fn(*args[:nargs])
             except:
                 print '%s hook error:' % hook[0]
                 traceback.print_exc()
 
-    def add(self, _type, desc, method, priority=100, data=None):
-        if not inspect.ismethod(method):
-            raise Exception("Only instance methods may be hooked")
-        hook = (_type, [desc,], priority, method, data)
-        if debug:
-            print 'new hook: %s' % repr(hook)
-        bisect.insort(self.hooks, hook)
+    @staticmethod
+    def create(fn, _type, desc, priority=100, data=None):
+        if data == None:
+            data = {}
+        if not callable(fn):
+            raise Exception('fn must be callable')
+        hook = (_type, [desc,], priority, fn, data)
         return hook
 
-    def resort(self, hook):
-        self.hooks.remove(hook)
-        bisect.insort(self.hooks, hook)
+    @contextmanager
+    def modify(self, hook):
+        self.uninstall(hook, True)
+        yield hook
+        self.install(hook, True)
 
-    def remove(self, hook):
-        if debug:
-            print 'removing hook: %s' % repr(hook)
+    def install(self, hook, modify=False):
+        i = bisect.bisect_left(self.hooks, hook)
+        if i < len(self.hooks) and self.hooks[i] == hook:
+            raise Exception('hook already installed')
+        self.hooks.insert(i, hook)
+        if debug and not modify:
+            print 'installed hook: %s' % repr(hook)
 
-        try:
-            self.hooks.remove(hook)
-        except:
-            pass
-
-    def remove_instance_hooks(self, instance):
-        if debug:
-            for hook in (h for h in self.hooks if h[3].__self__ == instance):
-                print 'removing hook: %s' % repr(hook)
-
-        self.hooks = [h for h in self.hooks if h[3].__self__ != instance]
+    def uninstall(self, hook, modify=False):
+        i = bisect.bisect_left(self.hooks, hook)
+        if i >= len(self.hooks) or self.hooks[i] != hook:
+            raise Exception('hook not installed')
+        if not modify:
+            data = hook[4]
+            fn = data.get('uninstall', None)
+            if fn: fn(hook)
+        del self.hooks[i]
+        if debug and not modify:
+            print 'uninstalled hook: %s' % repr(hook)
 
     def find(self, _type, left, right=None):
         if right == None:
