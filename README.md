@@ -54,6 +54,7 @@ var       |description
 method                           |description
 :--------------------------------|:-----------
 `install_hook(owner, hook)`      |Install `hook` for `owner`
+`install_hooks(owner)`           |Installs decorator hooks for `owner` *(automatic for plugins)*
 `join(channels[, keys])`         |Convenience method for JOIN
 `notice(target, text)`           |Convenience method for NOTICE
 `part(channels[, message])`      |Convenience method for PART
@@ -62,6 +63,7 @@ method                           |description
 `set_timeout(owner, fn, seconds)`|Install timestamp hook, calls `fn` after `seconds`
 `set_timer(owner, fn, timestamp)`|Install timestamp hook, calls `fn` at `timestamp`
 `uninstall_hook(hook)`           |Uninstall `hook`
+`uninstall_hooks(owner)`         |Removes all hooks for `owner` *(automatic for plugins)*
 
 ### Hook class *(the hook manager)*
 You normally do not need to use the hook class directly, unless you want to create new hook types or use hooks dynamically.
