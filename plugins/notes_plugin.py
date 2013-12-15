@@ -29,7 +29,7 @@ class Plugin(BasePlugin):
         c.execute('INSERT INTO notes VALUES (:channel, :sender, :recipient, :message)', data)
         self.db.commit()
 
-        msg.reply("Aye aye!")
+        msg.reply("Aye aye Cap'n!")
 
     @hook
     def privmsg_command(self, msg):
