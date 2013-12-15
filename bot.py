@@ -86,7 +86,7 @@ class Bot(Client):
             if msg.channel:
                 if text.lower().startswith(self.nick.lower()):
                     nicklen = len(self.nick)
-                    if text[nicklen] in [',', ':']:
+                    if len(text) > nicklen and text[nicklen] in [',', ':']:
                         trigger = text[nicklen + 1:]
             else:
                 trigger = text
