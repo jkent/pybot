@@ -18,7 +18,7 @@ class Plugin(BasePlugin):
         self.db.close()
 
     @hook
-    def note_trigger(self, msg, args, argstr):
+    def tell_trigger(self, msg, args, argstr):
         if not msg.channel:
             return
 
@@ -28,6 +28,8 @@ class Plugin(BasePlugin):
         c = self.db.cursor()
         c.execute('INSERT INTO notes VALUES (:channel, :sender, :recipient, :message)', data)
         self.db.commit()
+
+        msg.reply("Aye aye!")
 
     @hook
     def privmsg_command(self, msg):
