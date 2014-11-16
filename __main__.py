@@ -4,8 +4,7 @@
 from core import Core
 
 # bugfix/hack for lazy loaded modules in the plugin system
-import email
-import OpenSSL.SSL
+import requests
 
 if __name__ == '__main__':
     core = Core()
