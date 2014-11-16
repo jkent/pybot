@@ -17,3 +17,7 @@ directed_triggers = True
 # debug options: client, hook, plugin
 debug = ['client']
 
+# imgur plugin
+imgur_client_id = ''
+imgur_client_secret = ''
+
