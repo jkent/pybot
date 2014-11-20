@@ -36,7 +36,10 @@ class Plugin(BasePlugin):
         if m.group('subreddit') != None:
             item = client.subreddit_image(m.group('subreddit'), m.group('id'))
         else:
-            item = client.gallery_item(m.group('id'))
+            try:
+                item = client.gallery_item(m.group('id'))
+            except:
+                item = client.get_image(m.group('id'))
   
         item_type = 'Album' if getattr(item, 'is_album', False) else 'Image'
         item_type = 'NSFW ' + item_type if item.nsfw else item_type
@@ -47,5 +50,5 @@ class Plugin(BasePlugin):
         if item.title:
             msg.reply('%s: %s (%d)' % (item_type, item.title, getattr(item, 'score', -1)))
         else:
-            msg.reply('%s' % item_type)
+            msg.reply('%s: Untitled' % item_type)
 
