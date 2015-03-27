@@ -116,5 +116,6 @@ class Client(SelectableInterface):
     def send(self, line):
         if debug:
             print "<< %s" % line
-        self.sendbuf += line + "\r\n"
+        line_format = "%s\r\n".encode("utf-8")
+        self.sendbuf += line_format % line
 
