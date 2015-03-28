@@ -99,8 +99,7 @@ class Client(SelectableInterface):
     def _read(self, bufsize=1024):
         try:
             data = self.sock.recv(bufsize)
-            if type(data) == str:
-                data = data.decode("utf-8")
+            data = data.decode("utf-8")
         except socket.error as e:
             if e.errno == errno.ECONNRESET:
                 self.disconnect()
