@@ -78,6 +78,8 @@ class Client(SelectableInterface):
 
     def _write(self, data):
         try:
+            if type(data) == unicode:
+                data = data.encode('utf-8')
             n = self.sock.send(data)
         except socket.error as e:
             if e.errno == errno.ECONNRESET:
@@ -97,6 +99,8 @@ class Client(SelectableInterface):
     def _read(self, bufsize=1024):
         try:
             data = self.sock.recv(bufsize)
+            if type(data) == str:
+                data = data.decode("utf-8")
         except socket.error as e:
             if e.errno == errno.ECONNRESET:
                 self.disconnect()
@@ -116,6 +120,5 @@ class Client(SelectableInterface):
     def send(self, line):
         if debug:
             print "<< %s" % line
-        line_format = "%s\r\n".encode("utf-8")
-        self.sendbuf += line_format % line
+        self.sendbuf += line + "\r\n"
 
