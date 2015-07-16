@@ -27,7 +27,8 @@ class Hooks:
             else:
                 nargs = fn.__code__.co_argcount
             try:
-                fn(*args[:nargs])
+                if fn(*args[:nargs]):
+                    return True
             except:
                 print '%s hook error:' % hook[0]
                 traceback.print_exc()
