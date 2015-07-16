@@ -88,20 +88,20 @@ def hook(*args):
                 _, _type = f.__name__.rsplit('_', 1)
             except:
                 raise ValueError("function name must follow anything_<hooktype> convention")
-            if isinstance(arg[0], basestring):
-                hooks = ((_type, arg[0]),)
-            elif all(isinstance(s, basestring) for s in arg[0]):
-                hooks = ((_type, s) for s in arg[0])
+            if isinstance(args[0], basestring):
+                hooks = ((_type, args[0]),)
+            elif all(isinstance(s, basestring) for s in args[0]):
+                hooks = ((_type, s) for s in args[0])
             else:
                 raise TypeError("name is not a string or iterable of strings")
         elif len(args) == 2:
-            if not isinstance(arg[0], basestring):
+            if not isinstance(args[0], basestring):
                 raise TypeError("type is not a string")
-            _type = arg[0]
-            if isinstance(arg[1], basestring):
-                hooks = ((_type, arg[1]),)
-            elif all(isinstance(s, basestring) for s in arg[1]):
-                hooks = ((_type, s) for s in arg[1])
+            _type = args[0]
+            if isinstance(args[1], basestring):
+                hooks = ((_type, args[1]),)
+            elif all(isinstance(s, basestring) for s in args[1]):
+                hooks = ((_type, s) for s in args[1])
             else:
                 raise TypeError("name is not a string or iterable of strings")
         else:
