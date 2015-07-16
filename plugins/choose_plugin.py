@@ -45,7 +45,7 @@ class Plugin(BasePlugin):
 
         response = random.choice(responses)
         choice = random.choice(choices) if choices else None
-        msg.reply(response.format(msg.nick, choice))
+        msg.reply(response.format(msg.source, choice))
 
     @hook
     def privmsg_command(self, msg):

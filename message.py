@@ -6,60 +6,43 @@ import re
 
 
 message_re = re.compile(
-  '^(?:'
-    ':(?P<prefix>\\S+) '        +
-  ')?'                          +
-  '(?P<cmd>\\S+)'               +
-  '(?:'                         +
-    ' (?!:)(?P<param>.+?)'      +
-  ')?'                          +
-  '(?:'                         +
-    ' :(?P<trailing>.+)'        +
-  ')?$'
-)
-
-prefix_re =  re.compile(
-  '^(?:'                        +
-    '(?:'                       +
-      '(?P<nick>[^.]+?)'        +
-        '(?:'                   +
-          '(?:'                 +
-            '!(?P<user>.+?)'    +
-          ')?'                  +
-        '@(?P<host>.+)'         +
-      ')?'                      +
-    ')|(?P<server>.+)'          +
-  ')$'
+  '^(?:'                            +
+    ':(?P<prefix>'                  +
+      '(?P<source>[^ !@]+)'         +
+      '(?:'                         +
+        '(?:!(?P<user>[^ @]+))?'    +
+        '@(?P<host>[^ ]+)'          +
+      ')?'                          +
+    ') '                            +
+  ')?'                              +
+  '(?P<cmd>[^ :]+)'                 +
+  '(?: (?P<params>.+))?$'
 )
 
 
-def parse_prefix(prefix):
-    match = prefix_re.match(prefix)
-    if match:
-        return match.groupdict()
-    else:
-        return {'nick': None, 'user': None, 'host': None, 'server': None}
+def parse_params(params):
+    l = []
+    while params:
+        if params[0] == ':':
+            l.append(params[1:])
+            break
+        if len(l) == 14:
+            l.append(params)
+            break
+        param, _, params = params.partition(' ')
+        l.append(param)
+    return l
 
 def parse_message(message):
     match = message_re.match(message)
     if match:
         d = match.groupdict()
+        d['cmd'] = d['cmd'].upper()
+        d['param'] = parse_params(d['params'])
+        del d['params']
     else:
-        d = {'prefix': None, 'cmd': None, 'param': None, 'trailing': None}
-
-    if d['prefix']:
-        d.update(parse_prefix(d['prefix']))
-
-    d['cmd'] = d['cmd'].upper()
-
-    d['param'] = d['param'].split() if d['param'] else []
-
-    if d['trailing']:
-        d['param'].append(d['trailing'])
-        d['trailing'] = True
-    else:
-        d['trailing'] = False
-
+        d = {'prefix': None, 'source': None, 'user': None, 'host': None,
+             'command': '', 'param': []}
     return d
 
 
@@ -78,17 +61,17 @@ class Message(object):
                 self.channel = self.param[0]
                 self.reply_to = self.param[0]
             else:
-                self.reply_to = self.nick
+                self.reply_to = self.source
 
     def reply(self, text, direct=False):
         if not self.bot:
             raise Exception('No bot object bound')
 
-        if not self.reply_to and not self.nick:
+        if not self.reply_to and not self.source:
             raise Exception('Nobody to reply to')
 
         direct |= not bool(self.reply_to)
-        recipient = self.nick if direct else self.reply_to
+        recipient = self.source if direct else self.reply_to
 
         self.bot.privmsg(recipient, text)
 

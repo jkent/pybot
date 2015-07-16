@@ -22,7 +22,7 @@ class Plugin(BasePlugin):
         if not msg.channel:
             return
 
-        data = {'channel': msg.param[0], 'sender': msg.nick}
+        data = {'channel': msg.param[0], 'sender': msg.source}
         data['recipient'], data['message'] = argstr.split(None, 1)
 
         c = self.db.cursor()
@@ -37,7 +37,7 @@ class Plugin(BasePlugin):
             return
 
         c = self.db.cursor()
-        criteria = {'channel': msg.param[0], 'recipient': msg.nick}
+        criteria = {'channel': msg.param[0], 'recipient': msg.source}
         c.execute('SELECT sender, message FROM notes WHERE channel=:channel AND recipient=:recipient', criteria)
         rows = c.fetchall()
         if rows:

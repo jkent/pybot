@@ -185,12 +185,12 @@ class Bot(Client):
 
     @hook
     def join_command(self, msg):
-        if msg.nick == self.nick:
+        if msg.source == self.nick:
             self.channels.append(msg.param[0])
 
     @hook
     def part_command(self, msg):
-        if msg.nick == self.nick:
+        if msg.source == self.nick:
             self.channels.remove(msg.param[0])
 
     @hook
@@ -200,7 +200,7 @@ class Bot(Client):
 
     @hook
     def nick_command(self, msg):
-        if msg.nick == self.nick:
+        if msg.source == self.nick:
             self.nick = msg.param[0]
 
     @hook
