@@ -2,6 +2,7 @@
 # vim: set ts=4 et
 
 import inspect
+import re
 
 import config
 from client import Client
@@ -9,6 +10,14 @@ from hook import Hooks, hook
 from message import Message
 from plugin import Plugins
 from time import time
+
+url_re = re.compile(
+  'https?://[^ /]+\.[^ /]+(?:/[^ ]*)?'  +
+  '|'                                   +
+  '(?<![^ ])[^ /]+\.[^ /]+/[^ ]*'
+)
+
+domain_re = re.compile('https?://(?:www\.)?([^ /]+\.[^ /]+)')
 
 
 class Bot(Client):
@@ -77,6 +86,12 @@ class Bot(Client):
             trigger = self.detect_trigger(msg)
             if trigger:
                 self.call_trigger(trigger, msg)
+            elif msg.channel:
+                for match in url_re.finditer(msg.param[1]):
+                    url = match.group(0)
+                    if not url.startswith(('http:', 'https:')):
+                        url = 'http://' + url
+                    self.do_url(msg, url)
 
     def detect_trigger(self, msg):
         text = msg.param[-1]
@@ -141,6 +156,20 @@ class Bot(Client):
                     desc[0] += seconds
             else:
                 self.hooks.uninstall(hook)
+
+    def do_url(self, msg, url):
+        match = domain_re.match(url)
+        if not match:
+            return
+        domain = match.group(1)
+
+        hooks = self.hooks.find('url', domain)
+        hooks.extend(self.hooks.find('url', domain.replace('.', ' ')))
+        if Hooks.call(hooks, msg, domain, url):
+            return
+
+        hooks = self.hooks.find('url', 'any')
+        Hooks.call(hooks, msg, domain, url)
 
     def privmsg(self, target, text):
         self.send('PRIVMSG %s :%s' % (target, text))

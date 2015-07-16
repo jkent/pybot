@@ -29,12 +29,13 @@ To which the bot would reply:
     <pybot> Hello world!
 
 ### Hooks
-There are four types of hooks:
+There are five types of hooks:
 
   * event
   * command
   * trigger
   * timestamp
+  * url
 
 All except for timestamp hooks can be used via the `@hook` decorator.  `@hook` is a smart decorator that uses the naming convention of your method to determine the name and type of the hook.  Alternatively, it can be called as `@hook(names)` and `@hook(type, names)`.
 
