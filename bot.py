@@ -120,7 +120,7 @@ class Bot(Client):
             if not hooks:
                 continue
 
-            targstr = parts[depth] if len(parts) > depth else ''
+            targstr = parts[depth] if len(parts) > depth else u''
             targs = (' '.join(parts[:depth]),) + tuple(targstr.split())
             Hooks.call(hooks, msg, targs, targstr)
 
