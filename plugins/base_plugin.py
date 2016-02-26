@@ -6,6 +6,8 @@ import time
 import config
 from plugin import *
 
+BOT_PING_TIME = 120
+BOT_PING_TIMEOUT = 60
 
 class Plugin(BasePlugin):
     priority = 5
@@ -14,6 +16,8 @@ class Plugin(BasePlugin):
         BasePlugin.__init__(self, *args)
         self.connecting = False
         self.autojoin = config.autojoin
+        self.send_ping_hook = None
+        self.ping_timeout_hook = None
 
     def on_unload(self, reloading):
         if not reloading:
@@ -60,4 +64,29 @@ class Plugin(BasePlugin):
         self.connecting = False
         self.bot.join(self.autojoin)
         del self.autojoin[:]
+
+    @hook
+    def ping_command(self, msg):
+        pass
+
+    @hook
+    def line_event(self):
+        if self.send_ping_hook:
+            self.bot.uninstall_hook(self.send_ping_hook)
+            self.send_ping_hook = None
+
+        if self.ping_timeout_hook:
+            self.bot.uninstall_hook(self.ping_timeout_hook)
+            self.ping_timeout_hook = None
+
+        self.send_ping_hook = self.bot.set_timeout(self, self.send_ping, BOT_PING_TIME)
+
+    def send_ping(self):
+        self.send_ping_hook = None
+        self.bot.send('PING :%s' % self.bot.server)
+        self.ping_timeout_hook = self.bot.set_timeout(self, self.ping_timeout, BOT_PING_TIMEOUT)
+
+    def ping_timeout(self):
+        self.ping_timeout_hook = None
+        self.bot.disconnect()
 

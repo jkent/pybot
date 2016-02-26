@@ -211,6 +211,7 @@ class Bot(Client):
 
     @hook
     def _001_command(self, msg):
+        self.server = msg.source
         self.nick = msg.param[0]
 
     @hook
