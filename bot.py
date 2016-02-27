@@ -79,19 +79,22 @@ class Bot(Client):
             self.call_command(msg.cmd, msg)
 
     def call_command(self, command, *args):
+        if command == 'PRIVMSG':
+            self.process_privmsg(args[0])
         hooks = self.hooks.find('command', command.upper())
         Hooks.call(hooks, *args)
-        if command == 'PRIVMSG':
-            msg = args[0]
-            trigger = self.detect_trigger(msg)
-            if trigger:
-                self.call_trigger(trigger, msg)
-            elif msg.channel:
-                for match in url_re.finditer(msg.param[1]):
-                    url = match.group(0)
-                    if not url.startswith(('http:', 'https:')):
-                        url = 'http://' + url
-                    self.do_url(msg, url)
+
+    def process_privmsg(self, msg):
+        trigger = self.detect_trigger(msg)
+        if trigger:
+            msg.trigger = True
+            self.call_trigger(trigger, msg)
+        elif msg.channel:
+            for match in url_re.finditer(msg.param[1]):
+                url = match.group(0)
+                if not url.startswith(('http:', 'https:')):
+                    url = 'http://' + url
+                self.do_url(msg, url)
 
     def detect_trigger(self, msg):
         text = msg.param[-1]

@@ -53,6 +53,7 @@ class Message(object):
         self.reply_to = None
         self.time = datetime.utcnow()
         self.channel = None
+        self.trigger = False
         self.level = 0
         self.__dict__.update(parse_message(line))
 
