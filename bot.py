@@ -36,7 +36,7 @@ class Bot(Client):
             self.plugins.load(name)
 
         self.nick = None
-        self.channels = []
+        self.channels = {}
 
         self.connect()
 
@@ -204,7 +204,7 @@ class Bot(Client):
 
     @hook
     def disconnect_event(self):
-        del self.channels[:]
+        self.channels.clear()
 
     @hook
     def shutdown_event(self, reason):
@@ -218,26 +218,58 @@ class Bot(Client):
         self.nick = msg.param[0]
 
     @hook
-    def join_command(self, msg):
-        if msg.source == self.nick:
-            self.channels.append(msg.param[0])
+    def _353_command(self, msg):
+        channel = msg.param[2]
+        if self.channels.has_key(channel):
+            nicks = []
+            for nick in msg.param[-1].split():
+                if nick.startswith(('~', '&', '@', '%', '+')):
+                    nicks.append(nick[1:])
+                else:
+                    nicks.append(nick)
+            self.channels[channel].update(nicks)
 
     @hook
-    def part_command(self, msg):
+    def join_command(self, msg):
+        channel = msg.param[0]
         if msg.source == self.nick:
-            self.channels.remove(msg.param[0])
+            self.channels[channel] = set()
+        elif self.channels.has_key(channel):
+            self.channels[channel].update((msg.source,))
 
     @hook
     def kick_command(self, msg):
+        channel = msg.param[0]
         if msg.param[1] == self.nick:
-            self.channels.remove(msg.param[0])
+            del self.channels[channel]
+        elif self.channels.has_key(channel):
+            self.channels[channel].remove(msg.source)
 
     @hook
     def nick_command(self, msg):
+        new_nick = msg.param[0]
         if msg.source == self.nick:
-            self.nick = msg.param[0]
+            self.nick = new_nick
+        for _, nicks in self.channels.items():
+            if msg.source in nicks:
+                nicks.remove(msg.source)
+                nicks.update((new_nick,))
+
+    @hook
+    def part_command(self, msg):
+        channel = msg.param[0]
+        if msg.source == self.nick:
+            del self.channels[channel]
+        elif self.channels.has_key(channel):
+            self.channels[channel].remove(msg.source)
 
     @hook
     def ping_command(self, msg):
         self.send('PONG :%s' % msg.param[-1])
+
+    @hook
+    def quit_command(self, msg):
+        for _, nicks in self.channels.items():
+            if msg.source in nicks:
+                nicks.remove(msg.source)
 

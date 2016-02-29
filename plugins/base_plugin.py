@@ -33,7 +33,7 @@ class Plugin(BasePlugin):
         if self.bot.core.in_shutdown:
             return
         if not self.autojoin:
-            self.autojoin = self.bot.channels[:]
+            self.autojoin = self.bot.channels.keys()
         self.schedule_reconnect()
 
     def schedule_reconnect(self):
