@@ -5,9 +5,9 @@ import sys
 import traceback
 
 import config
-from hook import Hooks, hook
+from hook import Hooks, hook, pri
 
-__all__ = ['BasePlugin', 'hook']
+__all__ = ['BasePlugin', 'hook', 'pri']
 
 debug = 'plugin' in config.debug
 

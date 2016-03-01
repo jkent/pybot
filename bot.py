@@ -6,7 +6,7 @@ import re
 
 import config
 from client import Client
-from hook import Hooks, hook
+from hook import Hooks, hook, pri
 from message import Message
 from plugin import Plugins
 from time import time
@@ -51,7 +51,7 @@ class Bot(Client):
         self.hooks.uninstall(hook)
 
     def install_hooks(self, owner):
-        priority = getattr(owner, 'priority', 100)
+        default_priority = getattr(owner, 'priority', 100)
         for _, method in inspect.getmembers(owner, inspect.ismethod):
             try:
                 for _type, desc in method.__func__._hooks:
@@ -61,6 +61,10 @@ class Bot(Client):
                         parts = tuple(desc.split())
                         self.max_trigger = max(self.max_trigger, len(parts))
                         desc = (len(parts),) + parts
+                    try:
+                        priority = method._priority
+                    except AttributeError:
+                        priority = default_priority
                     hook = self.hooks.create(method, _type, desc, priority)
                     self.install_hook(owner, hook)
             except AttributeError:
@@ -256,6 +260,7 @@ class Bot(Client):
                 nicks.update((new_nick,))
 
     @hook
+    @pri(1000)
     def part_command(self, msg):
         channel = msg.param[0]
         if msg.source == self.nick:
@@ -268,6 +273,7 @@ class Bot(Client):
         self.send('PONG :%s' % msg.param[-1])
 
     @hook
+    @pri(1000)
     def quit_command(self, msg):
         for _, nicks in self.channels.items():
             if msg.source in nicks:
