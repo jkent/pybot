@@ -10,7 +10,7 @@ BOT_PING_TIME = 120
 BOT_PING_TIMEOUT = 60
 
 class Plugin(BasePlugin):
-    priority = 5
+    default_priority = 50
 
     def __init__(self, *args):
         BasePlugin.__init__(self, *args)

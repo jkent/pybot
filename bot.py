@@ -6,7 +6,7 @@ import re
 
 import config
 from client import Client
-from hook import Hooks, hook, pri
+from hook import Hooks, hook, priority
 from message import Message
 from plugin import Plugins
 from time import time
@@ -21,7 +21,7 @@ domain_re = re.compile('https?://(?:www\.)?([^ /]+\.[^ /]+)')
 
 
 class Bot(Client):
-    priority = 10
+    default_priority = 100
 
     def __init__(self, core):
         self.core = core
@@ -51,7 +51,7 @@ class Bot(Client):
         self.hooks.uninstall(hook)
 
     def install_hooks(self, owner):
-        default_priority = getattr(owner, 'priority', 100)
+        default_priority = getattr(owner, 'default_priority', 500)
         for _, method in inspect.getmembers(owner, inspect.ismethod):
             try:
                 for _type, desc in method.__func__._hooks:
@@ -260,7 +260,7 @@ class Bot(Client):
                 nicks.update((new_nick,))
 
     @hook
-    @pri(1000)
+    @priority(1000)
     def part_command(self, msg):
         channel = msg.param[0]
         if msg.source == self.nick:
@@ -273,7 +273,7 @@ class Bot(Client):
         self.send('PONG :%s' % msg.param[-1])
 
     @hook
-    @pri(1000)
+    @priority(1000)
     def quit_command(self, msg):
         for _, nicks in self.channels.items():
             if msg.source in nicks:
