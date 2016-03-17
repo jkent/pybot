@@ -10,7 +10,7 @@ BOT_PING_TIME = 120
 BOT_PING_TIMEOUT = 60
 
 class Plugin(BasePlugin):
-    default_priority = 50
+    default_priority = 100
 
     def __init__(self, *args):
         BasePlugin.__init__(self, *args)
@@ -29,11 +29,18 @@ class Plugin(BasePlugin):
         self.bot.send('USER %s * 0 :%s' % (config.username, config.realname))
 
     @hook
+    @priority(99)
     def disconnect_event(self):
         if self.bot.core.in_shutdown:
             return
         if not self.autojoin:
-            self.autojoin = self.bot.channels.keys()
+            for channel, props in self.bot.channels.items():
+                if not props['joined']:
+                    continue
+                if props.has_key('key'):
+                    self.autojoin.append((channel, props['key']))
+                else:
+                    self.autojoin.append(channel)
         self.schedule_reconnect()
 
     def schedule_reconnect(self):
@@ -62,7 +69,11 @@ class Plugin(BasePlugin):
     @hook
     def _001_command(self, msg):
         self.connecting = False
-        self.bot.join(self.autojoin)
+        for channel in self.autojoin:
+            if isinstance(channel, tuple):
+                self.bot.join(channel[0], channel[1])
+            else:
+                self.bot.join(channel)
         del self.autojoin[:]
 
     @hook

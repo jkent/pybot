@@ -32,11 +32,11 @@ class Bot(Client):
         self.max_trigger = 0
         self.install_hooks(self)
 
-        for name in config.autoload_plugins:
-            self.plugins.load(name)
-
         self.nick = None
         self.channels = {}
+
+        for name in config.autoload_plugins:
+            self.plugins.load(name)
 
         self.connect()
 
@@ -186,15 +186,22 @@ class Bot(Client):
         self.send('NOTICE %s :%s' % (target, text))
 
     def join(self, channels, keys=None):
-        if type(channels) == str:
+        if isinstance(channels, str):
             channels = (channels,)
         if channels:
-            channels = ','.join(channels)
+            channel_s = ','.join(channels)
             if keys:
-                keys = ','.join(keys)
-                self.send('JOIN %s %s' % (channels, keys))
+                if isinstance(keys, str):
+                    keys = (keys,)
+                key_s = ','.join(keys)
+                self.send('JOIN %s %s' % (channel_s, key_s))
+                pairs = zip(channels, keys)
+                for item in pairs:
+                    self.channels[item[0]] = {'key': item[1], 'joined': False, 'nicks': set()}
             else:
-                self.send('JOIN %s' % channels)
+                self.send('JOIN %s' % channel_s)
+                for channel in channels:
+                    self.channels[channel] = {'joined': False, 'nicks': set()}
 
     def part(self, channels, message=None):
         if type(channels) == str:
@@ -208,9 +215,12 @@ class Bot(Client):
 
     @hook
     def disconnect_event(self):
-        self.channels.clear()
+        for _, props in self.channels.items():
+            props['joined'] = False
+            props['nicks'].clear()
 
     @hook
+    @priority(1000)
     def shutdown_event(self, reason):
         self.send('QUIT :%s' % reason)
         for name in self.plugins.list():
@@ -224,49 +234,56 @@ class Bot(Client):
     @hook
     def _353_command(self, msg):
         channel = msg.param[2]
-        if self.channels.has_key(channel):
-            nicks = []
+        if self.channels.has_key(channel) and self.channels[channel]['joined']:
+            nicks = self.channels[channel]['nicks']
             for nick in msg.param[-1].split():
                 if nick.startswith(('~', '&', '@', '%', '+')):
-                    nicks.append(nick[1:])
+                    nicks.add(nick[1:])
                 else:
-                    nicks.append(nick)
-            self.channels[channel].update(nicks)
+                    nicks.add(nick)
 
     @hook
     def join_command(self, msg):
         channel = msg.param[0]
         if msg.source == self.nick:
-            self.channels[channel] = set()
+            if not self.channels.has_key(channel):
+                self.channels[channel] = {}
+            self.channels[channel]['joined'] = True
         elif self.channels.has_key(channel):
-            self.channels[channel].update((msg.source,))
+            self.channels[channel]['nicks'].add(msg.source)
 
     @hook
     def kick_command(self, msg):
         channel = msg.param[0]
         if msg.param[1] == self.nick:
-            del self.channels[channel]
+            if self.channels.has_key(channel):
+                self.channels[channel]['joined'] = False
+                if self.channels[channel].has_key('nicks'):
+                    self.channels[channel]['nicks'].clear()
         elif self.channels.has_key(channel):
-            self.channels[channel].remove(msg.source)
+            self.channels[channel]['nicks'].remove(msg.source)
 
     @hook
     def nick_command(self, msg):
         new_nick = msg.param[0]
         if msg.source == self.nick:
             self.nick = new_nick
-        for _, nicks in self.channels.items():
-            if msg.source in nicks:
-                nicks.remove(msg.source)
-                nicks.update((new_nick,))
+        for _, props in self.channels.items():
+            if props.has_key('nicks') and msg.source in props['nicks']:
+                props['nicks'].remove(msg.source)
+                props['nicks'].add(new_nick)
 
     @hook
     @priority(1000)
     def part_command(self, msg):
         channel = msg.param[0]
         if msg.source == self.nick:
-            del self.channels[channel]
+            if self.channels.has_key(channel):
+                self.channels[channel]['joined'] = False
+                if self.channels[channel].has_key('nicks'):
+                    self.channels[channel]['nicks'].clear()
         elif self.channels.has_key(channel):
-            self.channels[channel].remove(msg.source)
+            self.channels[channel]['nicks'].remove(msg.source)
 
     @hook
     def ping_command(self, msg):
@@ -275,7 +292,7 @@ class Bot(Client):
     @hook
     @priority(1000)
     def quit_command(self, msg):
-        for _, nicks in self.channels.items():
-            if msg.source in nicks:
-                nicks.remove(msg.source)
+        for _, props in self.channels.items():
+            if props.has_key('nicks') and msg.source in props['nicks']:
+                props['nicks'].remove(msg.source)
 
