@@ -62,7 +62,7 @@ class Bot(Client):
                         self.max_trigger = max(self.max_trigger, len(parts))
                         desc = (len(parts),) + parts
                     try:
-                        priority = method._priority
+                        priority = method.__func__._priority
                     except AttributeError:
                         priority = default_priority
                     hook = self.hooks.create(method, _type, desc, priority)
