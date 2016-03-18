@@ -57,7 +57,7 @@ class Message(object):
         self.level = 0
         self.__dict__.update(parse_message(line))
 
-        if self.cmd in ['PRIVMSG', 'NOTICE']:
+        if self.cmd in ('PRIVMSG', 'NOTICE'):
             if self.param[0].startswith(('&', '#', '+', '!')):
                 self.channel = self.param[0]
                 self.reply_to = self.param[0]

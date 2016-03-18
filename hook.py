@@ -34,7 +34,7 @@ class Hooks:
                 traceback.print_exc()
 
     @staticmethod
-    def create(fn, _type, desc, priority=100, data=None):
+    def create(fn, _type, desc, priority=500, data=None):
         if data == None:
             data = {}
         if not callable(fn):
