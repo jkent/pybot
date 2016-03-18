@@ -34,6 +34,9 @@ class Bot(Client):
 
         self.nick = None
         self.channels = {}
+        self.allow_rules = {'*': {'ANY': 1}, config.superuser: {'ANY': 1000}}
+        self.deny_rules = {}
+        self._name = '_bot'
 
         for name in config.autoload_plugins:
             self.plugins.load(name)
@@ -52,6 +55,7 @@ class Bot(Client):
 
     def install_hooks(self, owner):
         default_priority = getattr(owner, 'default_priority', 500)
+        default_level = getattr(owner, 'default_level', 1)
         for _, method in inspect.getmembers(owner, inspect.ismethod):
             try:
                 for _type, desc in method.__func__._hooks:
@@ -61,6 +65,10 @@ class Bot(Client):
                         parts = tuple(desc.split())
                         self.max_trigger = max(self.max_trigger, len(parts))
                         desc = (len(parts),) + parts
+                        try:
+                            method.__func__._level
+                        except AttributeError:
+                            method.__func__._level = default_level
                     try:
                         priority = method.__func__._priority
                     except AttributeError:
@@ -83,10 +91,36 @@ class Bot(Client):
             self.call_command(msg.cmd, msg)
 
     def call_command(self, command, *args):
+        if command in ('NOTICE', 'PRIVMSG'):
+            self.apply_permissions(args[0])
         if command == 'PRIVMSG':
             self.process_privmsg(args[0])
         hooks = self.hooks.find('command', command.upper())
         Hooks.call(hooks, *args)
+
+    def apply_permissions(self, msg):
+        msg.permissions = {}
+        for pattern, rules in self.allow_rules.items():
+            regex = '^' + re.escape(pattern).replace('\\*', '.*') + '$'
+            if not re.match(regex, msg.prefix):
+                continue
+
+            for plugin, level in rules.items():
+                current_level = msg.permissions.get(plugin, level)
+                msg.permissions[plugin] = max(level, current_level)
+
+        for pattern, rules in self.deny_rules.items():
+            regex = '^' + re.escape(pattern).replace('\\*', '.*') + '$'
+            if not re.match(regex, msg.prefix):
+                continue
+
+            for plugin, level in rules.items():
+                if plugin == 'ANY':
+                    for plugin, current_level in msg.permissions.items():
+                        msg.permissions[plugin] = min(level, current_level)
+                    continue
+                current_level = msg.permissions.get(plugin, level)
+                msg.permissions[plugin] = min(level, current_level)
 
     def process_privmsg(self, msg):
         trigger = self.detect_trigger(msg)
@@ -119,11 +153,24 @@ class Bot(Client):
         return trigger
 
     def call_trigger(self, trigger, *args):
+        authorized = True
         msg = args[0]
         for depth in range(self.max_trigger, 0, -1):
             parts = tuple(trigger.split(None, depth))
             desc = (depth,) + parts[:depth]
             hooks = self.hooks.find('trigger', desc)
+
+            if not hooks:
+                continue
+
+            for i, hook in enumerate(hooks):
+                plugin = hook[3].im_self._name
+                level = hook[3]._level
+                print level
+                if level > max(msg.permissions.get('ANY', 0), msg.permissions.get(plugin, 0)):
+                    del hooks[i]
+                    authorized = False
+
             if not hooks:
                 continue
 
@@ -131,6 +178,9 @@ class Bot(Client):
             targs = (' '.join(parts[:depth]),) + tuple(targstr.split())
             if Hooks.call(hooks, msg, targs, targstr):
                 break
+
+        if not authorized:
+            msg.reply("You don't have permission to use that trigger")
 
     def set_interval(self, owner, fn, seconds):
         desc = time() + seconds

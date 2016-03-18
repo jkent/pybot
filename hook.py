@@ -122,3 +122,11 @@ def priority(value):
         return f
     return decorate
 
+def level(value):
+    if not isinstance(value, int):
+        raise Exception("level decorator requires an integer value")
+    def decorate(f):
+        f._level = value
+        return f
+    return decorate
+

@@ -5,9 +5,9 @@ import sys
 import traceback
 
 import config
-from hook import Hooks, hook, priority
+from hook import Hooks, hook, priority, level
 
-__all__ = ['BasePlugin', 'hook', 'priority']
+__all__ = ['BasePlugin', 'hook', 'priority', 'level']
 
 debug = 'plugin' in config.debug
 
