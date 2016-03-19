@@ -79,7 +79,12 @@ class Bot(Client):
                 pass
 
     def uninstall_hooks(self, owner):
-        for hook in owner._hooks[:]:
+        try:
+            hooks = owner._hooks[:]
+        except AttributeError:
+            return
+
+        for hook in hooks:
             self.uninstall_hook(hook)
 
     def call_event(self, event, *args):
