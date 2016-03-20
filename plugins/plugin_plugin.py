@@ -5,6 +5,8 @@ from plugin import *
 
 
 class Plugin(BasePlugin):
+    default_level = 900
+
     @hook
     def list_plugins_trigger(self, msg):
         names = ', '.join(self.bot.plugins.list())

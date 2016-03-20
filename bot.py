@@ -171,7 +171,6 @@ class Bot(Client):
             for i, hook in enumerate(hooks):
                 plugin = hook[3].im_self._name
                 level = hook[3]._level
-                print level
                 if level > max(msg.permissions.get('ANY', 0), msg.permissions.get(plugin, 0)):
                     del hooks[i]
                     authorized = False
