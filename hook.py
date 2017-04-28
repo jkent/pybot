@@ -4,7 +4,6 @@
 import bisect
 from contextlib import contextmanager
 import inspect
-from sets import Set
 import traceback
 
 import config
@@ -20,7 +19,7 @@ class Hooks:
     def call(hooks, *args):
         for hook in hooks:
             if debug:
-                print 'calling hook: %s' % repr(hook)
+                print('calling hook: %s' % repr(hook))
             fn = hook[3]
             if inspect.ismethod(fn):
                 nargs = fn.__func__.__code__.co_argcount - 1
@@ -30,7 +29,7 @@ class Hooks:
                 if fn(*args[:nargs]):
                     return True
             except:
-                print '%s hook error:' % hook[0]
+                print('%s hook error:' % hook[0])
                 traceback.print_exc()
 
     @staticmethod
@@ -54,7 +53,7 @@ class Hooks:
             raise Exception('hook already installed')
         self.hooks.insert(i, hook)
         if debug and not modify:
-            print 'installed hook: %s' % repr(hook)
+            print('installed hook: %s' % repr(hook))
 
     def uninstall(self, hook, modify=False):
         i = bisect.bisect_left(self.hooks, hook)
@@ -66,7 +65,7 @@ class Hooks:
             if fn: fn(hook)
         del self.hooks[i]
         if debug and not modify:
-            print 'uninstalled hook: %s' % repr(hook)
+            print('uninstalled hook: %s' % repr(hook))
 
     def find(self, _type, left, right=None):
         if right == None:
@@ -89,19 +88,19 @@ def hook(*args):
                 _, _type = f.__name__.rsplit('_', 1)
             except:
                 raise ValueError("function name must follow anything_<hooktype> convention")
-            if isinstance(args[0], basestring):
+            if isinstance(args[0], str):
                 hooks = ((_type, args[0]),)
-            elif all(isinstance(s, basestring) for s in args[0]):
+            elif all(isinstance(s, str) for s in args[0]):
                 hooks = ((_type, s) for s in args[0])
             else:
                 raise TypeError("name is not a string or iterable of strings")
         elif len(args) == 2:
-            if not isinstance(args[0], basestring):
+            if not isinstance(args[0], str):
                 raise TypeError("type is not a string")
             _type = args[0]
-            if isinstance(args[1], basestring):
+            if isinstance(args[1], str):
                 hooks = ((_type, args[1]),)
-            elif all(isinstance(s, basestring) for s in args[1]):
+            elif all(isinstance(s, str) for s in args[1]):
                 hooks = ((_type, s) for s in args[1])
             else:
                 raise TypeError("name is not a string or iterable of strings")
@@ -110,7 +109,7 @@ def hook(*args):
         try:
             f._hooks.update(hooks)
         except AttributeError:
-            f._hooks = Set(hooks)
+            f._hooks = set(hooks)
         return f
     return decorate(args[0]) if call else decorate
 

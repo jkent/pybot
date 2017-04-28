@@ -58,7 +58,7 @@ class Client(SelectableInterface):
 
         for line in lines:
             if debug:
-                print ">> %s" % line
+                print(">> %s" % line)
             self.call_event('line', line)
 
     def connect(self):
@@ -78,7 +78,7 @@ class Client(SelectableInterface):
 
     def _write(self, data):
         try:
-            if type(data) == unicode:
+            if type(data) == str:
                 data = data.encode('utf-8')
             n = self.sock.send(data)
         except socket.error as e:
@@ -118,6 +118,6 @@ class Client(SelectableInterface):
 
     def send(self, line):
         if debug:
-            print "<< %s" % line
+            print("<< %s" % line)
         self.sendbuf += line + "\r\n"
 

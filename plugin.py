@@ -33,7 +33,7 @@ class Plugins(object):
         self.plugins = {}
 
     def _error(self, name, message, show_traceback=False):
-        print PLUGIN_ERROR % (name, message)
+        print(PLUGIN_ERROR % (name, message))
         if show_traceback:
             traceback.print_exc()
         return message
@@ -50,7 +50,7 @@ class Plugins(object):
             return None, self._error(name, 'module load failure', True)
 
         if debug and not was_loaded:
-            print PLUGIN_DEBUG % (name, 'loaded module')
+            print(PLUGIN_DEBUG % (name, 'loaded module'))
 
         return module, None
 
@@ -65,7 +65,7 @@ class Plugins(object):
             return None, self._error(name, 'module reload failure', True)
 
         if debug:
-            print PLUGIN_DEBUG % (name, 'reloaded module')
+            print(PLUGIN_DEBUG % (name, 'reloaded module'))
 
         return module, None
 
@@ -79,7 +79,7 @@ class Plugins(object):
             del sys.modules[modname]
 
             if debug:
-                print PLUGIN_DEBUG % (name, 'unloaded module')
+                print(PLUGIN_DEBUG % (name, 'unloaded module'))
 
         return None
 
@@ -131,7 +131,7 @@ class Plugins(object):
 
     def load(self, name):
         if debug:
-            print PLUGIN_DEBUG % (name, 'loading')
+            print(PLUGIN_DEBUG % (name, 'loading'))
 
         if name in self.plugins:
             return self._error(name, 'already loaded')
@@ -142,11 +142,11 @@ class Plugins(object):
         self.plugins[name] = plugin
         
         if debug:
-            print PLUGIN_DEBUG % (name, 'loaded')
+            print(PLUGIN_DEBUG % (name, 'loaded'))
 
     def reload(self, name):
         if debug:
-            print PLUGIN_DEBUG % (name, 'reloading')
+            print(PLUGIN_DEBUG % (name, 'reloading'))
 
         if name not in self.plugins:
             return self._error(name, 'not loaded')
@@ -167,11 +167,11 @@ class Plugins(object):
         self.plugins[name] = new_plugin
 
         if debug:
-            print PLUGIN_DEBUG % (name, 'reloaded')
+            print(PLUGIN_DEBUG % (name, 'reloaded'))
 
     def unload(self, name, force=False):
         if debug:
-            print PLUGIN_DEBUG % (name, 'unloading')
+            print(PLUGIN_DEBUG % (name, 'unloading'))
 
         if name not in self.plugins:
             return self._error(name, 'not loaded')
@@ -186,8 +186,8 @@ class Plugins(object):
         if error: return error
 
         if debug:
-            print PLUGIN_DEBUG % (name, 'unloaded')
+            print(PLUGIN_DEBUG % (name, 'unloaded'))
 
     def list(self):
-        return self.plugins.keys()
+        return list(self.plugins.keys())
 

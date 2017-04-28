@@ -105,23 +105,23 @@ class Bot(Client):
 
     def apply_permissions(self, msg):
         msg.permissions = {}
-        for pattern, rules in self.allow_rules.items():
+        for pattern, rules in list(self.allow_rules.items()):
             regex = '^' + re.escape(pattern).replace('\\*', '.*') + '$'
             if not re.match(regex, msg.prefix):
                 continue
 
-            for plugin, level in rules.items():
+            for plugin, level in list(rules.items()):
                 current_level = msg.permissions.get(plugin, level)
                 msg.permissions[plugin] = max(level, current_level)
 
-        for pattern, rules in self.deny_rules.items():
+        for pattern, rules in list(self.deny_rules.items()):
             regex = '^' + re.escape(pattern).replace('\\*', '.*') + '$'
             if not re.match(regex, msg.prefix):
                 continue
 
-            for plugin, level in rules.items():
+            for plugin, level in list(rules.items()):
                 if plugin == 'ANY':
-                    for plugin, current_level in msg.permissions.items():
+                    for plugin, current_level in list(msg.permissions.items()):
                         msg.permissions[plugin] = min(level, current_level)
                     continue
                 current_level = msg.permissions.get(plugin, level)
@@ -169,7 +169,7 @@ class Bot(Client):
                 continue
 
             for i, hook in enumerate(hooks):
-                plugin = hook[3].im_self._name
+                plugin = hook[3].__self__._name
                 level = hook[3]._level
                 if level > max(msg.permissions.get('ANY', 0), msg.permissions.get(plugin, 0)):
                     del hooks[i]
@@ -178,7 +178,7 @@ class Bot(Client):
             if not hooks:
                 continue
 
-            targstr = parts[depth] if len(parts) > depth else u''
+            targstr = parts[depth] if len(parts) > depth else ''
             targs = (' '.join(parts[:depth]),) + tuple(targstr.split())
             if Hooks.call(hooks, msg, targs, targstr):
                 break
@@ -249,7 +249,7 @@ class Bot(Client):
                     keys = (keys,)
                 key_s = ','.join(keys)
                 self.send('JOIN %s %s' % (channel_s, key_s))
-                pairs = zip(channels, keys)
+                pairs = list(zip(channels, keys))
                 for item in pairs:
                     self.channels[item[0]] = {'key': item[1], 'joined': False, 'nicks': set()}
             else:
@@ -269,7 +269,7 @@ class Bot(Client):
 
     @hook
     def disconnect_event(self):
-        for _, props in self.channels.items():
+        for _, props in list(self.channels.items()):
             props['joined'] = False
             props['nicks'].clear()
 
@@ -288,7 +288,7 @@ class Bot(Client):
     @hook
     def _353_command(self, msg):
         channel = msg.param[2]
-        if self.channels.has_key(channel) and self.channels[channel]['joined']:
+        if channel in self.channels and self.channels[channel]['joined']:
             nicks = self.channels[channel]['nicks']
             for nick in msg.param[-1].split():
                 if nick.startswith(('~', '&', '@', '%', '+')):
@@ -300,21 +300,21 @@ class Bot(Client):
     def join_command(self, msg):
         channel = msg.param[0]
         if msg.source == self.nick:
-            if not self.channels.has_key(channel):
+            if channel not in self.channels:
                 self.channels[channel] = {}
             self.channels[channel]['joined'] = True
-        elif self.channels.has_key(channel):
+        elif channel in self.channels:
             self.channels[channel]['nicks'].add(msg.source)
 
     @hook
     def kick_command(self, msg):
         channel = msg.param[0]
         if msg.param[1] == self.nick:
-            if self.channels.has_key(channel):
+            if channel in self.channels:
                 self.channels[channel]['joined'] = False
-                if self.channels[channel].has_key('nicks'):
+                if 'nicks' in self.channels[channel]:
                     self.channels[channel]['nicks'].clear()
-        elif self.channels.has_key(channel):
+        elif channel in self.channels:
             self.channels[channel]['nicks'].remove(msg.source)
 
     @hook
@@ -322,8 +322,8 @@ class Bot(Client):
         new_nick = msg.param[0]
         if msg.source == self.nick:
             self.nick = new_nick
-        for _, props in self.channels.items():
-            if props.has_key('nicks') and msg.source in props['nicks']:
+        for _, props in list(self.channels.items()):
+            if 'nicks' in props and msg.source in props['nicks']:
                 props['nicks'].remove(msg.source)
                 props['nicks'].add(new_nick)
 
@@ -332,11 +332,11 @@ class Bot(Client):
     def part_command(self, msg):
         channel = msg.param[0]
         if msg.source == self.nick:
-            if self.channels.has_key(channel):
+            if channel in self.channels:
                 self.channels[channel]['joined'] = False
-                if self.channels[channel].has_key('nicks'):
+                if 'nicks' in self.channels[channel]:
                     self.channels[channel]['nicks'].clear()
-        elif self.channels.has_key(channel):
+        elif channel in self.channels:
             self.channels[channel]['nicks'].remove(msg.source)
 
     @hook
@@ -346,7 +346,7 @@ class Bot(Client):
     @hook
     @priority(1000)
     def quit_command(self, msg):
-        for _, props in self.channels.items():
-            if props.has_key('nicks') and msg.source in props['nicks']:
+        for _, props in list(self.channels.items()):
+            if 'nicks' in props and msg.source in props['nicks']:
                 props['nicks'].remove(msg.source)
 
