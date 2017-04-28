@@ -6,7 +6,8 @@ import re
 
 import config
 from client import Client
-from hook import Hooks, hook, priority
+from decorators import hook, priority
+from hook import Hooks
 from message import Message
 from plugin import Plugins
 from time import time
