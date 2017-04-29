@@ -11,7 +11,7 @@ import config
 debug = 'hook' in config.debug
 
 
-class Hooks:
+class HookContainer:
     def __init__(self):
         self.hooks = []
 

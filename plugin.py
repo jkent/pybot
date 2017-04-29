@@ -6,7 +6,6 @@ import traceback
 
 import config
 from decorators import hook, priority, level
-from hook import Hooks
 
 __all__ = ['BasePlugin', 'hook', 'priority', 'level']
 

@@ -7,7 +7,7 @@ import re
 import config
 from client import Client
 from decorators import hook, priority
-from hook import Hooks
+from hook import HookContainer
 from message import Message
 from plugin import Plugins
 from time import time
@@ -27,7 +27,7 @@ class Bot(Client):
     def __init__(self, core):
         self.core = core
         Client.__init__(self, config.host, config.ssl)
-        self.hooks = Hooks()
+        self.hooks = HookContainer()
         self.plugins = Plugins(self)
 
         self.max_trigger = 0
@@ -90,7 +90,7 @@ class Bot(Client):
 
     def call_event(self, event, *args):
         hooks = self.hooks.find('event', event)
-        Hooks.call(hooks, *args)
+        HookContainer.call(hooks, *args)
         if event == 'line':
             line = args[0]
             msg = Message(line, self)
@@ -102,7 +102,7 @@ class Bot(Client):
         if command == 'PRIVMSG':
             self.process_privmsg(args[0])
         hooks = self.hooks.find('command', command.upper())
-        Hooks.call(hooks, *args)
+        HookContainer.call(hooks, *args)
 
     def apply_permissions(self, msg):
         msg.permissions = {}
@@ -181,7 +181,7 @@ class Bot(Client):
 
             targstr = parts[depth] if len(parts) > depth else ''
             targs = (' '.join(parts[:depth]),) + tuple(targstr.split())
-            if Hooks.call(hooks, msg, targs, targstr):
+            if HookContainer.call(hooks, msg, targs, targstr):
                 break
 
         if not authorized:
@@ -210,7 +210,7 @@ class Bot(Client):
 
     def do_tick(self, timestamp):
         hooks = self.hooks.find('timestamp', 0, timestamp)
-        Hooks.call(hooks, timestamp)
+        HookContainer.call(hooks, timestamp)
         for hook in hooks:
             _, desc, _, _, data = hook
             seconds = data.get('seconds', None)
@@ -228,11 +228,11 @@ class Bot(Client):
 
         hooks = self.hooks.find('url', domain)
         hooks.extend(self.hooks.find('url', domain.replace('.', ' ')))
-        if Hooks.call(hooks, msg, domain, url):
+        if HookContainer.call(hooks, msg, domain, url):
             return
 
         hooks = self.hooks.find('url', 'any')
-        Hooks.call(hooks, msg, domain, url)
+        HookContainer.call(hooks, msg, domain, url)
 
     def privmsg(self, target, text):
         self.send('PRIVMSG %s :%s' % (target, text))
