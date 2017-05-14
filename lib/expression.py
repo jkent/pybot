@@ -4,7 +4,6 @@
 
 import string
 import inspect
-import re
 import collections
 import math
 import random
@@ -105,11 +104,11 @@ def issymbol(s):
     if not s:
         return False
 
-    if s[0] not in string.letters + '_':
+    if s[0] not in string.ascii_letters + '_':
         return False
 
     for c in s[1:]:
-        if c not in string.digits + string.letters + '_':
+        if c not in string.digits + string.ascii_letters + '_':
             return False
 
     return True
@@ -300,7 +299,7 @@ def parse_expr(expr, offset=0):
             pos += 1
 
         else:
-            if expr[pos] not in string.digits + string.letters + '._':
+            if expr[pos] not in string.digits + string.ascii_letters + '._':
                 raise ParseError(offset + pos, 'invalid token')
 
             if token_start == None:
@@ -359,7 +358,7 @@ def call_func(name, pos, values, env):
         stack.append(name)
 
         new_env = env.copy()
-        new_env['locals'] = dict(zip(names, args))
+        new_env['locals'] = dict(list(zip(names, args)))
 
         try:
             value = func(new_env)
@@ -385,7 +384,7 @@ def call_func(name, pos, values, env):
                     raise ComputeError(pos, 'func %s must have nreq ' \
                         'or nreq_min/nreq_max defined' % name)
 
-                nreq = func.func_code.co_argcount
+                nreq = func.__code__.co_argcount
                 if inspect.ismethod(func):
                     nreq -= 1
 
@@ -420,7 +419,7 @@ def compile_expr(tokens):
         _, value, _ = token
         func = OPS[value][1]
         args = []
-        for _ in xrange(func.func_code.co_argcount):
+        for _ in range(func.__code__.co_argcount):
             args.insert(0, coherse(output.pop()))
 
         return func(*args)
@@ -504,7 +503,7 @@ def define_func(env, name, args, expr, desc=None):
     args = args.strip()
     if args:
         args = tuple(map(str.strip, args.split(',')))
-        for arg, count in collections.Counter(args).items():
+        for arg, count in list(collections.Counter(args).items()):
             if not issymbol(arg):
                 raise DeclarationError('arg is not a valid symbol: ' + arg)
             if count > 1:
@@ -525,7 +524,7 @@ def undefine_func(env, name):
         raise DeclarationError('name is not a valid symbol: ' + name)
 
     funcs = env.setdefault('funcs', {})
-    if funcs.has_key(name):
+    if name in funcs:
         del funcs[name]
 
 
@@ -549,17 +548,17 @@ def undefine_var(env, name):
         raise DeclarationError('name is not a valid symbol: ' + name)
 
     globals_ = env.setdefault('globals', {})
-    if globals_.has_key(name):
+    if name in globals_:
         del globals_[name]
 
 
 def expr_exc_handler(name, args, exc, env, expr):
     """Sample expr exception handler."""
 
-    print 'Error: ' + exc.message
+    print('Error: ' + exc.message)
     if expr:
-        print '  ' + expr
-        print ' ' * (exc.pos + 2) + '^'
+        print('  ' + expr)
+        print(' ' * (exc.pos + 2) + '^')
 
 
 if __name__ == '__main__':
@@ -581,10 +580,10 @@ if __name__ == '__main__':
     try:
         tokens = parse_expr(expr)
         compiled = compile_expr(tokens)
-        for i in xrange(5):
+        for i in range(5):
             env['globals']['x'] = i
             result = compiled(env)
-            print 'for x = %d:' % i, expr, '=', result
+            print('for x = %d:' % i, expr, '=', result)
     except ExpressionError as exc:
         expr_exc_handler('', [], exc, env, expr)
         sys.exit(1)

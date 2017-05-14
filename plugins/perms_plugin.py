@@ -43,11 +43,11 @@ class Plugin(BasePlugin):
                 self.bot.deny_rules[mask] = pickle.loads(rules)
 
     def save_rules(self):
-        for mask, rules in self.bot.allow_rules.items():
+        for mask, rules in list(self.bot.allow_rules.items()):
             rules = pickle.dumps(rules)
             self.cur.execute('INSERT OR REPLACE INTO allow (mask, rules) VALUES (?, ?)', (mask, rules))
 
-        for mask, rules in self.bot.deny_rules.items():
+        for mask, rules in list(self.bot.deny_rules.items()):
             rules = pickle.dumps(rules)
             self.cur.execute('INSERT OR REPLACE INTO deny (mask, rules) VALUES (?, ?)', (mask, rules))
 
@@ -56,16 +56,16 @@ class Plugin(BasePlugin):
     @hook
     def list_perms_trigger(self, msg, args, argstr):
         msg.reply('Allow:')
-        for mask, rules in self.bot.allow_rules.items():
+        for mask, rules in list(self.bot.allow_rules.items()):
             line = '  ' + mask
-            for plugin, level in rules.items():
+            for plugin, level in list(rules.items()):
                 line += ' %s=%s' % (plugin, level)
             msg.reply(line)
 
         msg.reply('Deny:')
-        for mask, rules in self.bot.deny_rules.items():
+        for mask, rules in list(self.bot.deny_rules.items()):
             line = '  ' + mask
-            for plugin, level in rules.items():
+            for plugin, level in list(rules.items()):
                 line += ' %s=%s' % (plugin, level)
             msg.reply(line)
 
@@ -80,7 +80,7 @@ class Plugin(BasePlugin):
             if len(args) != 2:
                 msg.reply('only one argument expected')
             mask = mask[1:]
-            if self.bot.allow_rules.has_key(mask):
+            if mask in self.bot.allow_rules:
                 del self.bot.allow_rules[mask]
                 self.cur.execute('DELETE FROM allow WHERE mask=?', (mask,))
                 self.db.commit()
@@ -116,7 +116,7 @@ class Plugin(BasePlugin):
             if len(args) != 2:
                 msg.reply('only one argument expected')
             mask = mask[1:]
-            if self.bot.deny_rules.has_key(mask):
+            if mask in self.bot.deny_rules:
                 del self.bot.deny_rules[mask]
                 self.cur.execute('DELETE FROM deny WHERE mask=?', (mask,))
                 self.db.commit()

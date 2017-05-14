@@ -1,24 +1,13 @@
 # -*- coding: utf-8 -*-
 # vim: set ts=4 et
 
-import inspect
-import re
+from time import time
 
 import config
 from client import Client
 from decorators import hook, priority
-from hook import HookContainer
-from message import Message
-from plugin import Plugins
-from time import time
-
-url_re = re.compile(
-  'https?://[^ /]+\.[^ /]+(?:/[^ ]*)?'  +
-  '|'                                   +
-  '(?<![^ ])[^ /]+\.[^ /]+/[^ ]*'
-)
-
-domain_re = re.compile('https?://(?:www\.)?([^ /]+\.[^ /]+)')
+from hook import HookManager, TimestampHook
+from plugin import PluginManager
 
 
 class Bot(Client):
@@ -27,11 +16,10 @@ class Bot(Client):
     def __init__(self, core):
         self.core = core
         Client.__init__(self, config.host, config.ssl)
-        self.hooks = HookContainer()
-        self.plugins = Plugins(self)
+        self.hooks = HookManager(self)
+        self.plugins = PluginManager(self)
 
-        self.max_trigger = 0
-        self.install_hooks(self)
+        self.hooks.install_owner(self)
 
         self.nick = None
         self.channels = {}
@@ -44,195 +32,23 @@ class Bot(Client):
 
         self.connect()
 
-    def install_hook(self, owner, hook):
-        hooks = owner._hooks = getattr(owner, '_hooks', [])
-        data = hook[4]
-        data['uninstall'] = lambda hook: hooks.remove(hook)
+    def set_timer(self, fn, timestamp, owner=None):
+        hook = TimestampHook(timestamp)
+        hook.bind(fn, owner)
         self.hooks.install(hook)
-        hooks.append(hook)
-
-    def uninstall_hook(self, hook):
-        self.hooks.uninstall(hook)
-
-    def install_hooks(self, owner):
-        default_priority = getattr(owner, 'default_priority', 500)
-        default_level = getattr(owner, 'default_level', 1)
-        for _, method in inspect.getmembers(owner, inspect.ismethod):
-            try:
-                for _type, desc in method.__func__._hooks:
-                    if _type == 'command':
-                        desc = desc.upper()
-                    elif _type == 'trigger':
-                        parts = tuple(desc.split())
-                        self.max_trigger = max(self.max_trigger, len(parts))
-                        desc = (len(parts),) + parts
-                        try:
-                            method.__func__._level
-                        except AttributeError:
-                            method.__func__._level = default_level
-                    try:
-                        priority = method.__func__._priority
-                    except AttributeError:
-                        priority = default_priority
-                    hook = self.hooks.create(method, _type, desc, priority)
-                    self.install_hook(owner, hook)
-            except AttributeError:
-                pass
-
-    def uninstall_hooks(self, owner):
-        try:
-            hooks = owner._hooks[:]
-        except AttributeError:
-            return
-
-        for hook in hooks:
-            self.uninstall_hook(hook)
-
-    def call_event(self, event, *args):
-        hooks = self.hooks.find('event', event)
-        HookContainer.call(hooks, *args)
-        if event == 'line':
-            line = args[0]
-            msg = Message(line, self)
-            self.call_command(msg.cmd, msg)
-
-    def call_command(self, command, *args):
-        if command in ('NOTICE', 'PRIVMSG'):
-            self.apply_permissions(args[0])
-        if command == 'PRIVMSG':
-            self.process_privmsg(args[0])
-        hooks = self.hooks.find('command', command.upper())
-        HookContainer.call(hooks, *args)
-
-    def apply_permissions(self, msg):
-        msg.permissions = {}
-        for pattern, rules in list(self.allow_rules.items()):
-            regex = '^' + re.escape(pattern).replace('\\*', '.*') + '$'
-            if not re.match(regex, msg.prefix):
-                continue
-
-            for plugin, level in list(rules.items()):
-                current_level = msg.permissions.get(plugin, level)
-                msg.permissions[plugin] = max(level, current_level)
-
-        for pattern, rules in list(self.deny_rules.items()):
-            regex = '^' + re.escape(pattern).replace('\\*', '.*') + '$'
-            if not re.match(regex, msg.prefix):
-                continue
-
-            for plugin, level in list(rules.items()):
-                if plugin == 'ANY':
-                    for plugin, current_level in list(msg.permissions.items()):
-                        msg.permissions[plugin] = min(level, current_level)
-                    continue
-                current_level = msg.permissions.get(plugin, level)
-                msg.permissions[plugin] = min(level, current_level)
-
-    def process_privmsg(self, msg):
-        trigger = self.detect_trigger(msg)
-        if trigger:
-            msg.trigger = True
-            self.call_trigger(trigger, msg)
-        elif msg.channel:
-            for match in url_re.finditer(msg.param[1]):
-                url = match.group(0)
-                if not url.startswith(('http:', 'https:')):
-                    url = 'http://' + url
-                self.do_url(msg, url)
-
-    def detect_trigger(self, msg):
-        text = msg.param[-1]
-        trigger = None
-
-        if config.directed_triggers:
-            if msg.channel:
-                if text.lower().startswith(self.nick.lower()):
-                    nicklen = len(self.nick)
-                    if len(text) > nicklen and text[nicklen] in [',', ':']:
-                        trigger = text[nicklen + 1:]
-            else:
-                trigger = text
-        else:
-            if text.startswith('!'):
-                trigger = text[1:]
-
-        return trigger
-
-    def call_trigger(self, trigger, *args):
-        authorized = True
-        msg = args[0]
-        for depth in range(self.max_trigger, 0, -1):
-            parts = tuple(trigger.split(None, depth))
-            desc = (depth,) + parts[:depth]
-            hooks = self.hooks.find('trigger', desc)
-
-            if not hooks:
-                continue
-
-            for i, hook in enumerate(hooks):
-                plugin = hook[3].__self__._name
-                level = hook[3]._level
-                if level > max(msg.permissions.get('ANY', 0), msg.permissions.get(plugin, 0)):
-                    del hooks[i]
-                    authorized = False
-
-            if not hooks:
-                continue
-
-            targstr = parts[depth] if len(parts) > depth else ''
-            targs = (' '.join(parts[:depth]),) + tuple(targstr.split())
-            if HookContainer.call(hooks, msg, targs, targstr):
-                break
-
-        if not authorized:
-            msg.reply("You don't have permission to use that trigger")
-
-    def set_interval(self, owner, fn, seconds):
-        desc = time() + seconds
-        data = {'seconds': seconds}
-        hook = self.hooks.create(fn, 'timestamp', desc, data=data)
-        self.install_hook(owner, hook)
         return hook
 
-    def set_timeout(self, owner, fn, seconds):
-        desc = time() + seconds
-        hook = self.hooks.create(fn, 'timestamp', desc)
-        self.install_hook(owner, hook)
+    def set_interval(self, fn, seconds, owner=None):
+        hook = TimestampHook(time() + seconds, {'repeat': seconds})
+        hook.bind(fn, owner)
+        self.hooks.install(hook)
         return hook
 
-    def set_timer(self, owner, fn, timestamp):
-        if timestamp <= time():
-            return None
-        desc = timestamp
-        hook = self.hooks.create(fn, 'timestamp', desc)
-        self.install_hook(owner, hook)
+    def set_timeout(self, fn, seconds, owner=None):
+        hook = TimestampHook(time() + seconds)
+        hook.bind(fn, owner)
+        self.hooks.install(hook)
         return hook
-
-    def do_tick(self, timestamp):
-        hooks = self.hooks.find('timestamp', 0, timestamp)
-        HookContainer.call(hooks, timestamp)
-        for hook in hooks:
-            _, desc, _, _, data = hook
-            seconds = data.get('seconds', None)
-            if seconds:
-                with self.hooks.modify(hook):
-                    desc[0] += seconds
-            else:
-                self.hooks.uninstall(hook)
-
-    def do_url(self, msg, url):
-        match = domain_re.match(url)
-        if not match:
-            return
-        domain = match.group(1)
-
-        hooks = self.hooks.find('url', domain)
-        hooks.extend(self.hooks.find('url', domain.replace('.', ' ')))
-        if HookContainer.call(hooks, msg, domain, url):
-            return
-
-        hooks = self.hooks.find('url', 'any')
-        HookContainer.call(hooks, msg, domain, url)
 
     def privmsg(self, target, text):
         self.send('PRIVMSG %s :%s' % (target, text))

@@ -59,7 +59,7 @@ class Client(SelectableInterface):
         for line in lines:
             if debug:
                 print(">> %s" % line)
-            self.call_event('line', line)
+            self.hooks.call_event('line', line)
 
     def connect(self):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -69,12 +69,12 @@ class Client(SelectableInterface):
         self.sock.settimeout(15)
         self.sock.connect(self.remote)
         self.connected = True
-        self.call_event('connect')
+        self.hooks.call_event('connect')
 
     def disconnect(self):
         self.sock.close()
         self.connected = False
-        self.call_event('disconnect')
+        self.hooks.call_event('disconnect')
 
     def _write(self, data):
         try:

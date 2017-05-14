@@ -83,19 +83,19 @@ class Plugin(BasePlugin):
     @hook
     def line_event(self):
         if self.send_ping_hook:
-            self.bot.uninstall_hook(self.send_ping_hook)
+            self.bot.hooks.uninstall(self.send_ping_hook)
             self.send_ping_hook = None
 
         if self.ping_timeout_hook:
-            self.bot.uninstall_hook(self.ping_timeout_hook)
+            self.bot.hooks.uninstall(self.ping_timeout_hook)
             self.ping_timeout_hook = None
 
-        self.send_ping_hook = self.bot.set_timeout(self, self.send_ping, BOT_PING_TIME)
+        self.send_ping_hook = self.bot.set_timeout(self.send_ping, BOT_PING_TIME)
 
     def send_ping(self):
         self.send_ping_hook = None
         self.bot.send('PING :%s' % self.bot.server)
-        self.ping_timeout_hook = self.bot.set_timeout(self, self.ping_timeout, BOT_PING_TIMEOUT)
+        self.ping_timeout_hook = self.bot.set_timeout(self.ping_timeout, BOT_PING_TIMEOUT)
 
     def ping_timeout(self):
         self.ping_timeout_hook = None

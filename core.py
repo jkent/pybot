@@ -58,5 +58,5 @@ class Core(object):
         
         for obj in self.selectable:
             if obj.connected and isinstance(obj, Bot):
-                obj.call_event('shutdown', reason)
+                obj.hooks.call_event('shutdown', reason)
 

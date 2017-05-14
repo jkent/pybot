@@ -49,7 +49,7 @@ class Plugin(BasePlugin):
         if ':' not in name:
             name = target + ':' + name
 
-        if self.workbooks.has_key(name):
+        if name in self.workbooks:
             self.target_to_workbook[target] = self.workbooks[name]
             return self.target_to_workbook[target]
 
@@ -93,7 +93,7 @@ class Plugin(BasePlugin):
 
 
     def get_workbook(self, target):
-        if self.target_to_workbook.has_key(target):
+        if target in self.target_to_workbook:
             return self.target_to_workbook[target]
 
         return self.load_workbook(target, 'Default')
@@ -135,7 +135,7 @@ class Plugin(BasePlugin):
             expression.define_var(workbook, name, expr)
 
             value = workbook['globals'][name]
-            if type(value) in [int, long]:
+            if type(value) in [int, int]:
                 type_ = VAR_TYPE_INT
             elif type(value) == float:
                 type_ = VAR_TYPE_FLOAT
@@ -219,7 +219,7 @@ class Plugin(BasePlugin):
     @hook
     def math_varlist_trigger(self, msg, args, argstr):
         workbook = self.get_workbook(msg.reply_to)
-        names = workbook.get('globals', {}).keys()
+        names = list(workbook.get('globals', {}).keys())
         names.sort()
         msg.reply(', '.join(names))
         return True
@@ -228,7 +228,7 @@ class Plugin(BasePlugin):
     @hook
     def math_funclist_trigger(self, msg, args, argstr):
         workbook = self.get_workbook(msg.reply_to)
-        names = workbook.get('funcs', {}).keys()
+        names = list(workbook.get('funcs', {}).keys())
         names.sort()
         msg.reply(', '.join(names))
         return True
@@ -243,20 +243,20 @@ class Plugin(BasePlugin):
 
         name = args[1]
         funcs = workbook.get('funcs', {})
-        if not funcs.has_key(name):
+        if name not in funcs:
             msg.reply(name + ' is not a defined func')
             return True
 
         func = funcs[name]
 
         if len(args) < 3:
-            if func.has_key('expr'):
+            if 'expr' in func:
                 args = func.get('args', ())
                 msg.reply('%s(%s) = %s' % (name, ', '.join(args), func['expr']))
             else:
                 msg.reply(name + ' is a python func')
 
-            if func.has_key('desc'):
+            if 'desc' in func:
                 msg.reply(func['desc'])
 
             return True

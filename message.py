@@ -4,6 +4,8 @@
 from datetime import datetime
 import re
 
+import config
+
 
 message_re = re.compile(
   '^(?:'                            +
@@ -45,7 +47,6 @@ def parse_message(message):
              'command': '', 'param': []}
     return d
 
-
 class Message(object):
     def __init__(self, line, bot=None):
         self.bot = bot
@@ -53,7 +54,7 @@ class Message(object):
         self.reply_to = None
         self.time = datetime.utcnow()
         self.channel = None
-        self.trigger = False
+        self.trigger = None
         self.level = 0
         self.__dict__.update(parse_message(line))
 
@@ -63,6 +64,24 @@ class Message(object):
                 self.reply_to = self.param[0]
             else:
                 self.reply_to = self.source
+        
+        if self.cmd == 'PRIVMSG':
+            self._detect_trigger()
+
+    def _detect_trigger(self):
+        text = self.param[-1]
+    
+        if config.directed_triggers:
+            if self.channel:
+                if text.lower().startswith(self.bot.nick.lower()):
+                    nicklen = len(self.bot.nick)
+                    if len(text) > nicklen and text[nicklen] in [',', ':']:
+                        self.trigger = text[nicklen + 1:]
+            else:
+                self.trigger = text
+        else:
+            if text.startswith('!'):
+                self.trigger = text[1:]
 
     def reply(self, text, direct=False):
         if not self.bot:

@@ -44,36 +44,43 @@ Timestamp hooks can be created 3 different ways: one-shot timeouts, one-shot tim
 ### Bot class
 Anything that you may need to access should be accessable from the bot class.  Plugins get a reference to the *bot instance* they are running on (`self.bot`).
 
-var       |description
-:---------|:-----------
-`channels`|A list of channels currently joined
-`core`    |The core instance the bot is running under
-`hooks`   |An instance of the Hooks class *(the hook manager)*
-`nick`    |A string identifying the bot's current nickname
-`plugins` |An instance of the Plugins class *(the plugin manager)*
+var          |description
+:------------|:-----------
+`channels`   |A dict with keys being channels, value is a dict with keys 'joined' and 'nicks'
+`core`       |The core instance the bot is running under
+`hooks`      |An instance of the HookManager class
+`nick`       |A string identifying the bot's current nickname
+`plugins`    |An instance of the PluginManager class
+`allow_rules`|Allow rules for the permission system
+`deny_rules` |Deny rules for the permission system
 
-method                           |description
-:--------------------------------|:-----------
-`install_hook(owner, hook)`      |Install `hook` for `owner`
-`install_hooks(owner)`           |Installs decorator hooks for `owner` *(automatic for plugins)*
-`join(channels[, keys])`         |Convenience method for JOIN
-`notice(target, text)`           |Convenience method for NOTICE
-`part(channels[, message])`      |Convenience method for PART
-`privmsg(target, text)`          |Convenience method for PRIVMSG
-`set_interval(owner,fn, seconds)`|Install timestamp hook, calls `fn` every `seconds`
-`set_timeout(owner, fn, seconds)`|Install timestamp hook, calls `fn` after `seconds`
-`set_timer(owner, fn, timestamp)`|Install timestamp hook, calls `fn` at `timestamp`
-`uninstall_hook(hook)`           |Uninstall `hook`
-`uninstall_hooks(owner)`         |Removes all hooks for `owner` *(automatic for plugins)*
+method                              |description
+:-----------------------------------|:-----------
+`set_interval(fn, seconds[, owner])`|Install timestamp hook, calls `fn` every `seconds`
+`set_timeout(fn, seconds[, owner])` |Install timestamp hook, calls `fn` after `seconds`
+`set_timer(fn, timestamp[, owner])` |Install timestamp hook, calls `fn` at `timestamp`
+`join(channels[, keys])`            |Convenience method for JOIN
+`notice(target, text)`              |Convenience method for NOTICE
+`part(channels[, message])`         |Convenience method for PART
+`privmsg(target, text)`             |Convenience method for PRIVMSG
 
-### Hook class *(the hook manager)*
-You normally do not need to use the hook class directly, unless you want to create new hook types or use hooks dynamically.
+### Hook class
+method             |description
+:------------------|:-----------
+`bind(fn[, owner])`|Binds a hook in preparation to install
 
-method                                      |description
-:-------------------------------------------|:----------
-`call(hooks, *args)`                        |Call hooks using as many args as possible
-`create(fn, type, desc[, priority][, data])`|Add hook of `type` identified by `desc`
-`find(type, left[, right])`                 |Search for hooks
-`install(hook)`                             |Install `hook`
-`modify(hook)`                              |Context manager for modifying *installed* hooks
-`uninstall(hook)`                           |Uninstall `hook`
+### EventHook class
+### CommandHook class
+### TriggerHook class
+### TimestampHook class
+### UrlHook class
+
+### HookManager class *(the hook manager)*
+method              |description
+:-------------------|:----------
+`install(hook)`     |Install a bound `hook`
+`uninstall(hook)`   |Uninstall `hook`
+`call(hooks, *args)`|Call hooks using as many args as possible
+`find(model)`       |Search for hooks by model hook instance
+`modify(hook)`      |Context manager for modifying *installed* hooks
+

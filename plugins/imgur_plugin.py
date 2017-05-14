@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 # vim: set ts=4 et
 
-from plugin import *
-import config
+import re
 
 from imgurpython import *
 
-import re
+from plugin import *
+import config
+
 
 client_id = config.imgur_client_id
 client_secret = config.imgur_client_secret
@@ -21,7 +22,6 @@ class Plugin(BasePlugin):
     @hook('i.imgur.com')
     @hook('m.imgur.com')
     def imgur_url(self, msg, domain, url):
-        print url
         m = imgur_re.search(url)
         if not m:
             return

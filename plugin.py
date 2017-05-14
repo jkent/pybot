@@ -3,6 +3,7 @@
 
 import sys
 import traceback
+import importlib
 
 import config
 from decorators import hook, priority, level
@@ -27,7 +28,7 @@ class BasePlugin(object):
         pass
 
 
-class Plugins(object):
+class PluginManager(object):
     def __init__(self, bot):
         self.bot = bot
         self.plugins = {}
@@ -55,12 +56,15 @@ class Plugins(object):
         return module, None
 
     def _reload_module(self, name):
-        modname = PLUGIN_MODULE % name
         module, error = self._load_module(name)
         if error: return None, error
 
         try:
-            reload(module)
+            try:
+                from importlib import reload as reload_func
+            except:
+                reload_func = reload
+            module = reload_func(module)
         except:
             return None, self._error(name, 'module reload failure', True)
 
@@ -100,7 +104,7 @@ class Plugins(object):
             return None, self._error(name, 'on_load error', True)
 
         try:
-            self.bot.install_hooks(plugin)
+            self.bot.hooks.install_owner(plugin)
         except:
             try:
                 plugin.on_unload(True)
@@ -115,7 +119,6 @@ class Plugins(object):
 
     def _unload_plugin(self, plugin, force=False, reloading=False):
         name = plugin._name
-        module = plugin._module
         try:
             abort = plugin.on_unload(reloading or force)
         except:
@@ -125,7 +128,7 @@ class Plugins(object):
             return self._error(name, 'not permitted')
 
         try:
-            self.bot.uninstall_hooks(plugin)
+            self.bot.hooks.uninstall_owner(plugin)
         except:
             return self._error(name, 'unhook error', True)
 
@@ -151,7 +154,7 @@ class Plugins(object):
         if name not in self.plugins:
             return self._error(name, 'not loaded')
 
-        module, error = self._reload_module(name)
+        _, error = self._reload_module(name)
         if error: return error
 
         old_plugin = self.plugins[name]
@@ -190,4 +193,3 @@ class Plugins(object):
 
     def list(self):
         return list(self.plugins.keys())
-
