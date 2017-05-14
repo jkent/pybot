@@ -1,6 +1,7 @@
 .project
 .pydevproject
 .settings/
-*.pyc
+__pycache__/
+*.py[cod]
 /config.py
 /data
