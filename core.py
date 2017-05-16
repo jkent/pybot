@@ -37,6 +37,10 @@ class Core(object):
         sys.path.append(self.plugin_dir)
 
     def scan_plugins(self):
+        for dirname in sys.path.copy():
+            if dirname.startswith(os.path.join(self.plugin_dir, '')):
+                sys.path.remove(dirname)
+
         for root, dirs, files in os.walk(self.plugin_dir):
             if root in sys.path:
                 continue
