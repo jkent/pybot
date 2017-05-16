@@ -3,6 +3,8 @@
 
 from select import select
 from time import time
+import os
+import sys
 
 from bot import Bot
 
@@ -12,6 +14,45 @@ class Core(object):
         self.selectable = []
         self.running = False
         self.in_shutdown = False
+
+        self.init_paths()
+        self.scan_plugins()
+
+    def init_paths(self):
+        self.root = os.path.dirname(os.path.abspath(__file__))
+        lib_path = os.path.abspath(os.path.join(self.root, 'lib'))
+        third_party_path = os.path.join(lib_path, 'third-party')
+
+        for name in os.listdir(third_party_path):
+            path = os.path.join(third_party_path, name)
+            if os.path.isdir(path):
+                if not os.path.exists(os.path.join(path, '__init__.py')):
+                    sys.path.insert(1, path)
+            elif path.endswith('.egg'):
+                sys.path.insert(1, path)
+        sys.path.insert(1, third_party_path)
+        sys.path.insert(1, lib_path)
+
+        self.plugin_dir = os.path.join(self.root, 'plugins')
+        sys.path.append(self.plugin_dir)
+
+    def scan_plugins(self):
+        for root, dirs, files in os.walk(self.plugin_dir):
+            if root in sys.path:
+                continue
+            for filename in files:
+                if filename.endswith('_plugin.py'):
+                    sys.path.append(root)
+                    break
+            if root in sys.path:
+                continue
+            for dirname in dirs:
+                if not dirname.endswith('_plugin'):
+                    continue
+                modname = os.path.join(root, dirname, '__init__.py')
+                if os.path.isfile(modname):
+                    sys.path.append(root)
+                    break
 
     def add_bot(self):
         bot = Bot(self)

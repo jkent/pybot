@@ -3,7 +3,6 @@
 
 import sys
 import traceback
-import importlib
 
 import config
 from decorators import hook, priority, level
@@ -12,7 +11,7 @@ __all__ = ['BasePlugin', 'hook', 'priority', 'level']
 
 debug = 'plugin' in config.debug
 
-PLUGIN_MODULE = 'plugins.%s_plugin'
+PLUGIN_MODULE = '%s_plugin'
 PLUGIN_ERROR = '%s plugin: %s'
 PLUGIN_DEBUG = '%s plugin: %s'
 
@@ -42,6 +41,8 @@ class PluginManager(object):
     def _load_module(self, name):
         modname = PLUGIN_MODULE % name
         was_loaded = modname in sys.modules
+
+        self.bot.core.scan_plugins()
 
         backup_modules = dict(sys.modules)
         try:
@@ -79,7 +80,6 @@ class PluginManager(object):
             return
 
         if modname in sys.modules:
-            del sys.modules['plugins'].__dict__['%s_plugin' % name]
             del sys.modules[modname]
 
             if debug:
