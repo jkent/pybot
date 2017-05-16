@@ -1,3 +1,6 @@
 [submodule "lib/third-party/requests"]
 	path = lib/third-party/requests
 	url = git://github.com/kennethreitz/requests.git
+[submodule "lib/third-party/imgurpython"]
+	path = lib/third-party/imgurpython
+	url = git://github.com/imgur/imgurpython.git
