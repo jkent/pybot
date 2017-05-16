@@ -5,6 +5,7 @@ This is a modular, plugin-based IRC bot written in Python.  Plugins can be dynam
 
 Plugins have a simple, easy to pick up API.  All events, commands, and triggers use a simple decorator convention.
 
+Checkout with:  ```git clone --recursive https://github.com/jkent/jkent-pybot.git```
 
 ### Plugins
 Here's a simple "Hello world" style plugin:
