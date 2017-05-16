@@ -23,21 +23,15 @@ class Core(object):
         lib_path = os.path.abspath(os.path.join(self.root, 'lib'))
         third_party_path = os.path.join(lib_path, 'third-party')
 
-        for name in os.listdir(third_party_path):
-            path = os.path.join(third_party_path, name)
-            if os.path.isdir(path):
-                if not os.path.exists(os.path.join(path, '__init__.py')):
-                    sys.path.insert(1, path)
-            elif path.endswith('.egg'):
-                sys.path.insert(1, path)
-        sys.path.insert(1, third_party_path)
+        sys.path.insert(1, os.path.join(third_party_path, 'requests'))
+        sys.path.insert(1, os.path.join(third_party_path, 'imgurpython'))
         sys.path.insert(1, lib_path)
 
         self.plugin_dir = os.path.join(self.root, 'plugins')
         sys.path.append(self.plugin_dir)
 
     def scan_plugins(self):
-        for dirname in sys.path.copy():
+        for dirname in sys.path[:]:
             if dirname.startswith(os.path.join(self.plugin_dir, '')):
                 sys.path.remove(dirname)
 
