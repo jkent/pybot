@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 # vim: set ts=4 et
 
+from six.moves.configparser import ConfigParser
 from time import time
-from configparser import ConfigParser
 
 from client import Client
 from decorators import hook, priority
@@ -20,10 +20,10 @@ class Bot(Client):
         self.config = ConfigParser()
         self.config.read(configfile)
         
-        host = self.config['base']['host']
-        port = self.config['base'].getint('port')
+        host = self.config.get('base', 'host')
+        port = self.config.getint('base', 'port')
         try:
-            ssl = self.config['base'].getboolean('ssl')
+            ssl = self.config.getboolean('base', 'ssl')
         except:
             ssl = False
         
@@ -35,12 +35,12 @@ class Bot(Client):
 
         self.nick = None
         self.channels = {}
-        superuser = self.config['base']['superuser']
+        superuser = self.config.get('base', 'superuser')
         self.allow_rules = {'*': {'ANY': 1}, superuser: {'ANY': 1000}}
         self.deny_rules = {}
         self._name = '_bot'
 
-        autoload = self.config['base']['autoload'].split()
+        autoload = self.config.get('base', 'autoload').split()
         for name in autoload:
             self.plugins.load(name)
 
