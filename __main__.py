@@ -5,5 +5,5 @@ from core import Core
 
 if __name__ == '__main__':
     core = Core()
-    core.add_bot()
+    core.add_bot('config.ini')
     core.run()

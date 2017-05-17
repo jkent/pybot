@@ -3,11 +3,11 @@
 
 import time
 
-import config
 from plugin import *
 
 BOT_PING_TIME = 120
 BOT_PING_TIMEOUT = 60
+
 
 class Plugin(BasePlugin):
     default_priority = 100
@@ -15,7 +15,7 @@ class Plugin(BasePlugin):
     def __init__(self, *args):
         BasePlugin.__init__(self, *args)
         self.connecting = False
-        self.autojoin = config.autojoin
+        self.autojoin = self.bot.config[self.name]['autojoin'].split()
         self.send_ping_hook = None
         self.ping_timeout_hook = None
 
@@ -25,8 +25,11 @@ class Plugin(BasePlugin):
 
     @hook
     def connect_event(self):
-        self.bot.send('NICK %s' % config.nickname)
-        self.bot.send('USER %s * 0 :%s' % (config.username, config.realname))
+        nickname = self.bot.config[self.name]['nickname']
+        username = self.bot.config[self.name]['username']
+        realname = self.bot.config[self.name]['realname']
+        self.bot.send('NICK %s' % nickname)
+        self.bot.send('USER %s * 0 :%s' % (username, realname))
 
     @hook
     @priority(99)

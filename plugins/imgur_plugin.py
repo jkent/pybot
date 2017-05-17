@@ -3,14 +3,10 @@
 
 import re
 
-from imgurpython import *
+from imgurpython import ImgurClient
 
 from plugin import *
-import config
 
-
-client_id = config.imgur_client_id
-client_secret = config.imgur_client_secret
 
 imgur_re = re.compile(
   'imgur.com/(?:gallery/|r/(?P<subreddit>\\w+)/)?'  +
@@ -25,6 +21,9 @@ class Plugin(BasePlugin):
         m = imgur_re.search(url)
         if not m:
             return
+
+        client_id = self.bot.config['imgur']['client_id']
+        client_secret = self.bot.config['imgur']['client_secret']
 
         client = ImgurClient(client_id, client_secret)
 
@@ -47,4 +46,3 @@ class Plugin(BasePlugin):
 
         if m.group('extension'):
             msg.reply('Gallery link: http://imgur.com/%s' % item.id)
-

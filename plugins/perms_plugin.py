@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 # vim: set ts=4 et
 
-import config
 import pickle
 import sqlite3
 
@@ -34,7 +33,7 @@ class Plugin(BasePlugin):
         count = self.cur.fetchone()[0]
         if count == 0:
             self.bot.allow_rules['*'] = {'ANY': 1}
-            self.bot.allow_rules[config.superuser] = {'ANY': 1000}
+            self.bot.allow_rules[self.bot.config['base']['superuser']] = {'ANY': 1000}
         else:
             for mask, rules in self.cur.execute('SELECT mask, rules FROM allow'):
                 self.bot.allow_rules[mask] = pickle.loads(rules)

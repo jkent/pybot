@@ -4,8 +4,6 @@
 from datetime import datetime
 import re
 
-import config
-
 
 message_re = re.compile(
   '^(?:'                            +
@@ -71,7 +69,7 @@ class Message(object):
     def _detect_trigger(self):
         text = self.param[-1]
     
-        if config.directed_triggers:
+        if self.bot.config['base'].getboolean('directed_triggers'):
             if self.channel:
                 if text.lower().startswith(self.bot.nick.lower()):
                     nicklen = len(self.bot.nick)

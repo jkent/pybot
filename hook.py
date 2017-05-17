@@ -179,7 +179,7 @@ class HookManager:
     def call_event(self, event, *args):
         hooks = self.find(EventHook(event))
         self.call(hooks, *args)
-        if event == 'line':
+        if event == 'recv':
             msg = Message(args[0], self.bot)
             self.call_command(msg)        
 
@@ -237,7 +237,7 @@ class HookManager:
             hooks[:] = (h for h in hooks if
                         h.fn._level <= max(
                             msg.permissions.get('ANY', 0),
-                            msg.permissions.get(h.fn.__self__._name, 0))) 
+                            msg.permissions.get(h.fn.__self__.name, 0))) 
             if len(hooks) < n:
                 authorized = False
 

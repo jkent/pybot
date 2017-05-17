@@ -52,8 +52,8 @@ class Core(object):
                     sys.path.append(root)
                     break
 
-    def add_bot(self):
-        bot = Bot(self)
+    def add_bot(self, configfile):
+        bot = Bot(self, configfile)
         self.selectable.append(bot)
 
     def run(self):

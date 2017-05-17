@@ -4,21 +4,19 @@
 import sys
 import traceback
 
-import config
 from decorators import hook, priority, level
 
 __all__ = ['BasePlugin', 'hook', 'priority', 'level']
 
-debug = 'plugin' in config.debug
-
 PLUGIN_MODULE = '%s_plugin'
 PLUGIN_ERROR = '%s plugin: %s'
-PLUGIN_DEBUG = '%s plugin: %s'
 
 
 class BasePlugin(object):
-    def __init__(self, bot):
+    def __init__(self, bot, name, module):
         self.bot = bot
+        self.name = name
+        self.module = module
 
     def on_load(self, reloading):
         pass
@@ -51,9 +49,6 @@ class PluginManager(object):
             sys.modules = backup_modules
             return None, self._error(name, 'module load failure', True)
 
-        if debug and not was_loaded:
-            print(PLUGIN_DEBUG % (name, 'loaded module'))
-
         return module, None
 
     def _reload_module(self, name):
@@ -69,9 +64,6 @@ class PluginManager(object):
         except:
             return None, self._error(name, 'module reload failure', True)
 
-        if debug:
-            print(PLUGIN_DEBUG % (name, 'reloaded module'))
-
         return module, None
 
     def _unload_module(self, name):
@@ -82,9 +74,6 @@ class PluginManager(object):
         if modname in sys.modules:
             del sys.modules[modname]
 
-            if debug:
-                print(PLUGIN_DEBUG % (name, 'unloaded module'))
-
         return None
 
     def _load_plugin(self, name, reloading=False):
@@ -92,7 +81,7 @@ class PluginManager(object):
         if error: return None, error
 
         try:
-            plugin = module.Plugin(self.bot)
+            plugin = module.Plugin(self.bot, name, module)
         except:
             self._unload_module(name)
             return None, self._error(name, 'init error', True)
@@ -113,12 +102,10 @@ class PluginManager(object):
             self._unload_module(name)
             return None, self._error(name, 'hook error', True)
 
-        plugin._module = module
-        plugin._name = name
         return plugin, None
 
     def _unload_plugin(self, plugin, force=False, reloading=False):
-        name = plugin._name
+        name = plugin.name
         try:
             abort = plugin.on_unload(reloading or force)
         except:
@@ -133,26 +120,23 @@ class PluginManager(object):
             return self._error(name, 'unhook error', True)
 
     def load(self, name):
-        if debug:
-            print(PLUGIN_DEBUG % (name, 'loading'))
-
         if name in self.plugins:
             return self._error(name, 'already loaded')
+
+        self.bot.hooks.call_event('plugin loading', name)
 
         plugin, error = self._load_plugin(name)
         if error: return error
 
         self.plugins[name] = plugin
+
+        self.bot.hooks.call_event('plugin loaded', name)
         
-        if debug:
-            print(PLUGIN_DEBUG % (name, 'loaded'))
-
     def reload(self, name):
-        if debug:
-            print(PLUGIN_DEBUG % (name, 'reloading'))
-
         if name not in self.plugins:
             return self._error(name, 'not loaded')
+
+        self.bot.hooks.call_event('plugin reload', name)
 
         _, error = self._reload_module(name)
         if error: return error
@@ -169,15 +153,13 @@ class PluginManager(object):
 
         self.plugins[name] = new_plugin
 
-        if debug:
-            print(PLUGIN_DEBUG % (name, 'reloaded'))
+        self.bot.hooks.call_event('plugin reloaded', name)
 
     def unload(self, name, force=False):
-        if debug:
-            print(PLUGIN_DEBUG % (name, 'unloading'))
-
         if name not in self.plugins:
             return self._error(name, 'not loaded')
+
+        self.bot.hooks.call_event('plugin unloading', name)
 
         plugin = self.plugins[name]
         error = self._unload_plugin(plugin, force, False)
@@ -188,8 +170,7 @@ class PluginManager(object):
         error = self._unload_module(name)
         if error: return error
 
-        if debug:
-            print(PLUGIN_DEBUG % (name, 'unloaded'))
+        self.bot.hooks.call_event('plugin unloaded', name)
 
     def list(self):
         return list(self.plugins.keys())

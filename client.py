@@ -5,10 +5,7 @@ import errno
 import socket
 import ssl
 
-import config
 from interface import SelectableInterface
-
-debug = 'client' in config.debug
 
 
 class Client(SelectableInterface):
@@ -57,9 +54,7 @@ class Client(SelectableInterface):
         lines, self.recvbuf = parts[:-1], parts[-1]
 
         for line in lines:
-            if debug:
-                print(">> %s" % line)
-            self.hooks.call_event('line', line)
+            self.hooks.call_event('recv', line)
 
     def connect(self):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -117,7 +112,5 @@ class Client(SelectableInterface):
         return data
 
     def send(self, line):
-        if debug:
-            print("<< %s" % line)
-        self.sendbuf += line + "\r\n"
-
+        self.hooks.call_event('send', line)
+        self.sendbuf += line + '\r\n'

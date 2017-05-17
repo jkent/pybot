@@ -2,8 +2,8 @@
 # vim: set ts=4 et
 
 from time import time
+from configparser import ConfigParser
 
-import config
 from client import Client
 from decorators import hook, priority
 from hook import HookManager, TimestampHook
@@ -13,9 +13,21 @@ from plugin import PluginManager
 class Bot(Client):
     default_priority = 100
 
-    def __init__(self, core):
+    def __init__(self, core, configfile):
         self.core = core
-        Client.__init__(self, config.host, config.ssl)
+
+        self.configfile = configfile
+        self.config = ConfigParser()
+        self.config.read(configfile)
+        
+        host = self.config['base']['host']
+        port = self.config['base'].getint('port')
+        try:
+            ssl = self.config['base'].getboolean('ssl')
+        except:
+            ssl = False
+        
+        Client.__init__(self, (host, port), ssl)
         self.hooks = HookManager(self)
         self.plugins = PluginManager(self)
 
@@ -23,11 +35,13 @@ class Bot(Client):
 
         self.nick = None
         self.channels = {}
-        self.allow_rules = {'*': {'ANY': 1}, config.superuser: {'ANY': 1000}}
+        superuser = self.config['base']['superuser']
+        self.allow_rules = {'*': {'ANY': 1}, superuser: {'ANY': 1000}}
         self.deny_rules = {}
         self._name = '_bot'
 
-        for name in config.autoload_plugins:
+        autoload = self.config['base']['autoload'].split()
+        for name in autoload:
             self.plugins.load(name)
 
         self.connect()

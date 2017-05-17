@@ -3,5 +3,5 @@
 .settings/
 __pycache__/
 *.py[cod]
-/config.py
+/config.ini
 /data
