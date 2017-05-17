@@ -23,8 +23,8 @@ class Core(object):
         lib_path = os.path.abspath(os.path.join(self.root, 'lib'))
         third_party_path = os.path.join(lib_path, 'third-party')
 
+        sys.path.insert(1, os.path.join(third_party_path, 'websocket-client'))
         sys.path.insert(1, os.path.join(third_party_path, 'requests'))
-        sys.path.insert(1, os.path.join(third_party_path, 'imgurpython'))
         sys.path.insert(1, lib_path)
 
         self.plugin_dir = os.path.join(self.root, 'plugins')
@@ -35,21 +35,25 @@ class Core(object):
             if dirname.startswith(os.path.join(self.plugin_dir, '')):
                 sys.path.remove(dirname)
 
+        def add_path(path):
+            if path not in sys.path:
+                sys.path.append(path)
+
         for root, dirs, files in os.walk(self.plugin_dir):
-            if root in sys.path:
-                continue
             for filename in files:
                 if filename.endswith('_plugin.py'):
-                    sys.path.append(root)
+                    add_path(root)
                     break
-            if root in sys.path:
-                continue
-            for dirname in dirs:
-                if not dirname.endswith('_plugin'):
-                    continue
+            if root.endswith('_plugin'):
+                lib = os.path.join(root, 'lib')
+                if not os.path.exists(lib): continue
+                for modname in os.listdir(lib):
+                    add_path(os.path.join(lib, modname))
+            else:
+                if not dirname.endswith('_plugin'): continue
                 modname = os.path.join(root, dirname, '__init__.py')
                 if os.path.isfile(modname):
-                    sys.path.append(root)
+                    add_path(root)
                     break
 
     def add_bot(self, configfile):

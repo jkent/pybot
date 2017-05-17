@@ -1,6 +1,6 @@
 [submodule "lib/third-party/requests"]
 	path = lib/third-party/requests
 	url = git://github.com/kennethreitz/requests.git
-[submodule "lib/third-party/imgurpython"]
-	path = lib/third-party/imgurpython
-	url = git://github.com/imgur/imgurpython.git
+[submodule "lib/third-party/websocket-client"]
+	path = lib/third-party/websocket-client
+	url = git@github.com:websocket-client/websocket-client.git
