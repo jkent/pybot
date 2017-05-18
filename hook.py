@@ -38,8 +38,8 @@ class Hook(object):
     def bind(self, fn, owner=None):
         if owner:
             self.owner = owner
-        elif hasattr(fn, '__class__'):
-            self.owner = fn.__class__
+        elif hasattr(fn, '__self__'):
+            self.owner = fn.__self__
         else:
             raise Exception('unable to bind hook, no owner!')
         self.fn = fn
