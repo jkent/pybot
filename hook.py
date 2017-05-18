@@ -166,11 +166,9 @@ class HookManager:
         for hook in hook_seq:
             if isinstance(hook, TimestampHook):
                 self.uninstall(hook)
-                repeat = hook.extra.get('repeat', 0)
+                repeat = hook.extra.get('repeat', None)
                 if repeat:
-                    fn, owner = hook.fn, hook.owner
-                    hook = TimestampHook(hook.timestamp + repeat, hook.extra)
-                    hook.fn, hook.owner = fn, owner
+                    hook.sort += repeat
                     self.install(hook)
 
             if hook(*args):
@@ -251,6 +249,10 @@ class HookManager:
 
         if not authorized:
             msg.reply("You don't have permission to use that trigger")
+ 
+    def call_timestamp(self, timestamp):
+        hooks = self.find(TimestampHook(timestamp))
+        self.call(hooks, timestamp)
  
     def call_url(self, msg, url):
         match = domain_re.match(url)

@@ -64,6 +64,9 @@ class Bot(Client):
         self.hooks.install(hook)
         return hook
 
+    def do_tick(self, timestamp):
+        self.hooks.call_timestamp(timestamp)
+
     def privmsg(self, target, text):
         self.send('PRIVMSG %s :%s' % (target, text))
 
