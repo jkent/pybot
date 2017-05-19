@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # vim: set ts=4 et
 
-import pickle
+import json
 import sqlite3
 
 from plugin import *
@@ -36,18 +36,18 @@ class Plugin(BasePlugin):
             self.bot.allow_rules[self.bot.config.get('base', 'superuser')] = {'ANY': 1000}
         else:
             for mask, rules in self.cur.execute('SELECT mask, rules FROM allow'):
-                self.bot.allow_rules[mask] = pickle.loads(rules)
+                self.bot.allow_rules[mask] = json.loads(rules)
 
             for mask, rules in self.cur.execute('SELECT mask, rules FROM deny'):
-                self.bot.deny_rules[mask] = pickle.loads(rules)
+                self.bot.deny_rules[mask] = json.loads(rules)
 
     def save_rules(self):
         for mask, rules in list(self.bot.allow_rules.items()):
-            rules = pickle.dumps(rules)
+            rules = json.dumps(rules)
             self.cur.execute('INSERT OR REPLACE INTO allow (mask, rules) VALUES (?, ?)', (mask, rules))
 
         for mask, rules in list(self.bot.deny_rules.items()):
-            rules = pickle.dumps(rules)
+            rules = json.dumps(rules)
             self.cur.execute('INSERT OR REPLACE INTO deny (mask, rules) VALUES (?, ?)', (mask, rules))
 
         self.db.commit()
