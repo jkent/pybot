@@ -20,24 +20,23 @@ class Plugin(BasePlugin):
     @level(1000)
     def set_config_trigger(self, msg, args, argstr):
         try:
-            section, key, value = argstr.split(None, 3)
+            section, key, value = argstr.split(None, 2)
         except:
-            value = None
-            try:
-                section, key = argstr.split(None, 2)
-            except:
-                msg.reply('usage: set config SECTION KEY [VALUE]')
-                return
+            msg.reply('usage: set config SECTION KEY VALUE')
+            return
 
-        if value == None:
-            try:
-                del self.bot.config[section][key]
-            except:
-                msg.reply('Key does not exist')
-        else:
-            if section not in self.bot.config:
-                self.bot.config[section] = {}
-            self.bot.config[section][key] = value
+        if not self.bot.config.has_section(section):
+            self.bot.config.add_section(section)
+        self.bot.config.set(section, key, value)
+
+    @hook
+    @level(1000)
+    def unset_config_trigger(self, msg, args, argstr):
+        try:
+            section, key = argstr.split(None, 2)
+        except:
+            msg.reply('usage: unset config SECTION KEY')
+        self.bot.config.remove_option(section, key)
 
     @hook
     @level(1000)
