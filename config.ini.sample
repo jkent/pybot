@@ -8,4 +8,4 @@ realname = Python IRC bot - http://git.io/M1XRlw
 directed_triggers = True
 autojoin = #bot_lab
 autoload = base config debug perms plugin
-superuser = Jeff!jkent@localhost'
+superuser = Jeff!jkent@localhost

@@ -68,8 +68,8 @@ class Message(object):
 
     def _detect_trigger(self):
         text = self.param[-1]
-    
-        if self.bot.config['base'].getboolean('directed_triggers'):
+
+        if self.bot.config.getboolean('base', 'directed_triggers'):
             if self.channel:
                 if text.lower().startswith(self.bot.nick.lower()):
                     nicklen = len(self.bot.nick)
@@ -92,4 +92,3 @@ class Message(object):
         recipient = self.source if direct else self.reply_to
 
         self.bot.privmsg(recipient, text)
-
