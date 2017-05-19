@@ -29,11 +29,11 @@ class Plugin(BasePlugin):
         self.bot.allow_rules = {}
         self.bot.deny_rules = {}
 
-        self.cur.execute('''SELECT COUNT(*) FROM allow''')
+        self.cur.execute('SELECT COUNT(*) FROM allow')
         count = self.cur.fetchone()[0]
         if count == 0:
             self.bot.allow_rules['*'] = {'ANY': 1}
-            self.bot.allow_rules[self.bot.config['base']['superuser']] = {'ANY': 1000}
+            self.bot.allow_rules[self.bot.config.get('base', 'superuser')] = {'ANY': 1000}
         else:
             for mask, rules in self.cur.execute('SELECT mask, rules FROM allow'):
                 self.bot.allow_rules[mask] = pickle.loads(rules)
