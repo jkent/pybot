@@ -80,11 +80,7 @@ class Plugin(BasePlugin):
         del self.autojoin[:]
 
     @hook
-    def ping_command(self, msg):
-        pass
-
-    @hook
-    def line_event(self):
+    def recv_event(self):
         if self.send_ping_hook:
             self.bot.hooks.uninstall(self.send_ping_hook)
             self.send_ping_hook = None
