@@ -5,6 +5,8 @@ from plugin import *
 
 
 class Plugin(BasePlugin):
+    default_level = 1000
+    
     @hook
     def reload_config_trigger(self, msg, args, argstr):
         self.bot.config.read(self.bot.configfile)
@@ -17,7 +19,6 @@ class Plugin(BasePlugin):
         msg.reply('Configuration saved')
         
     @hook
-    @level(1000)
     def set_config_trigger(self, msg, args, argstr):
         try:
             section, key, value = argstr.split(None, 2)
@@ -30,7 +31,6 @@ class Plugin(BasePlugin):
         self.bot.config.set(section, key, value)
 
     @hook
-    @level(1000)
     def unset_config_trigger(self, msg, args, argstr):
         try:
             section, key = argstr.split(None, 2)
@@ -39,7 +39,6 @@ class Plugin(BasePlugin):
         self.bot.config.remove_option(section, key)
 
     @hook
-    @level(1000)
     def list_config_trigger(self, msg, args, argstr):
         section = argstr
         for key in self.bot.config[section]:
