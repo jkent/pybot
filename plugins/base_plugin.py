@@ -52,7 +52,7 @@ class Plugin(BasePlugin):
             self.reconnect_attempt = 0
 
         timeout_period = 60 * min(self.reconnect_attempt, 5)
-        self.bot.set_timeout(self, self.timeout, timeout_period)
+        self.bot.set_timeout(self.timeout, timeout_period)
         self.reconnect_attempt += 1
 
     def timeout(self):
