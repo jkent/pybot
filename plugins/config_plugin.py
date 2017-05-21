@@ -41,6 +41,6 @@ class Plugin(BasePlugin):
     @hook
     def list_config_trigger(self, msg, args, argstr):
         section = argstr
-        for key in self.bot.config[section]:
-            value = self.bot.config[section][key]
-            msg.reply('%s = %s' % (key, value))
+        for option in self.bot.config.options(section):
+            value = self.bot.config.get(section, option)
+            msg.reply('%s = %s' % (option, value))
