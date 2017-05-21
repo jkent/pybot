@@ -197,7 +197,7 @@ class HookManager:
             if not re.match(regex, msg.prefix):
                 continue
 
-            for plugin, level in list(rules.items()):
+            for plugin,     level in list(rules.items()):
                 current_level = msg.permissions.get(plugin, level)
                 msg.permissions[plugin] = max(level, current_level)
 
@@ -232,10 +232,9 @@ class HookManager:
             hooks = self.find(TriggerHook(parts[:depth]))
 
             n = len(hooks)           
-            hooks[:] = (h for h in hooks if
-                        h.fn._level <= max(
-                            msg.permissions.get('ANY', 0),
-                            msg.permissions.get(h.fn.__self__.name, 0))) 
+            hooks[:] = [h for h in hooks if
+                        h.fn._level <= msg.permissions.get(h.fn.__self__.name, msg.permissions.get('ANY', 0))]
+
             if len(hooks) < n:
                 authorized = False
 
