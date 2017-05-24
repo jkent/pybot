@@ -50,11 +50,12 @@ class Core(object):
                 for modname in os.listdir(lib):
                     add_path(os.path.join(lib, modname))
             else:
-                if not dirname.endswith('_plugin'): continue
-                modname = os.path.join(root, dirname, '__init__.py')
-                if os.path.isfile(modname):
-                    add_path(root)
-                    break
+		for dirname in dirs:
+                    if not dirname.endswith('_plugin'): continue
+                    modname = os.path.join(root, dirname, '__init__.py')
+                    if os.path.isfile(modname):
+                        add_path(root)
+                        break
 
     def add_bot(self, configfile):
         bot = Bot(self, configfile)
