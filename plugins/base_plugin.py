@@ -10,8 +10,6 @@ BOT_PING_TIMEOUT = 60
 
 
 class Plugin(BasePlugin):
-    default_priority = 100
-
     def __init__(self, *args):
         BasePlugin.__init__(self, *args)
         self.connecting = False
@@ -32,7 +30,6 @@ class Plugin(BasePlugin):
         self.bot.send('USER %s * 0 :%s' % (username, realname))
 
     @hook
-    @priority(99)
     def disconnect_event(self):
         if self.bot.core.in_shutdown:
             return
@@ -40,7 +37,7 @@ class Plugin(BasePlugin):
             for channel, props in self.bot.channels.items():
                 if not props['joined']:
                     continue
-                if props.has_key('key'):
+                if 'key' in props:
                     self.autojoin.append((channel, props['key']))
                 else:
                     self.autojoin.append(channel)
@@ -99,4 +96,3 @@ class Plugin(BasePlugin):
     def ping_timeout(self):
         self.ping_timeout_hook = None
         self.bot.disconnect()
-

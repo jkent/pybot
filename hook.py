@@ -97,7 +97,7 @@ class HookManager:
         if not hasattr(hook, 'fn') or not hasattr(hook, 'owner'):
             raise Exception('hook not bound')
         
-        default_priority = getattr(hook.owner, 'default_priority', 500)
+        default_priority = getattr(hook.owner, 'default_priority', 100)
         default_level = getattr(hook.owner, 'default_level', 1)
         hook.priority = getattr(hook.fn, '_priority', default_priority)
         hook.level = getattr(hook.fn, '_level', default_level)

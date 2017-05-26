@@ -11,8 +11,6 @@ from plugin import PluginManager
 
 
 class Bot(Client):
-    default_priority = 100
-
     def __init__(self, core, configfile):
         self.core = core
 
@@ -102,13 +100,14 @@ class Bot(Client):
                 self.send('PART %s' % channels)
 
     @hook
+    @priority(0)
     def disconnect_event(self):
         for _, props in list(self.channels.items()):
             props['joined'] = False
             props['nicks'].clear()
 
     @hook
-    @priority(1000)
+    @priority(0)
     def shutdown_event(self, reason):
         self.send('QUIT :%s' % reason)
         for name in self.plugins.list():
@@ -162,7 +161,7 @@ class Bot(Client):
                 props['nicks'].add(new_nick)
 
     @hook
-    @priority(1000)
+    @priority(0)
     def part_command(self, msg):
         channel = msg.param[0]
         if msg.source == self.nick:
@@ -178,9 +177,8 @@ class Bot(Client):
         self.send('PONG :%s' % msg.param[-1])
 
     @hook
-    @priority(1000)
+    @priority(0)
     def quit_command(self, msg):
         for _, props in list(self.channels.items()):
             if 'nicks' in props and msg.source in props['nicks']:
                 props['nicks'].remove(msg.source)
-
