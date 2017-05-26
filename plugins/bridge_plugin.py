@@ -21,10 +21,10 @@ class BridgeServer(SelectableInterface):
         self.sock.listen(5)
         self.connected = True
         self.plugin.bot.core.selectable.append(self)
-        
+
     def fileno(self):
         return self.sock.fileno()
-    
+
     def can_read(self):
         return self.connected
 
@@ -51,13 +51,14 @@ class BridgeClient(SelectableInterface):
         self.authenticated = False
         self.server.plugin.bot.core.selectable.append(self)
         self.server.clients.append(self)
+        self.realm = None
 
     def fileno(self):
         return self.sock.fileno()
 
     def can_read(self):
         return self.connected
-    
+
     def can_write(self):
         return self.connected and bool(self.sendbuf)
 
@@ -86,20 +87,21 @@ class BridgeClient(SelectableInterface):
 
     def recv_obj(self, obj):
         objtype = obj.get('type', None) 
-        
+
         if not self.authenticated:
             if objtype != 'auth':
                 self.disconnect()
                 return
-            token = self.server.plugin.bot.config.get(self.server.plugin.name, 'token')
-            if obj['token'] != token:
+            secret = self.server.plugin.bot.config.get(self.server.plugin.name, 'secret')
+            if obj['secret'] != secret:
                 self.disconnect()
                 return
-                
+
             self.realm = obj.get('realm', None)
             self.authenticated = True
+            self.send_obj({'type': 'authok'})
             return
-        
+
         if objtype == 'message':
             channel = obj.get('channel', None)
             username = obj.get('username', None)
@@ -160,30 +162,30 @@ class Plugin(BasePlugin):
         self.server.shutdown()
 
     def load_streams(self):
-        streams = self.bot.config.get(self.name, 'input_streams')
+        streams = self.bot.config.get(self.name, 'inputs')
         self.input_streams = []
         for stream_str in streams.split():
             try:
-                realm, channel, stream_id = stream_str.split(':')
+                realm, channel, stream_id = stream_str.split(':', 2)
             except:
                 continue
 
-            stream = {'realm': realm, 'channel': channel, 'id': int(stream_id)}
+            stream = {'realm': realm, 'channel': channel, 'id': stream_id}
             self.input_streams.append(stream)
 
-        streams = self.bot.config.get(self.name, 'output_streams')
+        streams = self.bot.config.get(self.name, 'outputs')
         self.output_streams = []
         for stream_str in streams.split():
             try:
-                realm, channel, stream_id = stream_str.split(':')
+                realm, channel, stream_id = stream_str.split(':', 2)
             except:
                 continue
 
-            stream = {'realm': realm, 'channel': channel, 'id': int(stream_id)}
+            stream = {'realm': realm, 'channel': channel, 'id': stream_id}
             self.output_streams.append(stream)
-    
+
     @hook
-    def bridge_reload_trigger(self, msg, args, argstr):
+    def reload_bridge_trigger(self, msg, args, argstr):
         self.load_streams()
         msg.reply("reloaded input/output streams")
 
@@ -191,7 +193,7 @@ class Plugin(BasePlugin):
     def privmsg_command(self, msg):
         if not msg.channel:
             return
-        
+
         if msg.trigger:
             return
 
@@ -206,5 +208,5 @@ class Plugin(BasePlugin):
             else:
                 for client in self.server.clients:
                     if getattr(client, 'realm', None) == output_stream['realm']:
-                        obj = {'type': 'message', 'channel': channel, 'username': username, 'message': message}
+                        obj = {'type': 'message', 'realm': realm, 'channel': channel, 'username': username, 'message': message}
                         client.send_obj(obj)
