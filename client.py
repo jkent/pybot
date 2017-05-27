@@ -50,10 +50,14 @@ class Client(SelectableInterface):
                 self.recvbuf += self._read(data_left)
                 data_left = self.sock.pending()
 
-        parts = self.recvbuf.split('\r\n')
+        parts = self.recvbuf.split(b'\r\n')
         lines, self.recvbuf = parts[:-1], parts[-1]
 
         for line in lines:
+            try:
+                line = line.decode('utf-8')
+            except UnicodeDecodeError:
+                line = line.decode('latin-1')
             self.hooks.call_event('recv', line)
 
     def connect(self):
@@ -72,9 +76,6 @@ class Client(SelectableInterface):
         self.hooks.call_event('disconnect')
 
     def _write(self, data):
-        if type(data) == str:
-            data = data.encode('utf-8')
-
         try:
             n = self.sock.send(data)
         except socket.error as e:
@@ -108,14 +109,8 @@ class Client(SelectableInterface):
             if e.errno == ssl.SSL_ERROR_WANT_WRITE:
                 return
             raise
-
-        try:
-            data = data.decode("utf-8")
-        except UnicodeDecodeError:
-            data = data.decode("latin-1")
-
         return data
 
     def send(self, line):
         self.hooks.call_event('send', line)
-        self.sendbuf += line + '\r\n'
+        self.sendbuf += line.encode('utf-8') + b'\r\n'
