@@ -3,6 +3,7 @@
 
 from plugin import *
 import expression
+import os
 import re
 import sqlite3
 
@@ -15,7 +16,7 @@ VAR_TYPE_STR     = 3
 
 class Plugin(BasePlugin):
     def on_load(self, reloading):
-        self.db = sqlite3.connect('data/math.db')
+        self.db = sqlite3.connect(os.path.join(self.bot.core.data_path, 'math.db'))
         c = self.db.cursor()
         c.execute('''
             CREATE TABLE IF NOT EXISTS Workbook (

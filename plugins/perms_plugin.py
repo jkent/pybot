@@ -2,6 +2,7 @@
 # vim: set ts=4 et
 
 import json
+import os
 import sqlite3
 
 from plugin import *
@@ -11,7 +12,7 @@ class Plugin(BasePlugin):
     default_level = 1000
 
     def on_load(self, reloading):
-        self.db = sqlite3.connect('data/perms.db')
+        self.db = sqlite3.connect(os.path.join(self.bot.core.data_path, 'perms.db'))
         self.cur = self.db.cursor()
         self.cur.execute('''CREATE TABLE IF NOT EXISTS allow
                      (mask TEXT PRIMARY KEY, rules TEXT)''')

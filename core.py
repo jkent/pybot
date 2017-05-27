@@ -30,6 +30,8 @@ class Core(object):
         self.plugin_dir = os.path.join(self.root, 'plugins')
         sys.path.append(self.plugin_dir)
 
+        self.data_path = os.path.join(self.root, 'data')
+
     def scan_plugins(self):
         for dirname in sys.path[:]:
             if dirname.startswith(os.path.join(self.plugin_dir, '')):
@@ -58,6 +60,12 @@ class Core(object):
                         break
 
     def add_bot(self, configfile):
+        if os.path.exists(configfile):
+            pass
+        if os.path.exists(os.path.join(self.root, configfile)):
+            configfile = os.path.join(self.root, configfile)
+        else:
+            raise Exception("Config file not found")
         bot = Bot(self, configfile)
         self.selectable.append(bot)
 

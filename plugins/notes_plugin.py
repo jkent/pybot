@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # vim: set ts=4 et
 
+import os
 import sqlite3
 
 from plugin import *
@@ -8,7 +9,7 @@ from plugin import *
 
 class Plugin(BasePlugin):
     def on_load(self, reloading):
-        self.db = sqlite3.connect('data/notes.db')
+        self.db = sqlite3.connect(os.path.join(self.bot.core.data_path, 'notes.db'))
         c = self.db.cursor()
         c.execute('''CREATE TABLE IF NOT EXISTS notes
                      (channel text, sender text, recipient text, message text)''')
