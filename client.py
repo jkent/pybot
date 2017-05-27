@@ -13,8 +13,8 @@ class Client(SelectableInterface):
         self.use_ssl = use_ssl
         self.remote = remote
         self.connected = False
-        self.sendbuf = ''
-        self.recvbuf = ''
+        self.sendbuf = b''
+        self.recvbuf = b''
 
     def fileno(self):
         return self.sock.fileno()
