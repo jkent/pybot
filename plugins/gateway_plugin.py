@@ -156,38 +156,26 @@ class BridgeClient(SelectableInterface):
 class Plugin(BasePlugin):
     def on_load(self, reloading):
         self.server = BridgeServer(self)
-        self.load_streams()
+        self.load_routes()
         
     def on_unload(self, reloading):
         self.server.shutdown()
 
-    def load_streams(self):
-        streams = self.config_get('inputs')
-        self.input_streams = []
-        for stream_str in streams.split():
+    def load_routes(self):
+        self.routes = []
+        routes = self.config_get('routes')
+        for route in routes.split():
             try:
-                realm, channel, stream_id = stream_str.split(':', 2)
+                src_realm, src_channel, dst_realm, dst_channel = route.split(':', 3)
             except:
-                continue
+                continue 
 
-            stream = {'realm': realm, 'channel': channel, 'id': stream_id}
-            self.input_streams.append(stream)
-
-        streams = self.config_get(self.name, 'outputs')
-        self.output_streams = []
-        for stream_str in streams.split():
-            try:
-                realm, channel, stream_id = stream_str.split(':', 2)
-            except:
-                continue
-
-            stream = {'realm': realm, 'channel': channel, 'id': stream_id}
-            self.output_streams.append(stream)
+            self.routes.append({'src_realm': src_realm, 'src_channel': src_channel, 'dst_realm': dst_realm, 'dst_channel': dst_channel})
 
     @hook
     def bridge_reload_trigger(self, msg, args, argstr):
-        self.load_streams()
-        msg.reply("reloaded input/output streams")
+        self.load_routes()
+        msg.reply("reloaded routes")
 
     @hook
     def privmsg_command(self, msg):
@@ -197,16 +185,15 @@ class Plugin(BasePlugin):
         if msg.trigger:
             return
 
-        self.process_input('master', msg.channel, msg.source, msg.param[-1])
+        self.process_input('irc', msg.channel, msg.source, msg.param[-1])
 
     def process_input(self, realm, channel, username, message):
-        input_ids = [stream['id'] for stream in self.input_streams if stream['realm'] == realm and stream['channel'] == channel]
-        output_streams = [stream for stream in self.output_streams if stream['id'] in input_ids]
-        for output_stream in output_streams:
-            if output_stream['realm'] == 'master':
-                self.bot.privmsg(output_stream['channel'], '<%s> %s' % (username, message))
+        routes = [route for route in self.routes if route['src_realm'] == realm and route['src_channel'] == channel]
+        for route in routes:
+            if route['dst_realm'] == 'irc':
+                self.bot.privmsg(route['dst_channel'], '<%s> %s' % (username, message))
             else:
                 for client in self.server.clients:
-                    if getattr(client, 'realm', None) == output_stream['realm']:
-                        obj = {'type': 'message', 'from_realm': realm, 'from_channel': channel, 'realm': output_stream['realm'], 'channel': output_stream['channel'], 'username': username, 'message': message}
+                    if route['dst_realm'] == getattr(client, 'realm', None):
+                        obj = {'type': 'message', 'from_realm': realm, 'from_channel': channel, 'realm': route['dst_realm'], 'channel': route['dst_channel'], 'username': username, 'message': message}
                         client.send_obj(obj)
