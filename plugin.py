@@ -24,6 +24,26 @@ class BasePlugin(object):
     def on_unload(self, reloading):
         pass
 
+    def config_get(self, name, fallback=None):
+        try:
+            return self.bot.config.get(self.name, name)
+        except:
+            if fallback != None:
+                return fallback
+            print("config %s:%s is not set" % (self.name, name))
+            raise
+
+    def config_getint(self, name, fallback=None):
+        try:
+            return self.bot.config.getint(name)
+        except:
+            if fallback != None:
+                return fallback
+            print("config %s:%s is not set" % (self.name, name))
+            raise
+
+    def config_set(self, name, value):
+        self.bot.config.set(self.name, name, value)
 
 class PluginManager(object):
     def __init__(self, bot):

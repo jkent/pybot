@@ -15,7 +15,7 @@ class BridgeServer(SelectableInterface):
         self.clients = []
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        port = self.plugin.bot.config.getint(self.plugin.name, 'port', fallback=65432)
+        port = self.plugin.config_getint('port', 65432)
         listen = ('127.0.0.1', port)
         self.sock.bind(listen)
         self.sock.listen(5)
@@ -92,7 +92,7 @@ class BridgeClient(SelectableInterface):
             if objtype != 'auth':
                 self.disconnect()
                 return
-            secret = self.server.plugin.bot.config.get(self.server.plugin.name, 'secret')
+            secret = self.server.plugin.config_get('secret')
             if obj['secret'] != secret:
                 self.disconnect()
                 return
@@ -162,7 +162,7 @@ class Plugin(BasePlugin):
         self.server.shutdown()
 
     def load_streams(self):
-        streams = self.bot.config.get(self.name, 'inputs')
+        streams = self.config_get('inputs')
         self.input_streams = []
         for stream_str in streams.split():
             try:
@@ -173,7 +173,7 @@ class Plugin(BasePlugin):
             stream = {'realm': realm, 'channel': channel, 'id': stream_id}
             self.input_streams.append(stream)
 
-        streams = self.bot.config.get(self.name, 'outputs')
+        streams = self.config_get(self.name, 'outputs')
         self.output_streams = []
         for stream_str in streams.split():
             try:
@@ -204,9 +204,9 @@ class Plugin(BasePlugin):
         output_streams = [stream for stream in self.output_streams if stream['id'] in input_ids]
         for output_stream in output_streams:
             if output_stream['realm'] == 'master':
-                self.bot.privmsg(channel, '<%s> %s' % (username, message))
+                self.bot.privmsg(output_stream['channel'], '<%s> %s' % (username, message))
             else:
                 for client in self.server.clients:
                     if getattr(client, 'realm', None) == output_stream['realm']:
-                        obj = {'type': 'message', 'realm': realm, 'channel': channel, 'username': username, 'message': message}
+                        obj = {'type': 'message', 'from_realm': realm, 'from_channel': channel, 'realm': output_stream['realm'], 'channel': output_stream['channel'], 'username': username, 'message': message}
                         client.send_obj(obj)
