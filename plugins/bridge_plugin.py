@@ -185,7 +185,7 @@ class Plugin(BasePlugin):
             self.output_streams.append(stream)
 
     @hook
-    def reload_bridge_trigger(self, msg, args, argstr):
+    def bridge_reload_trigger(self, msg, args, argstr):
         self.load_streams()
         msg.reply("reloaded input/output streams")
 

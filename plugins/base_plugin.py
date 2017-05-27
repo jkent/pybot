@@ -13,7 +13,7 @@ class Plugin(BasePlugin):
     def __init__(self, *args):
         BasePlugin.__init__(self, *args)
         self.connecting = False
-        self.autojoin = self.bot.config.get(self.name, 'autojoin').split()
+        self.autojoin = self.config_get('autojoin', '').split()
         self.send_ping_hook = None
         self.ping_timeout_hook = None
 
@@ -23,9 +23,9 @@ class Plugin(BasePlugin):
 
     @hook
     def connect_event(self):
-        nickname = self.bot.config.get(self.name, 'nickname')
-        username = self.bot.config.get(self.name, 'username')
-        realname = self.bot.config.get(self.name, 'realname')
+        nickname = self.config_get('nickname')
+        username = self.config_get('username')
+        realname = self.config_get('realname')
         self.bot.send('NICK %s' % nickname)
         self.bot.send('USER %s * 0 :%s' % (username, realname))
 

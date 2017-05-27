@@ -53,7 +53,7 @@ class Plugin(BasePlugin):
         self.db.commit()
 
     @hook
-    def list_perms_trigger(self, msg, args, argstr):
+    def perms_list_trigger(self, msg, args, argstr):
         msg.reply('Allow:')
         for mask, rules in list(self.bot.allow_rules.items()):
             line = '  ' + mask
@@ -69,7 +69,7 @@ class Plugin(BasePlugin):
             msg.reply(line)
 
     @hook
-    def allow_trigger(self, msg, args, argstr):
+    def perms_allow_trigger(self, msg, args, argstr):
         if len(args) < 2:
             msg.reply('a prefix mask is required')
             return
@@ -105,7 +105,7 @@ class Plugin(BasePlugin):
                 rules[plugin] = level
 
     @hook
-    def deny_trigger(self, msg, args, argstr):
+    def perms_deny_trigger(self, msg, args, argstr):
         if len(args) < 2:
             msg.reply('a prefix mask is required')
             return
@@ -139,4 +139,3 @@ class Plugin(BasePlugin):
                     msg.reply('invalid syntax, "plugin=level" format required')
                     return
                 rules[plugin] = level
-

@@ -45,4 +45,3 @@ class Plugin(BasePlugin):
                 msg.reply("Note: <%s> %s" % row)
             c.execute('DELETE FROM notes WHERE channel=:channel AND recipient=:recipient', criteria)
             self.db.commit()
-

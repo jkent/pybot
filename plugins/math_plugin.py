@@ -91,13 +91,11 @@ class Plugin(BasePlugin):
 
         return workbook
 
-
     def get_workbook(self, target):
         if target in self.target_to_workbook:
             return self.target_to_workbook[target]
 
         return self.load_workbook(target, 'Default')
-
 
     def exc_handler(self, name, args, exc, workbook, expr):
         self.lastmsg.reply('Error: ' + exc.message)
@@ -105,8 +103,7 @@ class Plugin(BasePlugin):
             self.lastmsg.reply('  ' + expr)
             self.lastmsg.reply(' ' * (exc.pos + 2) + '^')
 
-
-    def define_func(self, workbook, name, args, expr):
+    def define_func(self, msg, workbook, name, args, expr):
         try:
             expression.define_func(workbook, name, args, expr)
             c = self.db.cursor()
@@ -118,8 +115,7 @@ class Plugin(BasePlugin):
         except expression.ExpressionError as exc:
             self.exc_handler('', [], exc, workbook, expr)
 
-
-    def undefine_func(self, workbook, name):
+    def undefine_func(self, msg, workbook, name):
         try:
             expression.undefine_func(workbook, name)
             c = self.db.cursor()
@@ -129,8 +125,7 @@ class Plugin(BasePlugin):
         except expression.DeclarationError as exc:
             msg.reply('Error: ' + exc.message)
 
-
-    def define_var(self, workbook, name, expr):
+    def define_var(self, msg, workbook, name, expr):
         try:
             expression.define_var(workbook, name, expr)
 
@@ -153,8 +148,7 @@ class Plugin(BasePlugin):
         except expression.ExpressionError as exc:
             self.exc_handler('', [], exc, workbook, expr)
 
-
-    def undefine_var(self, workbook, name):
+    def undefine_var(self, msg, workbook, name):
         try:
             expression.undefine_var(workbook, name)
             c = self.db.cursor()
@@ -163,7 +157,6 @@ class Plugin(BasePlugin):
             self.db.commit()
         except expression.DeclarationError as exc:
             msg.reply('Error: ' + exc.message)
-
 
     @hook
     def math_trigger(self, msg, args, argstr):
@@ -176,18 +169,18 @@ class Plugin(BasePlugin):
         if m:
             name, args, expr = m.groups()
             expr = expr.strip()
-            self.undefine_func(workbook, name)
+            self.undefine_func(msg, workbook, name)
             if expr:
-                self.define_func(workbook, name, args, expr)
+                self.define_func(msg, workbook, name, args, expr)
             return
 
         m = re.match('(\w+)\s*=\s*(.*)', line)
         if m:
             name, expr = m.groups()
             expr = expr.strip()
-            self.undefine_var(workbook, name)
+            self.undefine_var(msg, workbook, name)
             if expr:
-                self.define_var(workbook, name, expr)
+                self.define_var(msg, workbook, name, expr)
             return
 
         try:
@@ -203,7 +196,6 @@ class Plugin(BasePlugin):
             return
         msg.reply(str(value))
 
-
     @hook
     def math_workbook_trigger(self, msg, args, argstr):
         if len(args) <= 1:
@@ -215,7 +207,6 @@ class Plugin(BasePlugin):
         self.load_workbook(msg.reply_to, args[1])
         return True
 
-
     @hook
     def math_varlist_trigger(self, msg, args, argstr):
         workbook = self.get_workbook(msg.reply_to)
@@ -224,7 +215,6 @@ class Plugin(BasePlugin):
         msg.reply(', '.join(names))
         return True
 
-
     @hook
     def math_funclist_trigger(self, msg, args, argstr):
         workbook = self.get_workbook(msg.reply_to)
@@ -232,7 +222,6 @@ class Plugin(BasePlugin):
         names.sort()
         msg.reply(', '.join(names))
         return True
-
 
     @hook
     def math_describe_trigger(self, msg, args, argstr):
@@ -267,4 +256,3 @@ class Plugin(BasePlugin):
             (func['desc'], workbook['id'], name))
         self.db.commit()
         return True
-
