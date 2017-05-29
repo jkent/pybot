@@ -173,7 +173,7 @@ class Plugin(BasePlugin):
             self.routes.append({'src_realm': src_realm, 'src_channel': src_channel, 'dst_realm': dst_realm, 'dst_channel': dst_channel})
 
     @hook
-    def bridge_reload_trigger(self, msg, args, argstr):
+    def gateway_reload_trigger(self, msg, args, argstr):
         self.load_routes()
         msg.reply("reloaded routes")
 

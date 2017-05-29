@@ -8,7 +8,7 @@ class Plugin(BasePlugin):
     default_level = 1000
     
     @hook
-    def reload_config_trigger(self, msg, args, argstr):
+    def config_reload_trigger(self, msg, args, argstr):
         self.bot.config.read(self.bot.configfile)
         msg.reply('Configuration reloaded')
 
