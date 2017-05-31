@@ -119,8 +119,11 @@ class BridgeClient(SelectableInterface):
     def disconnect(self):
         self.connected = False
         self.sock.close()
-        self.server.plugin.bot.core.selectable.remove(self)
-        self.server.clients.remove(self)
+        try:
+            self.server.plugin.bot.core.selectable.remove(self)
+            self.server.clients.remove(self)
+        except:
+            pass
 
     def _write(self, data):
         if type(data) == str:
