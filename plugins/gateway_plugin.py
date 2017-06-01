@@ -102,7 +102,7 @@ class BridgeClient(SelectableInterface):
             self.send_obj({'type': 'authok'})
             return
 
-        if objtype == 'message':
+        if objtype in ['message', 'action']:
             channel = obj.get('channel', None)
             username = obj.get('username', None)
             message = obj.get('message', None)
@@ -110,8 +110,8 @@ class BridgeClient(SelectableInterface):
             if not channel or not username or not message:
                 self.disconnect()
                 return
-
-            self.server.plugin.process_input(self.realm, channel, username, message)
+            if objtype in ['message', 'action']:
+                self.server.plugin.process_message(self.realm, channel, username, message, objtype == 'action')
 
     def send_obj(self, obj):
         self.sendbuf += json.dumps(obj) + '\r\n'
@@ -188,15 +188,29 @@ class Plugin(BasePlugin):
         if msg.trigger:
             return
 
-        self.process_input('irc', msg.channel, msg.source, msg.param[-1])
+        message = msg.param[-1]
+        if message.startswith('\x01ACTION') and message.endswith('\x01'):
+            message = message[8:-1]
+            self.process_message('irc', msg.channel, msg.source, message, True)
+        else:
+            self.process_message('irc', msg.channel, msg.source, message)
 
-    def process_input(self, realm, channel, username, message):
+    def process_message(self, realm, channel, username, message, is_action=False):
         routes = [route for route in self.routes if route['src_realm'] == realm and route['src_channel'] == channel]
         for route in routes:
             if route['dst_realm'] == 'irc':
-                self.bot.privmsg(route['dst_channel'], '<%s> %s' % (username, message))
+                if is_action:
+                    self.bot.privmsg(route['dst_channel'], '* %s %s' % (username, message))
+                else:
+                    self.bot.privmsg(route['dst_channel'], '<%s> %s' % (username, message))
             else:
                 for client in self.server.clients:
                     if route['dst_realm'] == getattr(client, 'realm', None):
-                        obj = {'type': 'message', 'from_realm': realm, 'from_channel': channel, 'realm': route['dst_realm'], 'channel': route['dst_channel'], 'username': username, 'message': message}
+                        obj = {'type': 'action' if is_action else 'message',
+                               'from_realm': realm,
+                               'from_channel': channel,
+                               'realm': route['dst_realm'],
+                               'channel': route['dst_channel'],
+                               'username': username,
+                               'message': message}
                         client.send_obj(obj)
