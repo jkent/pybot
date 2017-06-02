@@ -8,7 +8,7 @@ from client import Client
 from decorators import hook, priority
 from hook import HookManager, TimestampHook
 from plugin import PluginManager
-
+from textwrap import wrap
 
 class Bot(Client):
     def __init__(self, core, configfile):
@@ -66,10 +66,26 @@ class Bot(Client):
         self.hooks.call_timestamp(timestamp)
 
     def privmsg(self, target, text):
-        self.send('PRIVMSG %s :%s' % (target, text))
+        wraplen = 510
+        wraplen -= 1 + len(self.nick) # ":<nick>"
+        wraplen -= 1 + 10 # "!<user>"
+        wraplen -= 1 + 63 # "@<host>"
+        wraplen -= 9 # " PRIVMSG "
+        wraplen -= len(target) # "<target>"
+        wraplen -= 2 # " :"
+        for line in wrap(text, wraplen):
+            self.send('PRIVMSG %s :%s' % (target, line))
 
     def notice(self, target, text):
-        self.send('NOTICE %s :%s' % (target, text))
+        wraplen = 510
+        wraplen -= 1 + len(self.nick) # ":<nick>"
+        wraplen -= 1 + 10 # "!<user>"
+        wraplen -= 1 + 63 # "@<host>"
+        wraplen -= 8 # " NOTICE "
+        wraplen -= len(target) # "<target>"
+        wraplen -= 2 # " :"
+        for line in wrap(text, wraplen):
+            self.send('NOTICE %s :%s' % (target, line))
 
     def join(self, channels, keys=None):
         if isinstance(channels, str):
