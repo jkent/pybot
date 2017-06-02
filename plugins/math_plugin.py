@@ -15,7 +15,7 @@ VAR_TYPE_STR     = 3
 
 
 class Plugin(BasePlugin):
-    def on_load(self, reloading):
+    def on_load(self, reload):
         self.db = sqlite3.connect(os.path.join(self.bot.core.data_path, 'math.db'))
         c = self.db.cursor()
         c.execute('''
@@ -43,7 +43,7 @@ class Plugin(BasePlugin):
         self.workbooks = {}
         self.target_to_workbook = {}
 
-    def on_unload(self, reloading):
+    def on_unload(self, reload):
         self.db.close()
 
     def load_workbook(self, target, name):

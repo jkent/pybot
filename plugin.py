@@ -3,6 +3,7 @@
 
 import sys
 import traceback
+from six.moves import reload_module
 
 from decorators import hook, priority, level
 
@@ -18,10 +19,13 @@ class BasePlugin(object):
         self.name = name
         self.module = module
 
-    def on_load(self, reloading):
+    def on_load(self, reload):
         pass
 
-    def on_unload(self, reloading):
+    def on_unload(self, reload):
+        pass
+
+    def on_reload(self):
         pass
 
     def config_get(self, name, fallback=None):
@@ -76,11 +80,7 @@ class PluginManager(object):
         if error: return None, error
 
         try:
-            try:
-                from importlib import reload as reload_func
-            except:
-                reload_func = reload
-            module = reload_func(module)
+            module = reload_module(module)
         except:
             return None, self._error(name, 'module reload failure', True)
 
@@ -96,7 +96,7 @@ class PluginManager(object):
 
         return None
 
-    def _load_plugin(self, name, reloading=False):
+    def _load_plugin(self, name):
         module, error = self._load_module(name)
         if error: return None, error
 
@@ -105,12 +105,6 @@ class PluginManager(object):
         except:
             self._unload_module(name)
             return None, self._error(name, 'init error', True)
-
-        try:
-            plugin.on_load(reloading)
-        except:
-            self._unload_module(name)
-            return None, self._error(name, 'on_load error', True)
 
         try:
             self.bot.hooks.install_owner(plugin)
@@ -124,20 +118,15 @@ class PluginManager(object):
 
         return plugin, None
 
-    def _unload_plugin(self, plugin, force=False, reloading=False):
+    def _unload_plugin(self, plugin):
         name = plugin.name
-        try:
-            abort = plugin.on_unload(reloading or force)
-        except:
-            return self._error(name, 'on_unload error', True)
-
-        if not force and abort:
-            return self._error(name, 'not permitted')
 
         try:
             self.bot.hooks.uninstall_owner(plugin)
         except:
             return self._error(name, 'unhook error', True)
+        
+        return None
 
     def load(self, name):
         if name in self.plugins:
@@ -150,28 +139,47 @@ class PluginManager(object):
 
         self.plugins[name] = plugin
 
+        try:
+            plugin.on_load(False)
+        except:
+            return self._error(name, 'on_load error', True)
+
         self.bot.hooks.call_event('plugin loaded', name)
         
-    def reload(self, name):
+    def reload(self, name, force=False):
         if name not in self.plugins:
             return self._error(name, 'not loaded')
 
-        self.bot.hooks.call_event('plugin reload', name)
+        self.bot.hooks.call_event('plugin reloading', name)
 
+        old_plugin = self.plugins[name]
+        abort = False
+        try:
+            abort = bool(old_plugin.on_reload())
+        except:
+            if not force: return self._error(name, 'on_reload error', True)
+        if abort and not force: return self._error(name, 'plugin prohibits reloading')
+            
         _, error = self._reload_module(name)
         if error: return error
 
-        old_plugin = self.plugins[name]
-
-        new_plugin, error = self._load_plugin(name, True)
+        new_plugin, error = self._load_plugin(name)
         if error: return error
 
-        error = self._unload_plugin(old_plugin, False, True)
-        if error:
-            self._unload_plugin(new_plugin, True, False)
-            return error
+        error = self._unload_plugin(old_plugin)
+        if error: return error
 
         self.plugins[name] = new_plugin
+
+        try:
+            old_plugin.on_unload(True)
+        except:
+            return self._error(name, 'on_unload error', True)
+
+        try:
+            new_plugin.on_load(True)
+        except:
+            return self._error(name, 'on_load error', True)
 
         self.bot.hooks.call_event('plugin reloaded', name)
 
@@ -182,8 +190,13 @@ class PluginManager(object):
         self.bot.hooks.call_event('plugin unloading', name)
 
         plugin = self.plugins[name]
-        error = self._unload_plugin(plugin, force, False)
-        if error: return error
+        try:
+            abort = bool(plugin.on_unload(False))
+        except:
+            if not force: return self._error(name, 'on_unload error', True)
+        if abort and not force: return self._error(name, 'plugin prohibits unloading')
+        
+        self._unload_plugin(plugin)
 
         del self.plugins[name]
         

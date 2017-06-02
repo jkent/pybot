@@ -11,7 +11,7 @@ from plugin import *
 class Plugin(BasePlugin):
     default_level = 1000
 
-    def on_load(self, reloading):
+    def on_load(self, reload):
         self.db = sqlite3.connect(os.path.join(self.bot.core.data_path, 'perms.db'))
         self.cur = self.db.cursor()
         self.cur.execute('''CREATE TABLE IF NOT EXISTS allow
@@ -19,10 +19,9 @@ class Plugin(BasePlugin):
         self.cur.execute('''CREATE TABLE IF NOT EXISTS deny
                      (mask TEXT PRIMARY KEY, rules TEXT)''')
         self.db.commit()
-        if not reloading:
-            self.load_rules()
+        self.load_rules()
 
-    def on_unload(self, reloading):
+    def on_unload(self, reload):
         self.save_rules()
         self.db.close()
 

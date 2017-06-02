@@ -157,11 +157,11 @@ class BridgeClient(SelectableInterface):
 
 
 class Plugin(BasePlugin):
-    def on_load(self, reloading):
+    def on_load(self, reload):
         self.server = BridgeServer(self)
         self.load_routes()
         
-    def on_unload(self, reloading):
+    def on_unload(self, reload):
         self.server.shutdown()
 
     def load_routes(self):

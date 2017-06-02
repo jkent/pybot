@@ -17,8 +17,8 @@ class Plugin(BasePlugin):
         self.send_ping_hook = None
         self.ping_timeout_hook = None
 
-    def on_unload(self, reloading):
-        if not reloading:
+    def on_unload(self, reload):
+        if not reload:
             return True
 
     @hook

@@ -8,14 +8,14 @@ from plugin import *
 
 
 class Plugin(BasePlugin):
-    def on_load(self, reloading):
+    def on_load(self, reload):
         self.db = sqlite3.connect(os.path.join(self.bot.core.data_path, 'notes.db'))
         c = self.db.cursor()
         c.execute('''CREATE TABLE IF NOT EXISTS notes
                      (channel text, sender text, recipient text, message text)''')
         self.db.commit()
 
-    def on_unload(self, reloading):
+    def on_unload(self, reload):
         self.db.close()
 
     @hook

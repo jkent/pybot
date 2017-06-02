@@ -34,7 +34,10 @@ class Plugin(BasePlugin):
             msg.reply('plugin name required')
             return
 
-        error = self.bot.plugins.reload(name)
+        force = name.startswith('!')
+        if force: name = name[1:]
+
+        error = self.bot.plugins.reload(name, force)
         if error:
             msg.reply('%s plugin error: %s' % (name, error))
         else:
@@ -48,8 +51,13 @@ class Plugin(BasePlugin):
             msg.reply('plugin name is required')
             return
 
-        error = self.bot.plugins.unload(name)
+        force = name.startswith('!')
+        if force: name = name[1:]
+
+        error = self.bot.plugins.unload(name, force)
         if error:
             msg.reply('%s plugin error: %s' % (name, error))
         else:
             msg.reply('%s plugin unloaded' % name)
+
+    
