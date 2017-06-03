@@ -92,8 +92,7 @@ class BridgeClient(SelectableInterface):
             if objtype != 'auth':
                 self.disconnect()
                 return
-            secret = self.server.plugin.config_get('secret')
-            if obj['secret'] != secret:
+            if obj['secret'] != self.server.plugin.secret:
                 self.disconnect()
                 return
 
@@ -165,8 +164,10 @@ class Plugin(BasePlugin):
         self.server.shutdown()
 
     def load_routes(self):
+        self.secret = self.server.plugin.config_get('secret')
+
         self.routes = []
-        routes = self.config_get('routes')
+        routes = self.config_get('routes', '')
         for route in routes.split():
             try:
                 src_realm, src_channel, dst_realm, dst_channel = route.split(':', 3)

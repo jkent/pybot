@@ -137,12 +137,17 @@ class PluginManager(object):
         plugin, error = self._load_plugin(name)
         if error: return error
 
-        self.plugins[name] = plugin
-
         try:
             plugin.on_load(False)
         except:
+            try:
+                plugin.on_unload(False)
+            except:
+                pass
+            self._unload_plugin(plugin)
             return self._error(name, 'on_load error', True)
+
+        self.plugins[name] = plugin
 
         self.bot.hooks.call_event('plugin loaded', name)
         
@@ -169,17 +174,22 @@ class PluginManager(object):
         error = self._unload_plugin(old_plugin)
         if error: return error
 
-        self.plugins[name] = new_plugin
-
         try:
             old_plugin.on_unload(True)
         except:
-            return self._error(name, 'on_unload error', True)
+            pass
 
         try:
             new_plugin.on_load(True)
         except:
+            try:
+                new_plugin.on_unload(False)
+            except:
+                pass
+            self._unload_plugin(new_plugin)
             return self._error(name, 'on_load error', True)
+
+        self.plugins[name] = new_plugin
 
         self.bot.hooks.call_event('plugin reloaded', name)
 
