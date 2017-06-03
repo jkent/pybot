@@ -5,7 +5,114 @@ This is a modular, plugin-based IRC bot written in Python.  Plugins can be dynam
 
 Plugins have a simple, easy to pick up API.  All events, commands, and triggers use a simple decorator convention.
 
-Clone with:  ```git clone --recursive https://github.com/jkent/jkent-pybot.git```
+Clone with:  `git clone --recursive https://github.com/jkent/jkent-pybot.git`
+
+### Dependencies
+
+Pybot will run under Python 2 and Python 3.  It has only one external dependency, `six`.  This package can be found under most package managers as `python-six` or `python3-six`. You can also install six using `pip install six`.
+
+### Configuring
+
+You need to copy `config.ini.sample` to `config.ini` and edit it to your liking.
+
+### Running
+
+Pybot is a python package, which means you need to run it as `python jkent-pybot` or `python3 jkent-pybot`.  Yes, you need to provide the path to the package itself.
+
+### Plugins
+
+#### anyurl
+
+This plugin will fetch and reply with the og:title or title of a HTML document
+
+#### base
+
+This plugin handles some of the core behaviors of the bot, such as setting the nick, joining channels, and auto-reconnect.  Its required.
+
+#### choose
+
+A fun yet frustrating plugin that gives random responses. 
+
+should I|<nick> <question>?
+!choose a or b, c.
+
+#### config
+
+This plugin allows live editing of the config.ini file.  Usage is limited to level 1000.
+
+!config reload
+!config save
+!config set <section> <option> <value>
+!config unset <section> <option>
+!config list <section>
+
+#### debug
+
+This plugin prints all IRC traffic and module events while loaded.  Usage is limited to level 900.
+
+!raw <message> - send a raw IRC message
+
+#### eval
+
+This is a dangerous plugin that allows arbitrary execution of python code.  Usage is limited to level 1000.
+
+!eval <code>
+
+#### gateway
+
+The gateway plugin allows for linking between services such as slack and discord.
+
+config:
+
+    [gateway]
+    port = 65432
+    secret = <random key here>
+    routes = irc:#a:discord:#b discord:#b:irc:#a
+
+Routes are in the form of `source_realm:#source:dest_realm:#dest`.  The gateway plugin realm is irc.
+
+!gateway reload - reloads the routes
+
+#### math
+
+The math plugin is a nifty calculator that has support for functions and variables.  Its state is saved in a database as workbooks which can be switched out as needed.
+
+!math [expr]
+!math var=[expr]
+!math func([var[, ...]])=[expr]
+!math workbook [name]
+!math varlist
+!math funclist
+!math describe <funcname>
+
+#### notes
+
+Leave a message for someone when the bot next sees them talk.
+
+!tell <nick> <message>
+
+#### perms
+
+Manage bot permissions.  Usage is limited to level 1000.
+
+!perms list
+!perms allow [-][<plugin>=<n>]
+!perms deny [-][<plugin>=<n>]
+
+Where plugin is the name of a plugin and n is the level to set.  Plugin can be the special constant ANY.
+
+#### plugin
+
+Load, unload, reload plugins at runtime.  Usage is limited to level 1000.
+
+!plugin load <name>
+!plugin reload [!]<name>
+!plugin unload [!]<name>
+!plugin list
+
+For reload and unload, the "bang" means force.  Use with caution.
+
+## For Developers
 
 ### Plugins
 Here's a simple "Hello world" style plugin:
