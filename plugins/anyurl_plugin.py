@@ -51,9 +51,16 @@ class Plugin(BasePlugin):
 
         parser = TitleParser()
 
-        for line in r.iter_lines(chunk_size=1024, decode_unicode=True):
+        for line in r.iter_lines(chunk_size=1024):
+            try:
+                line = line.decode('utf-8')
+            except:
+                line = line.decode('latin-1')
+            
             parser.feed(line)
             if parser.title:
                 break
+
+        print(parser.title)
 
         msg.reply('\x031,0URL\x03 %s' % parser.title)
