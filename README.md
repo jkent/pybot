@@ -90,7 +90,7 @@ The math plugin is a nifty calculator that has support for functions and variabl
     !math workbook [name]
     !math varlist
     !math funclist
-    !math describe <funcname>
+    !math describe <funcname> [description]
 
 
 #### notes
