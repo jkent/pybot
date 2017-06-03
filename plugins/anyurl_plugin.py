@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 # vim: set ts=4 et
 
+import cgi
 import requests
 from six.moves.html_parser import HTMLParser
 
@@ -45,18 +46,18 @@ class Plugin(BasePlugin):
     @hook
     def any_url(self, msg, domain, url):
         r = requests.get(url, stream=True)
-        
-        if not r.headers['Content-Type'].startswith(content_types):   
+
+        content_type, params = cgi.parse_header(r.headers['Content-Type'])
+        if not content_type in content_types:
             return
+
+        r.encoding = 'utf-8'
+        if 'charset' in params:
+            r.encoding = params['charset'].strip("'\"")
 
         parser = TitleParser()
 
-        for line in r.iter_lines(chunk_size=1024):
-            try:
-                line = line.decode('utf-8')
-            except:
-                line = line.decode('latin-1')
-            
+        for line in r.iter_lines(chunk_size=1024, decode_unicode=True):            
             parser.feed(line)
             if parser.title:
                 break
