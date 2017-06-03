@@ -33,13 +33,18 @@ class Plugin(BasePlugin):
         count = self.cur.fetchone()[0]
         if count == 0:
             self.bot.allow_rules['*'] = {'ANY': 1}
-            self.bot.allow_rules[self.bot.config.get('base', 'superuser')] = {'ANY': 1000}
         else:
             for mask, rules in self.cur.execute('SELECT mask, rules FROM allow'):
                 self.bot.allow_rules[mask] = json.loads(rules)
 
             for mask, rules in self.cur.execute('SELECT mask, rules FROM deny'):
                 self.bot.deny_rules[mask] = json.loads(rules)
+
+        try:
+            superuser = self.bot.config.get('base', 'superuser')
+            self.bot.allow_rules[superuser] = {'ANY': 1000}
+        except:
+            pass
 
     def save_rules(self):
         for mask, rules in list(self.bot.allow_rules.items()):
