@@ -66,7 +66,7 @@ This is a dangerous plugin that allows arbitrary execution of python code.  Usag
 
 #### gateway
 
-The gateway plugin allows for linking between services such as slack and discord.
+The gateway plugin allows for linking between services such as [slack](https://github.com/jkent/slackbridge) and [discord](https://github.com/jkent/discordbridge).
 
 config:
 
@@ -75,7 +75,7 @@ config:
     secret = <random key here>
     routes = irc:#a:discord:#b discord:#b:irc:#a
 
-Routes are in the form of `source_realm:#source:dest_realm:#dest`.  The gateway plugin realm is irc.
+Routes are in the form of `source_realm:#source_channel:dest_realm:#dest_channel`.  A route creates a 1 way "transport" for messages.  The gateway plugin realm is `irc`.
 
     !gateway reload - reloads the routes
 
