@@ -15,9 +15,9 @@ class BridgeServer(SelectableInterface):
         self.clients = []
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        port = self.plugin.config_getint('port', 65432)
-        listen = ('127.0.0.1', port)
-        self.sock.bind(listen)
+        bind_host = self.plugin.config_get('bind_host', '127.0.0.1')
+        bind_port = self.plugin.config_getint('bind_port', 65432)
+        self.sock.bind((bind_host, bind_port))
         self.sock.listen(5)
         self.connected = True
         self.plugin.bot.core.selectable.append(self)

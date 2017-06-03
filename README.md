@@ -71,7 +71,8 @@ The gateway plugin allows for linking between services such as [slack](https://g
 config:
 
     [gateway]
-    port = 65432
+    bind_host = 127.0.0.1
+    bind_port = 65432
     secret = <random key here>
     routes = irc:#a:discord:#b discord:#b:irc:#a
 
