@@ -61,11 +61,8 @@ class Core(object):
                         break
 
     def add_bot(self, configfile):
-        if os.path.exists(configfile):
-            pass
-        if os.path.exists(os.path.join(self.parent, configfile)):
-            configfile = os.path.join(self.parent, configfile)
-        else:
+        configfile = os.path.join(self.parent, configfile)
+        if not os.path.exists(configfile):
             raise Exception("Config file not found")
         bot = Bot(self, configfile)
         self.selectable.append(bot)
