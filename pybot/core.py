@@ -20,17 +20,18 @@ class Core(object):
 
     def init_paths(self):
         self.root = os.path.dirname(os.path.abspath(__file__))
-        lib_path = os.path.abspath(os.path.join(self.root, 'lib'))
+        self.parent = os.path.abspath(os.path.join(self.root, '..'))
+        lib_path = os.path.abspath(os.path.join(self.parent, 'lib'))
         third_party_path = os.path.join(lib_path, 'third-party')
 
         sys.path.insert(1, os.path.join(third_party_path, 'websocket-client'))
         sys.path.insert(1, os.path.join(third_party_path, 'requests'))
         sys.path.insert(1, lib_path)
 
-        self.plugin_dir = os.path.join(self.root, 'plugins')
+        self.plugin_dir = os.path.join(self.parent, 'plugins')
         sys.path.append(self.plugin_dir)
 
-        self.data_path = os.path.join(self.root, 'data')
+        self.data_path = os.path.join(self.parent, 'data')
 
     def scan_plugins(self):
         for dirname in sys.path[:]:
@@ -62,8 +63,8 @@ class Core(object):
     def add_bot(self, configfile):
         if os.path.exists(configfile):
             pass
-        if os.path.exists(os.path.join(self.root, configfile)):
-            configfile = os.path.join(self.root, configfile)
+        if os.path.exists(os.path.join(self.parent, configfile)):
+            configfile = os.path.join(self.parent, configfile)
         else:
             raise Exception("Config file not found")
         bot = Bot(self, configfile)

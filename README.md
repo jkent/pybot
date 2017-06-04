@@ -17,7 +17,7 @@ You need to copy `config.ini.sample` to `config.ini` and edit it to your liking.
 
 ### Running
 
-Pybot is a python package, which means you need to run it as `python jkent-pybot` or `python3 jkent-pybot`.  Yes, you need to provide the path to the package itself.
+Pybot is a python package, which means you need to run it as `python pybot` or `python3 pybot`.  Yes, you need to provide the path to the pybot package itself.
 
 ### Plugins
 
