@@ -6,6 +6,8 @@ import inspect
 import re
 import traceback
 
+from message import Message
+
 url_re = re.compile(
   'https?://[^ /]+\.[^ /]+(?:/[^ ]*)?'  +
   '|'                                   +
@@ -13,8 +15,6 @@ url_re = re.compile(
 )
 
 domain_re = re.compile('https?://(?:www\.)?([^ /]+\.[^ /]+)')
-
-from message import Message
 
 class Hook(object):
     def __init__(self, sort, extra={}):

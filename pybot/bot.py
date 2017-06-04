@@ -2,13 +2,13 @@
 # vim: set ts=4 et
 
 from six.moves.configparser import ConfigParser
+from textwrap import wrap
 from time import time
 
 from client import Client
 from decorators import hook, priority
 from hook import HookManager, TimestampHook
 from plugin import PluginManager
-from textwrap import wrap
 
 class Bot(Client):
     def __init__(self, core, configfile):
