@@ -22,9 +22,9 @@ class Plugin(BasePlugin):
 
         error = self.bot.plugins.load(name)
         if error:
-            msg.reply('%s plugin error: %s' % (name, error))
+            msg.reply("'%s' plugin error: %s" % (name, error))
         else:
-            msg.reply('%s plugin loaded' % name)
+            msg.reply("'%s' plugin loaded" % name)
 
     @hook
     def plugin_reload_trigger(self, msg, args):
@@ -39,9 +39,9 @@ class Plugin(BasePlugin):
 
         error = self.bot.plugins.reload(name, force)
         if error:
-            msg.reply('%s plugin error: %s' % (name, error))
+            msg.reply("'%s' plugin error: %s" % (name, error))
         else:
-            msg.reply('%s plugin reloaded' % name)
+            msg.reply("'%s' plugin reloaded" % name)
 
     @hook
     def plugin_unload_trigger(self, msg, args):
@@ -56,8 +56,6 @@ class Plugin(BasePlugin):
 
         error = self.bot.plugins.unload(name, force)
         if error:
-            msg.reply('%s plugin error: %s' % (name, error))
+            msg.reply("'%s' plugin error: %s" % (name, error))
         else:
-            msg.reply('%s plugin unloaded' % name)
-
-    
+            msg.reply("'%s' plugin unloaded" % name)

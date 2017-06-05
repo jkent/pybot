@@ -23,7 +23,7 @@ class Plugin(BasePlugin):
         try:
             section, key, value = argstr.split(None, 2)
         except:
-            msg.reply('usage: config set SECTION KEY VALUE')
+            msg.reply('usage: config set <SECTION> <KEY> <VALUE>')
             return
 
         if not self.bot.config.has_section(section):
@@ -35,7 +35,7 @@ class Plugin(BasePlugin):
         try:
             section, key = argstr.split(None, 2)
         except:
-            msg.reply('usage: config unset SECTION KEY')
+            msg.reply('usage: config unset <SECTION> <KEY>')
         self.bot.config.remove_option(section, key)
 
         if len(self.bot.config.options(section)) == 0:
@@ -44,11 +44,11 @@ class Plugin(BasePlugin):
     @hook
     def config_list_trigger(self, msg, args, argstr):
         if not argstr:
-            msg.reply('usage: config list SECTION')
+            msg.reply('usage: config list <SECTION>')
             return
         
         if not self.bot.config.has_section(argstr):
-            msg.reply('no section %s' % argstr)
+            msg.reply("no section '%s'" % argstr)
             return
 
         for option in self.bot.config.options(argstr):

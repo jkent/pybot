@@ -10,7 +10,6 @@ from decorators import hook, priority, level
 __all__ = ['BasePlugin', 'hook', 'priority', 'level']
 
 PLUGIN_MODULE = '%s_plugin'
-PLUGIN_ERROR = '%s plugin: %s'
 
 
 class BasePlugin(object):
@@ -34,7 +33,7 @@ class BasePlugin(object):
         except:
             if fallback != None:
                 return fallback
-            print("config %s:%s is not set" % (self.name, name))
+            print("config section '%s': option '%s' is not set" % (self.name, name))
             raise
 
     def config_getint(self, name, fallback=None):
@@ -43,7 +42,7 @@ class BasePlugin(object):
         except:
             if fallback != None:
                 return fallback
-            print("config %s:%s is not set" % (self.name, name))
+            print("config section '%s': option '%s' is not set" % (self.name, name))
             raise
 
     def config_set(self, name, value):
@@ -55,7 +54,7 @@ class PluginManager(object):
         self.plugins = {}
 
     def _error(self, name, message, show_traceback=False):
-        print(PLUGIN_ERROR % (name, message))
+        print("plugin '%s': %s" % (name, message))
         if show_traceback:
             traceback.print_exc()
         return message
