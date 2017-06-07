@@ -66,13 +66,9 @@ This is a dangerous plugin that allows arbitrary execution of python code.  Usag
 
 #### gateway
 
-The gateway plugin allows for linking between services such as [slack](https://github.com/jkent/slackbridge) and [discord](https://github.com/jkent/discordbridge).
-
-config:
+The gateway plugin allows for linking between services such as Slack and Discord.  See bridge [applications](#Bridge_appplications) for info on bridges.
 
     [gateway]
-    bind_host = 127.0.0.1
-    bind_port = 65432
     secret = <random key here>
     routes = irc:#a:discord:#b discord:#b:irc:#a
 
@@ -124,6 +120,9 @@ Load, unload, reload plugins at runtime.  Usage is limited to level 1000.
 
 For reload and unload, the "bang" means force.  Use with caution.
 
+## Bridge applications
+
+The bridges directory includes bridge programs for communicating with the gateway plugin.  They have configuration files of their own, with example config.py.sample files.
 
 ## For Developers
 
