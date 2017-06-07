@@ -81,10 +81,20 @@ class SlackClient(SelectableInterface):
         if 'bot_id' in message:
             return
 
-        user = self.lookup_user(message['user'])
+        if message.get('hidden', None) == True:
+            return
+
+        subtype = message.get('subtype', None)
+        if subtype not in [None, 'me_message']:
+            return
+
         channel = self.lookup_channel(message['channel'])
+        if not channel:
+            return
+
+        user = self.lookup_user(message['user'])
         
-        data = {'type': 'action' if message.get('subtype', None) == 'me_message' else 'message',
+        data = {'type': 'action' if subtype == 'me_message' else 'message',
                 'realm': config.realm,
                 'channel': '#' + channel['name'],
                 'username': user['name'],
@@ -113,8 +123,18 @@ class SlackClient(SelectableInterface):
             data = self.slack.api_call(
                 'channels.info',
                 channel=_id)
-            self.channels[_id] = data['channel']
+            if data['ok']:
+                self.channels[_id] = data['channel']
+                return data['channel']
 
+            data = self.slack.api_call(
+                'groups.info',
+                channel=_id)
+            if data['ok']:
+                self.channels[_id] = data['group']
+                return data['group']
+            
+            self.channels[_id] = None
         return self.channels[_id]
 
 
