@@ -66,7 +66,7 @@ This is a dangerous plugin that allows arbitrary execution of python code.  Usag
 
 #### gateway
 
-The gateway plugin allows for linking between services such as Slack and Discord.  See bridge [applications](#Bridge_appplications) for info on bridges.
+The gateway plugin allows for linking between services such as Slack and Discord.  See [bridge applications](#bridge-appplications) for info on bridges.
 
     [gateway]
     secret = <random key here>
