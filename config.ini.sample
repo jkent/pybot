@@ -2,9 +2,11 @@
 host = irc.jkent.net
 port = 6697
 ssl = True
+#connect_password = some_password
 nickname = pybot
 username = pybot
 realname = Python IRC bot - http://git.io/M1XRlw
+#nickserv_password = some_password
 directed_triggers = True
 autojoin = #bot_lab
 autoload = base config debug perms plugin

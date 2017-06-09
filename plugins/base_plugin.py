@@ -23,10 +23,15 @@ class Plugin(BasePlugin):
 
     @hook
     def connect_event(self):
+        password = self.config_get('connect_password', None)
+        if password:
+            self.bot.send('PASS %s %s %s', (password, '0210', 'IRC|'))
+        
         nickname = self.config_get('nickname')
+        self.bot.send('NICK %s' % nickname)
+
         username = self.config_get('username')
         realname = self.config_get('realname')
-        self.bot.send('NICK %s' % nickname)
         self.bot.send('USER %s * 0 :%s' % (username, realname))
 
     @hook
@@ -68,6 +73,9 @@ class Plugin(BasePlugin):
 
     @hook
     def _001_command(self, msg):
+        password = self.config_get('nickserv_password', None)
+        if password:
+            self.bot.privmsg('NickServ', 'identify %s' % (password))
         self.connecting = False
         for channel in self.autojoin:
             if isinstance(channel, tuple):
