@@ -25,7 +25,7 @@ class Plugin(BasePlugin):
     def connect_event(self):
         password = self.config_get('connect_password', None)
         if password:
-            self.bot.send('PASS %s %s %s', (password, '0210', 'IRC|'))
+            self.bot.send('PASS %s %s %s' % (password, '0210', 'IRC|'))
         
         nickname = self.config_get('nickname')
         self.bot.send('NICK %s' % nickname)
