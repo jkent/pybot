@@ -59,11 +59,11 @@ class SlackClient(SelectableInterface):
             if _type == 'hello':
                 print("Connected to Slack")
             elif _type == 'message':
-                self.handle_slack_message(message)
+                self.handle_message(message)
             elif _type == 'user_change':
-                self.handle_slack_user_change(message['user'])
+                self.handle_user_change(message['user'])
             elif _type == 'channel_change':
-                self.handle_slack_channel_rename(message['channel'])
+                self.handle_channel_changs(message['channel'])
 
     def do_tick(self, now):
         if not self.connected:
@@ -77,7 +77,7 @@ class SlackClient(SelectableInterface):
             except:
                 self.connected = False
 
-    def handle_slack_message(self, message):
+    def handle_message(self, message):
         if 'bot_id' in message:
             return
 
@@ -105,7 +105,7 @@ class SlackClient(SelectableInterface):
         _id = user['id']
         self.slack_users[_id] = user
         
-    def handle_channel_rename(self, channel):
+    def handle_channel_change(self, channel):
         _id = channel['id']
         self.channels[_id]['name'] = channel['name']
 
