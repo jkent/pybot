@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
 # vim: set ts=4 et
 
-import time
-
 from plugin import *
+
 
 BOT_PING_TIME = 120
 BOT_PING_TIMEOUT = 60
@@ -23,7 +22,7 @@ class Plugin(BasePlugin):
 
     @hook
     def connect_event(self):
-        password = self.config_get('connect_password', None)
+        password = self.config_get('connect_password', '')
         if password:
             self.bot.send('PASS %s %s %s' % (password, '0210', 'IRC|'))
         
@@ -73,7 +72,7 @@ class Plugin(BasePlugin):
 
     @hook
     def _001_command(self, msg):
-        password = self.config_get('nickserv_password', None)
+        password = self.config_get('nickserv_password', '')
         if password:
             self.bot.privmsg('NickServ', 'identify %s' % (password))
         self.connecting = False

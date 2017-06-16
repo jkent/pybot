@@ -3,6 +3,7 @@
 
 import errno
 import json
+import re
 from select import select
 from slackclient import SlackClient as Slack
 import socket
@@ -10,6 +11,10 @@ import time
 
 from interface import SelectableInterface
 import config
+
+
+mention_re = re.compile('<@(\w+)>')
+channel_re = re.compile('<#(\w+)(?:\|([\w-]+))?>')
 
 
 class SlackClient(SelectableInterface):
@@ -23,7 +28,7 @@ class SlackClient(SelectableInterface):
         self.backoff = 0
         self.reconnect_time = 0
 
-        self.slack = Slack(config.slack_bot_token)
+        self.slack = Slack(config.bot_token)
         self.connect()
 
     def connect(self):
@@ -93,12 +98,24 @@ class SlackClient(SelectableInterface):
             return
 
         user = self.lookup_user(message['user'])
+
+        def mention_replace(var):
+            _id = var.group(1)
+            user = self.lookup_user(_id)
+            return '@' + user['name']
+        text = mention_re.sub(mention_replace, message['text'])
+
+        def channel_replace(var):
+            _id = var.group(1)
+            channel = self.lookup_channel(_id)
+            return '#' + channel['name']
+        text = channel_re.sub(channel_replace, text)
         
         data = {'type': 'action' if subtype == 'me_message' else 'message',
                 'realm': config.realm,
                 'channel': '#' + channel['name'],
                 'username': user['name'],
-                'message': message['text']}
+                'message': text}
         self.bridge.handle_slack_message(data)
 
     def handle_user_change(self, user):
