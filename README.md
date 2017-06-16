@@ -15,11 +15,11 @@ Pybot will run under Python 2 and Python 3.  It has only one external dependency
 
 You need to copy `config.ini.sample` to `config.ini` and edit it to your liking.
 
+The below examples in the **Plugins** section assume `directed_triggers = False`.  Directed triggers start with the bot's name, followed by a colon or comma, and finally the command and any arguments.  The other option, classic triggers, take a ! followed by the command and any arguments.  The default option is to use directed triggers, so multiple bots can peacefully coexist.
+
 ### Running
 
 Pybot is a python package, which means you need to run it as `python pybot` or `python3 pybot`.  Yes, you need to provide the path to the pybot package itself.
-
-The below examples assume `directed_triggers = False`.  Directed triggers start with the bot's name, followed by a colon or comma, and finally the command and any arguments.  The other option, classic triggers, take a ! followed by the command and any arguments.  The default option is to use directed triggers, so multiple bots can coexist.
 
 ### Plugins
 
@@ -124,7 +124,7 @@ For reload and unload, the "bang" means force.  Use with caution.
 
 ## Bridge applications
 
-The bridges directory includes bridge programs for communicating with the gateway plugin.  They have configuration files of their own, with example config.py.sample files.
+Bridge applications run independent from the bot.  The *bridges* directory contains bridge programs that communicate with the gateway plugin.  They have configuration files of their own, with example config.py.sample files.  Run them like `python bridges/slack` or `python3 bridges/discord`.
 
 ## For Developers
 
@@ -205,4 +205,3 @@ method              |description
 `call(hooks, *args)`|Call hooks using as many args as possible
 `find(model)`       |Search for hooks by model hook instance
 `modify(hook)`      |Context manager for modifying *installed* hooks
-
