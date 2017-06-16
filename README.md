@@ -19,6 +19,8 @@ You need to copy `config.ini.sample` to `config.ini` and edit it to your liking.
 
 Pybot is a python package, which means you need to run it as `python pybot` or `python3 pybot`.  Yes, you need to provide the path to the pybot package itself.
 
+The below examples assume `directed_triggers = False`.  Directed triggers start with the bot's name, followed by a colon or comma, and finally the command and any arguments.  The other option, classic triggers, take a ! followed by the command and any arguments.  The default option is to use directed triggers, so multiple bots can coexist.
+
 ### Plugins
 
 #### anyurl
