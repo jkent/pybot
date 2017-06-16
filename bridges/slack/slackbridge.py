@@ -13,8 +13,9 @@ from interface import SelectableInterface
 import config
 
 
-mention_re = re.compile('<@(\w+)>')
-channel_re = re.compile('<#(\w+)(?:\|([\w-]+))?>')
+slack_mention_re = re.compile('<@(\w+)>')
+slack_channel_re = re.compile('<#(\w+)(?:\|([\w-]+))?>')
+bridge_mention_re = re.compile('(^|\s)@(\w+)(\s|$)')
 
 
 class SlackClient(SelectableInterface):
@@ -62,7 +63,7 @@ class SlackClient(SelectableInterface):
         for message in messages:
             _type = message.get('type', None)
             if _type == 'hello':
-                print("Connected to Slack")
+                self.handle_hello(message)
             elif _type == 'message':
                 self.handle_message(message)
             elif _type == 'user_change':
@@ -81,6 +82,15 @@ class SlackClient(SelectableInterface):
                 self.slack.server.ping()
             except:
                 self.connected = False
+
+    def handle_hello(self, message):
+            print("Connected to Slack")
+            data = self.slack.api_call(
+                'users.list')
+            if data['ok']:
+                for user in data['members']:
+                    _id = user['id']
+                    self.users[_id] = user
 
     def handle_message(self, message):
         if 'bot_id' in message:
@@ -103,14 +113,17 @@ class SlackClient(SelectableInterface):
             _id = var.group(1)
             user = self.lookup_user(_id)
             return '@' + user['name']
-        text = mention_re.sub(mention_replace, message['text'])
+        text = slack_mention_re.sub(mention_replace, message['text'])
 
         def channel_replace(var):
             _id = var.group(1)
             channel = self.lookup_channel(_id)
             return '#' + channel['name']
-        text = channel_re.sub(channel_replace, text)
-        
+        text = slack_channel_re.sub(channel_replace, text)
+
+        text = text.replace('&lt;', '<')
+        text = text.replace('&gt;', '>')
+
         data = {'type': 'action' if subtype == 'me_message' else 'message',
                 'realm': config.realm,
                 'channel': '#' + channel['name'],
@@ -267,14 +280,34 @@ class SlackBridge(object):
         self.bridge_client.sendbuf += data.encode() + b'\r\n'
     
     def handle_bridge_message(self, message):
+        text = message['message'].replace('<', '&lt;')
+        text = text.replace('>', '&gt;')
+        def mention_replace(var):
+            name = var.group(2)
+            for user in self.slack_client.users.values():
+                if user['name'] == name.lower():
+                    return '%s<@%s>%s' % (var.group(1), user['id'], var.group(3))
+            return var.group(0)
+        text = bridge_mention_re.sub(mention_replace, text)
+        
         self.slack_client.slack.api_call(
             'chat.postMessage',
             channel=message['channel'],
-            text=message['message'],
+            text=text,
             username=message['username'],
             icon_url=config.avatar_url.replace('$username', message['username']))
 
     def handle_bridge_action(self, message):
+        text = message['message'].replace('<', '&lt;')
+        text = text.replace('<', '&gt;')
+        def mention_replace(var):
+            name = var.group(2)
+            for user in self.slack_client.users.values():
+                if user['name'] == name.lower():
+                    return '%s<@%s>%s' % (var.group(1), user['id'], var.group(3))
+            return var.group(0)
+        text = bridge_mention_re.sub(mention_replace, text)
+        
         self.slack_client.slack.api_call(
             'chat.postMessage',
             channel=message['channel'],
