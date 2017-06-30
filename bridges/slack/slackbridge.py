@@ -133,7 +133,7 @@ class SlackClient(SelectableInterface):
 
     def handle_user_change(self, user):
         _id = user['id']
-        self.slack_users[_id] = user
+        self.users[_id] = user
         
     def handle_channel_change(self, channel):
         _id = channel['id']
