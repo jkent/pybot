@@ -23,6 +23,18 @@ Pybot is a python package, which means you need to run it as `python pybot` or `
 
 ### Plugins
 
+#### aftership
+
+This plugin ties in with aftership.com for package tracking services.  Updates are private messaged to users.  Configuration:
+
+    [aftership]
+    api_key = xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+
+Usage example:
+
+    !aftership add [usps] LK437895158CN Ethernet adapter
+    !aftership add 9405509699938114314372 Telephone handset
+
 #### anyurl
 
 This plugin will fetch and reply with the og:title or title of a HTML document.
