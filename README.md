@@ -21,7 +21,7 @@ The below examples in the **Plugins** section assume `directed_triggers = False`
 
 ### Running
 
-Pybot is a python package, which means you need to run it as `python pybot` or `python3 pybot`.  Yes, you need to provide the path to the pybot package itself.
+Pybot is a python package.  Using pipenv, you would run like `pipenv run python pybot`.
 
 ### Plugins
 
