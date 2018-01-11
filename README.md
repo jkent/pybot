@@ -9,7 +9,9 @@ Clone with:  `git clone --recursive https://github.com/jkent/jkent-pybot.git`
 
 ### Dependencies
 
-Pybot will run under Python 2 and Python 3.  It has only one external dependency, `six`.  This package can be found under most package managers as `python-six` or `python3-six`. You can also install six using `pip install six`.
+Pybot runs under Python 3, however it may run under Python 2.  It is recommended to run Pybot inside [Pipenv](http://docs.python-guide.org/en/latest/dev/virtualenvs/).  Setting up and using Pipenv is outside the scope of this document.
+
+The package `six` is the only thing the Pybot core depends on.  Plugins state what dependencies they have below.
 
 ### Configuring
 
@@ -25,6 +27,8 @@ Pybot is a python package, which means you need to run it as `python pybot` or `
 
 #### aftership
 
+Dependencies: `requests`
+
 This plugin ties in with aftership.com for package tracking services.  Updates are private messaged to users.  Configuration:
 
     [aftership]
@@ -35,7 +39,10 @@ Usage example:
     !aftership add [usps] LK437895158CN Ethernet adapter
     !aftership add 9405509699938114314372 Telephone handset
 
+
 #### anyurl
+
+Dependencies: `requests`
 
 This plugin will fetch and reply with the og:title or title of a HTML document.
 
@@ -137,6 +144,8 @@ For reload and unload, the "bang" means force.  Use with caution.
 ## Bridge applications
 
 Bridge applications run independent from the bot.  The *bridges* directory contains bridge programs that communicate with the gateway plugin.  They have configuration files of their own, with example config.py.sample files.  Run them like `python bridges/slack` or `python3 bridges/discord`.
+
+The Slack bridge depends on `slackclient` and the discord bridge depends on `discord.py`.
 
 ## For Developers
 
