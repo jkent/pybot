@@ -57,17 +57,16 @@ class Plugin(BasePlugin):
                 continue
 
             tracking_id = tracking['id']
+            checkpoint_count = len(tracking['checkpoints'])
             self.cur.execute('''SELECT checkpoint_count FROM trackings
                 WHERE id = ? LIMIT 1''', (tracking_id,))
             try:
                 row = self.cur.fetchone()
                 old_checkpoint_count = row['checkpoint_count']
-                checkpoint_count = len(tracking['checkpoints'])
                 if checkpoint_count <= old_checkpoint_count:
                     continue
             except:
                 old_checkpoint_count = 0
-                checkpoint_count = 0
 
             self.cur.execute('''INSERT OR REPLACE INTO trackings
                 (id, checkpoint_count) VALUES (?, ?)''', (tracking_id,
@@ -92,9 +91,23 @@ class Plugin(BasePlugin):
                     datetime.strptime(
                         checkpoint['checkpoint_time'], "%Y-%m-%dT%H:%M:%S")
 
+                location = ''
+                if checkpoint['state']:
+                    if checkpoint['city']:
+                        location += checkpoint['city'] + ', '
+                    location += checkpoint['state']
+                elif checkpoint['country_name']:
+                    if checkpoint['city']:
+                        location += checkpoint['city'] + ', '
+                    location += checkpoint['country_name']
+                elif checkpoint['city']:
+                    location += checkpoint['city']
+
                 message = "%s %s" % \
                     (checkpoint_time.strftime("%Y-%m-%d %H:%M"),
                         checkpoint['message'])
+                if location:
+                    message += ' (%s)' % location
                 self.bot.privmsg(irc_nickname, message)
 
         self.db.commit()
