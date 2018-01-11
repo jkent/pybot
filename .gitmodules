@@ -1,6 +1,3 @@
-[submodule "lib/third-party/requests"]
-	path = lib/third-party/requests
-	url = git://github.com/kennethreitz/requests.git
 [submodule "lib/third-party/discord.py"]
 	path = lib/third-party/discord.py
 	url = https://github.com/Rapptz/discord.py.git
@@ -19,9 +16,6 @@
 [submodule "lib/third-party/yarl"]
 	path = lib/third-party/yarl
 	url = https://github.com/aio-libs/yarl.git
-[submodule "lib/third-party/chardet"]
-	path = lib/third-party/chardet
-	url = https://github.com/chardet/chardet.git
 [submodule "lib/third-party/websocket-client"]
 	path = lib/third-party/websocket-client
 	url = https://github.com/websocket-client/websocket-client
