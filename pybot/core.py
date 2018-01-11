@@ -22,10 +22,6 @@ class Core(object):
         self.root = os.path.dirname(os.path.abspath(__file__))
         self.parent = os.path.abspath(os.path.join(self.root, '..'))
         lib_path = os.path.abspath(os.path.join(self.parent, 'lib'))
-        third_party_path = os.path.join(lib_path, 'third-party')
-
-        sys.path.insert(1, os.path.join(third_party_path, 'websocket-client'))
-        sys.path.insert(1, os.path.join(third_party_path, 'requests'))
         sys.path.insert(1, lib_path)
 
         self.plugin_dir = os.path.join(self.parent, 'plugins')
