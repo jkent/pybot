@@ -71,13 +71,9 @@ class Plugin(BasePlugin):
             print(e)
             msg.reply('No user by that name.')
 
-        return
-
     @hook
     def twitter_help_trigger(self, msg, args, argstr):
         msg.reply('Usage: twitter [search|user] <text> Returns most recent or specified by URL Tweet text.')
-
-        return
 
     @hook
     def twitter_search_trigger(self, msg, args, argstr):
@@ -96,6 +92,4 @@ class Plugin(BasePlugin):
         except tweepy.TweepError as e:
             print(e)
             msg.reply('Update failed.')
-
-        return
 
