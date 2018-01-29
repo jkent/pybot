@@ -128,6 +128,18 @@ Manage bot permissions.  Usage is limited to level 1000.
 
 Where plugin is the name of a plugin and n is the level to set.  Plugin can be the special constant ANY.
 
+#### plugin
+
+Load, unload, reload plugins at runtime.  Usage is limited to level 1000.
+
+    !plugin load <name>
+    !plugin reload [!]<name>
+    !plugin unload [!]<name>
+    !plugin list
+
+
+For reload and unload, the "bang" means force.  Use with caution.
+
 #### twitter
 
 Parse URLs, get latest user tweet, and search keywords on Twitter.
@@ -147,18 +159,6 @@ Usage:
      <url>
      !twitter user <@user_id>
      !twitter search <keyword>
-
-#### plugin
-
-Load, unload, reload plugins at runtime.  Usage is limited to level 1000.
-
-    !plugin load <name>
-    !plugin reload [!]<name>
-    !plugin unload [!]<name>
-    !plugin list
-
-
-For reload and unload, the "bang" means force.  Use with caution.
 
 ## Bridge applications
 
