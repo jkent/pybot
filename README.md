@@ -128,6 +128,25 @@ Manage bot permissions.  Usage is limited to level 1000.
 
 Where plugin is the name of a plugin and n is the level to set.  Plugin can be the special constant ANY.
 
+#### twitter
+
+Parse URLs, get latest user tweet, and search keywords on Twitter.
+
+Dependencies: `requests, tweepy`
+
+Configuration requires Twitter account and application setup:
+
+     [twitter]
+     apikey=<api key>
+     secret=<api secret>
+     auth_t=<api access token>
+     auth_ts=<api access token secret>
+
+Usage:
+
+     <url>
+     !twitter user <@user_id>
+     !twitter search <keyword>
 
 #### plugin
 
