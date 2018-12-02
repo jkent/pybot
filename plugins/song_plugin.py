@@ -9,13 +9,9 @@ from plugin import *
 
 
 class Plugin(BasePlugin):
-    @hook
-    def privmsg_command(self, msg):
-        m = re.match('^!song.*', msg.param[-1], re.I)
-        if not m:
-            return
-
-        filename = os.path.join(self.bot.core.data_path, 'tunes')
+    @hook(('Song', 'song'))
+    def song_trigger(self, msg):
+        filename = os.path.join(self.bot.core.data_path, 'songs')
         song_list = open(filename).read().splitlines()
         song = random.choice(song_list)
         msg.reply(song)

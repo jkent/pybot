@@ -128,6 +128,7 @@ Manage bot permissions.  Usage is limited to level 1000.
 
 Where plugin is the name of a plugin and n is the level to set.  Plugin can be the special constant ANY.
 
+
 #### plugin
 
 Load, unload, reload plugins at runtime.  Usage is limited to level 1000.
@@ -140,14 +141,13 @@ Load, unload, reload plugins at runtime.  Usage is limited to level 1000.
 
 For reload and unload, the "bang" means force.  Use with caution.
 
+
 #### song
 
-Choose a random song from the text file "tunes" in the data directory.
+Choose a random song from the text file "songs" in the data directory.
 
-    !Song
-    !song
+    ![Ss]ong
 
-Bot will reply in any channel it is joined to or Private Message.
 
 #### twitter
 
@@ -168,6 +168,7 @@ Usage:
      <url>
      !twitter user <@user_id>
      !twitter search <keyword>
+
 
 ## Bridge applications
 
