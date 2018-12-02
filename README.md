@@ -140,6 +140,15 @@ Load, unload, reload plugins at runtime.  Usage is limited to level 1000.
 
 For reload and unload, the "bang" means force.  Use with caution.
 
+#### song
+
+Choose a random song from the text file "tunes" in the data directory.
+
+    !Song
+    !song
+
+Bot will reply in any channel it is joined to or Private Message.
+
 #### twitter
 
 Parse URLs, get latest user tweet, and search keywords on Twitter.
