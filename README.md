@@ -144,9 +144,10 @@ For reload and unload, the "bang" means force.  Use with caution.
 
 #### song
 
-Choose a random song from the text file "songs" in the data directory.
+Choose a random song from a song database.
 
-    ![Ss]ong
+    !song
+    !song load <data-file>
 
 
 #### twitter
