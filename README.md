@@ -148,6 +148,9 @@ Choose a random song from a song database.
 
     !song
     !song load <data-file>
+    !song who
+    !song add <artist> - <title>
+    !song youtube <youtube-url>
 
 
 #### twitter
