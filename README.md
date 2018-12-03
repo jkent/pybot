@@ -151,6 +151,7 @@ Choose a random song from a song database.
     !song who
     !song add <artist> - <title>
     !song youtube <youtube-url>
+    !song youtube delete
 
 
 #### twitter

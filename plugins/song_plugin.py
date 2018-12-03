@@ -5,6 +5,7 @@ import os
 import random
 import re
 import sqlite3
+from traceback import print_exc
 
 from plugin import *
 
@@ -93,6 +94,7 @@ class Plugin(BasePlugin):
                     self.add_track(artist, title)
             self.db.commit()
         except:
+            print_exc()
             msg.reply('failed to read file')
         return True
 
@@ -138,7 +140,7 @@ class Plugin(BasePlugin):
             msg.reply('No last track.')
             return True
 
-        pattern = '^(?:https?://)?(?:www\.)?(?:youtu\.be/|youtube\.com(?:/embed/|/v/|/watch\?v=))([\w-]{10,12})$'
+        pattern = '^(?:https?://)?(?:www\.)?(?:youtu\.be/|youtube\.com(?:/embed/|/v/|/watch\?v=))([\w-]{10,12})(?:&.*)?$'
         m = re.match(pattern, argstr.strip())
         if not m:
             msg.reply('That is not a valid youtube URL!')
@@ -149,6 +151,19 @@ class Plugin(BasePlugin):
                    SET youtube = ?
                    WHERE id = ?'''
         self.cur.execute(query, (youtube_id, self.last_track[msg.reply_to]))
+        self.db.commit()
+        return True
+
+    @hook
+    def song_youtube_delete_trigger(self, msg):
+        if not self.last_track.get(msg.reply_to):
+            msg.reply('No last track.')
+            return True
+
+        query = '''UPDATE track
+                   SET youtube = NULL
+                   WHERE id = ?'''
+        self.cur.execute(query, (self.last_track[msg.reply_to],))
         self.db.commit()
         return True
 
