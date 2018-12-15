@@ -74,29 +74,18 @@ class Plugin(BasePlugin):
                    ORDER BY RANDOM()
                    LIMIT 1;'''
         self.cur.execute(query)
-        artist_id, track_id, artist, track, youtube = self.cur.fetchone()
+        row = self.cur.fetchone()
+        if row is None:
+            msg.reply('No songs yet!')
+            return
+
+        artist_id, track_id, artist, track, youtube = row
         if youtube:
             msg.reply('%s - %s - https://youtu.be/%s' % (artist, track, youtube))
         else:
             msg.reply('%s - %s' % (artist, track))
 
         self.last_track[msg.reply_to] = track_id
-
-    @level(1000)
-    @hook
-    def song_load_trigger(self, msg, args, argstr):
-        try:
-            filepath = os.path.join(self.bot.core.data_path, argstr)
-            with open(filepath) as f:
-                for line in f:
-                    line = line.strip()
-                    artist, title = line.rsplit(' - ', 1)
-                    self.add_track(artist, title)
-            self.db.commit()
-        except:
-            print_exc()
-            msg.reply('failed to read file')
-        return True
 
     @hook
     def song_add_trigger(self, msg, args, argstr):
@@ -116,6 +105,61 @@ class Plugin(BasePlugin):
         else:
             msg.reply("That song already exists!")
 
+        return True
+
+    @level(900)
+    @hook
+    def song_delete_trigger(self, msg):
+        if not self.last_track.get(msg.reply_to):
+            msg.reply('No last track.')
+            return True
+
+        query = '''DELETE FROM track
+                   WHERE id = ?'''
+        self.cur.execute(query, (self.last_track[msg.reply_to],))
+        self.db.commit()
+        del self.last_track[msg.reply_to]
+
+        msg.reply('Track deleted')
+        return True
+
+    @hook
+    def song_last_trigger(self, msg):
+        if not self.last_track.get(msg.reply_to):
+            msg.reply('No last track.')
+            return True
+
+        query = '''SELECT artist.id, track.id, artist.name, track.name, track.youtube
+                   FROM track
+                   JOIN artist ON artist_id = artist.id
+                   WHERE track.id = ?
+                   LIMIT 1;'''
+        self.cur.execute(query, (self.last_track[msg.reply_to],))
+        row = self.cur.fetchone()
+
+        artist_id, track_id, artist, track, youtube = row
+        if youtube:
+            msg.reply('%s - %s - https://youtu.be/%s' % (artist, track, youtube))
+        else:
+            msg.reply('%s - %s' % (artist, track))
+
+        return True
+
+    @level(1000)
+    @hook
+    def song_load_trigger(self, msg, args, argstr):
+        try:
+            filepath = os.path.join(self.bot.core.data_path, argstr)
+            with open(filepath) as f:
+                for line in f:
+                    line = line.strip()
+                    parts = line.split(' - ', 2)
+                    artist, title, nick = map(str.strip, parts)
+                    self.add_track(artist, title, nick)
+            self.db.commit()
+        except:
+            print_exc()
+            msg.reply('failed to read file')
         return True
 
     @hook
@@ -154,6 +198,7 @@ class Plugin(BasePlugin):
         self.db.commit()
         return True
 
+    @level(900)
     @hook
     def song_youtube_delete_trigger(self, msg):
         if not self.last_track.get(msg.reply_to):
@@ -165,9 +210,4 @@ class Plugin(BasePlugin):
                    WHERE id = ?'''
         self.cur.execute(query, (self.last_track[msg.reply_to],))
         self.db.commit()
-        return True
-
-    @hook
-    def song_last_trigger(self, msg):
-        msg.reply('%r' % (self.last_track.get(msg.reply_to),))
         return True
