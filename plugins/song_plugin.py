@@ -204,7 +204,23 @@ class Plugin(BasePlugin):
             return True
 
         msg.reply('Loaded %d songs sucessfully.' % (count,))
-        return
+        return True
+
+
+    @hook
+    def song_stats_trigger(self, msg):
+        query = '''SELECT COUNT(*)
+                   FROM artist;'''
+        self.cur.execute(query)
+        artist_count, = self.cur.fetchone()
+
+        query = '''SELECT COUNT(*)
+                   FROM track;'''
+        self.cur.execute(query)
+        track_count, = self.cur.fetchone()
+
+        msg.reply('There are %d artists with %d tracks.' % (artist_count, track_count))
+        return True
 
 
     @hook
