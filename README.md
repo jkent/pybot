@@ -147,9 +147,10 @@ For reload and unload, the "bang" means force.  Use with caution.
 Choose a random song from a song database.
 
     !song
+    !song add <artist> - <title>
+    !song delete
     !song load <data-file>
     !song who
-    !song add <artist> - <title>
     !song youtube <youtube-url>
     !song youtube delete
 
