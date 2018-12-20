@@ -15,7 +15,7 @@ KEEP_RATIO = 0.1
 
 class Plugin(BasePlugin):
     def on_load(self, reload):
-        self.db = sqlite3.connect(os.path.join(self.bot.core.data_path, 'songs.db'))
+        self.db = sqlite3.connect(os.path.join(self.bot.core.data_path, 'song.db'))
         self.cur = self.db.cursor()
         query = '''CREATE TABLE IF NOT EXISTS artist (
                        id INTEGER PRIMARY KEY,
