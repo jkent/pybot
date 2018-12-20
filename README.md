@@ -9,7 +9,7 @@ Clone with:  `git clone https://github.com/jkent/jkent-pybot.git`
 
 ### Dependencies
 
-Pybot runs under Python 3, however it might run under Python 2.  It is recommended to run Pybot using [Pipenv](http://docs.python-guide.org/en/latest/dev/virtualenvs/) to handle all dependencies.  Install pipenv and run 'pipenv run python pybot' from within the top directory.
+Pybot is designed and tested to run under Python 3. It is not thoroughly tested under python 2, but it may work for you. It is also recommended to use `pipenv` to manage dependencies.
 
 ### Configuring
 
@@ -144,9 +144,6 @@ Choose a random song from a song database.
 #### twitter
 
 Parse URLs, get latest user tweet, and search keywords on Twitter.
-
-Dependencies: `requests, tweepy`
-
 Configuration requires Twitter account and application setup:
 
      [twitter]
