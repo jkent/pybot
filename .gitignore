@@ -1,7 +1,5 @@
-.project
-.pydevproject
+.vscode/
 .settings/
-Pipfile.lock
 __pycache__/
 *.py[cod]
 /config.ini

@@ -9,9 +9,7 @@ Clone with:  `git clone https://github.com/jkent/jkent-pybot.git`
 
 ### Dependencies
 
-Pybot runs under Python 3, however it may run under Python 2.  It is recommended to run Pybot inside [Pipenv](http://docs.python-guide.org/en/latest/dev/virtualenvs/).  Setting up and using Pipenv is outside the scope of this document.
-
-The package `six` is the only thing the Pybot core depends on.  Plugins state what dependencies they have below.
+Pybot runs under Python 3, however it might run under Python 2.  It is recommended to run Pybot using [Pipenv](http://docs.python-guide.org/en/latest/dev/virtualenvs/) to handle all dependencies.  Install pipenv and run 'pipenv run python pybot' from within the top directory.
 
 ### Configuring
 
@@ -27,8 +25,6 @@ Pybot is a python package.  Using pipenv, you would run like `pipenv run python 
 
 #### aftership
 
-Dependencies: `requests`
-
 This plugin ties in with aftership.com for package tracking services.  Updates are private messaged to users.  Configuration:
 
     [aftership]
@@ -41,8 +37,6 @@ Usage example:
 
 
 #### anyurl
-
-Dependencies: `requests`
 
 This plugin will fetch and reply with the og:title or title of a HTML document.
 
@@ -83,19 +77,6 @@ This plugin prints all IRC traffic and module events while loaded.  Usage is lim
 This is a dangerous plugin that allows arbitrary execution of python code.  Usage is limited to level 1000.
 
     !eval <code>
-
-
-#### gateway
-
-The gateway plugin allows for linking between services such as Slack and Discord.  See [bridge applications](#bridge-applications) for info on bridges.
-
-    [gateway]
-    secret = <random key here>
-    routes = irc:#a:discord:#b discord:#b:irc:#a
-
-Routes are in the form of `source_realm:#source_channel:dest_realm:#dest_channel`.  A route creates a 1 way "transport" for messages.  The gateway plugin realm is `irc`.
-
-    !gateway reload - reloads the routes
 
 
 #### math
@@ -180,12 +161,6 @@ Usage:
      !twitter user <@user_id>
      !twitter search <keyword>
 
-
-## Bridge applications
-
-Bridge applications run independent from the bot.  The *bridges* directory contains bridge programs that communicate with the gateway plugin.  They have configuration files of their own, with example config.py.sample files.  Run them like `python bridges/slack` or `python3 bridges/discord`.
-
-The Slack bridge depends on `slackclient` and the discord bridge depends on `discord.py`.
 
 ## For Developers
 
