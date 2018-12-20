@@ -36,7 +36,7 @@ class TitleParser(HTMLParser):
         
     def handle_data(self, data):
         if self.match:
-            self.title = data
+            self.title = data.strip()
             self.match = False
 
 
@@ -45,7 +45,10 @@ class Plugin(BasePlugin):
     
     @hook
     def any_url(self, msg, domain, url):
-        r = requests.get(url, stream=True)
+        headers = {
+            'User-Agent': 'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; Googlebot/2.1; +http://www.google.com/bot.html) Safari/537.36'
+        }
+        r = requests.get(url, stream=True, headers=headers)
 
         content_type, params = cgi.parse_header(r.headers['Content-Type'])
         if not content_type in content_types:
@@ -61,7 +64,5 @@ class Plugin(BasePlugin):
             parser.feed(line)
             if parser.title:
                 break
-
-        print(parser.title)
 
         msg.reply('\x031,0URL\x03 %s' % parser.title)
