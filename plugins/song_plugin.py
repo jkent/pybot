@@ -164,8 +164,7 @@ class Plugin(BasePlugin):
         track_id = self.last_tracks[context][-1]
 
         query = '''DELETE FROM track
-                   WHERE id = ?
-                   LIMIT 1;'''
+                   WHERE id = ?;'''
         self.cur.execute(query, (track_id,))
         self.db.commit()
 
@@ -188,8 +187,7 @@ class Plugin(BasePlugin):
         query = '''SELECT artist.id, artist.name
                    FROM track
                    JOIN artist ON artist_id = artist.id
-                   WHERE track.id = ?
-                   LIMIT 1;'''
+                   WHERE track.id = ?;'''
         self.cur.execute(query, (track_id,))
         row = self.cur.fetchone()
         original_artist_id, original_artist_name = row
@@ -208,28 +206,24 @@ class Plugin(BasePlugin):
             artist_id, = row
             query = '''UPDATE track
                        SET artist_id = ?
-                       WHERE id = ?
-                       LIMIT 1;'''
+                       WHERE id = ?;'''
             self.cur.execute(query, (artist_id, track_id))
 
             query = '''SELECT COUNT(*)
                        FROM track
-                       WHERE artist_id = ?
-                       LIMIT 1;'''
+                       WHERE artist_id = ?;'''
             self.cur.execute(query, (original_artist_id,))
             row = self.cur.fetchone()
             count, = row
 
             if count == 0:
                 query = '''DELETE FROM artist
-                           WHERE id = ?
-                           LIMIT 1;'''
+                           WHERE id = ?;'''
                 self.cur.execute(query, (original_artist_id,))
         else:
             query = '''UPDATE artist
                        SET name = ?
-                       WHERE id = ?
-                       LIMIT 1;'''
+                       WHERE id = ?;'''
             self.cur.execute(query, (argstr, original_artist_id))
 
         msg.reply('Artist updated.')
@@ -247,8 +241,7 @@ class Plugin(BasePlugin):
 
         query = '''SELECT name
                    FROM track
-                   WHERE id = ?
-                   LIMIT 1;'''
+                   WHERE id = ?;'''
         self.cur.execute(query, (track_id,))
         row = self.cur.fetchone()
         original_track_name, = row
@@ -259,8 +252,7 @@ class Plugin(BasePlugin):
 
         query = '''UPDATE track
                    SET name = ?
-                   WHERE id = ?
-                   LIMIT 1;'''
+                   WHERE id = ?;'''
         self.cur.execute(query, (argstr, track_id))
         self.db.commit()
 
@@ -280,8 +272,7 @@ class Plugin(BasePlugin):
         query = '''SELECT track.id, artist.name, track.name, track.youtube
                    FROM track
                    JOIN artist ON artist_id = artist.id
-                   WHERE track.id = ?
-                   LIMIT 1;'''
+                   WHERE track.id = ?;'''
         self.cur.execute(query, (track_id,))
         row = self.cur.fetchone()
 
