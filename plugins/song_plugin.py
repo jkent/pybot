@@ -33,6 +33,13 @@ class Plugin(BasePlugin):
                        FOREIGN KEY(artist_id) REFERENCES artist(id)
                    );'''
         self.cur.execute(query)
+        query = '''CREATE TRIGGER IF NOT EXISTS delete_unused_artist
+                   AFTER DELETE ON track
+                   BEGIN
+                       DELETE FROM artist WHERE id = OLD.artist_id AND
+                       (SELECT COUNT(*) FROM track WHERE artist_id = OLD.artist_id) = 0;
+                   END;'''
+        self.cur.execute(query)
         self.db.commit()
 
         self.last_tracks = {}
@@ -45,24 +52,25 @@ class Plugin(BasePlugin):
     def add_track(self, artist, title, nick=None):
         track_added = False
 
-        try:
-            query = '''SELECT id FROM artist
-                       WHERE name = ?;'''
-            self.cur.execute(query, (artist,))
-            artist_id = self.cur.fetchone()[0]
-        except:
+        query = '''SELECT id FROM artist
+                    WHERE name = ? COLLATE NOCASE;'''
+        self.cur.execute(query, (artist,))
+        row = self.cur.fetchone()
+        if row is not None:
+            artist_id, = row
+        else:
             query = '''INSERT INTO artist (name)
-                       VALUES (?);'''
+                    VALUES (?);'''
             self.cur.execute(query, (artist,))
             artist_id = self.cur.lastrowid
 
-        try:
-            query = '''SELECT id FROM track
-                       WHERE artist_id = ?, name = ?;'''
-            self.cur.execute(query, (artist_id, title))
-            track_id = self.cur.fetchone()[0]
-            track_exists = True
-        except:
+        query = '''SELECT id FROM track
+                    WHERE artist_id = ? AND name = ? COLLATE NOCASE;'''
+        self.cur.execute(query, (artist_id, title))
+        row = self.cur.fetchone()
+        if row is not None:
+            track_id, = row
+        else:
             query = '''INSERT INTO track (artist_id, name, nick)
                        VALUES (?, ?, ?);'''
             self.cur.execute(query, (artist_id, title, nick))
@@ -73,10 +81,14 @@ class Plugin(BasePlugin):
 
 
     @hook
-    def song_trigger(self, msg):
+    def song_trigger(self, msg, args, argstr):
         context = msg.reply_to
+        if argstr:
+            msg.reply('Unknown command, see help.')
+            return
+
         while True:
-            query = '''SELECT artist.id, track.id, artist.name, track.name, track.youtube
+            query = '''SELECT track.id, artist.name, track.name, track.youtube
                     FROM track
                     JOIN artist ON artist_id = artist.id
                     ORDER BY RANDOM()
@@ -87,12 +99,12 @@ class Plugin(BasePlugin):
                 msg.reply('No songs yet!')
                 return
                 
-            artist_id, track_id, artist, track, youtube = row
+            track_id, artist, track, youtube = row
 
             if context not in self.last_tracks or track_id not in self.last_tracks[context]:
                 break
 
-        if youtube:
+        if youtube is not None:
             msg.reply('%s - %s - https://youtu.be/%s' % (artist, track, youtube))
         else:
             msg.reply('%s - %s' % (artist, track))
@@ -119,6 +131,7 @@ class Plugin(BasePlugin):
             return True
 
         track_id, track_added = self.add_track(artist, title, msg.source)
+        print(track_id, track_added)
         self.db.commit()
 
         query = '''SELECT COUNT(*)
@@ -144,38 +157,135 @@ class Plugin(BasePlugin):
     @hook
     def song_delete_trigger(self, msg):
         context = msg.reply_to
-        if self.last_tracks.get(context) is None:
+        if not self.last_tracks.get(context):
             msg.reply('No last track.')
             return True
+
+        track_id = self.last_tracks[context][-1]
 
         query = '''DELETE FROM track
                    WHERE id = ?
                    LIMIT 1;'''
-        self.cur.execute(query, (self.last_tracks[context][-1],))
+        self.cur.execute(query, (track_id,))
         self.db.commit()
+
+
         del self.last_tracks[context][-1]
 
-        msg.reply('Track deleted')
+        msg.reply('Song deleted')
+        return True
+
+
+    @hook
+    def song_fix_artist_trigger(self, msg, args, argstr):
+        context = msg.reply_to
+        if self.last_tracks.get(context) is None:
+            msg.reply('No last track.')
+            return True
+
+        track_id = self.last_tracks[context][-1]
+
+        query = '''SELECT artist.id, artist.name
+                   FROM track
+                   JOIN artist ON artist_id = artist.id
+                   WHERE track.id = ?
+                   LIMIT 1;'''
+        self.cur.execute(query, (track_id,))
+        row = self.cur.fetchone()
+        original_artist_id, original_artist_name = row
+
+        if original_artist_name == argstr:
+            msg.reply('No change.')
+            return True
+
+        query = '''SELECT id
+                   FROM artist
+                   WHERE name = ?
+                   LIMIT 1;'''
+        self.cur.execute(query, (argstr,))
+        row = self.cur.fetchone()
+        if row:
+            artist_id, = row
+            query = '''UPDATE track
+                       SET artist_id = ?
+                       WHERE id = ?
+                       LIMIT 1;'''
+            self.cur.execute(query, (artist_id, track_id))
+
+            query = '''SELECT COUNT(*)
+                       FROM track
+                       WHERE artist_id = ?
+                       LIMIT 1;'''
+            self.cur.execute(query, (original_artist_id))
+            row = self.cur.fetchone()
+            count, = row
+
+            if count == 0:
+                query = '''DELETE FROM artist
+                           WHERE id = ?
+                           LIMIT 1;'''
+                self.cur.execute(query, (original_artist_id,))
+        else:
+            query = '''UPDATE artist
+                       SET name = ?
+                       WHERE id = ?
+                       LIMIT 1;'''
+            self.cur.execute(query, (argstr, original_artist_id))
+
+        msg.reply('Artist updated.')
+        return True
+
+
+    @hook
+    def song_fix_title_trigger(self, msg, args, argstr):
+        context = msg.reply_to
+        if not self.last_tracks.get(context):
+            msg.reply('No last track.')
+            return True
+
+        track_id = self.last_tracks[context][-1]
+
+        query = '''SELECT name
+                   FROM track
+                   WHERE id = ?
+                   LIMIT 1;'''
+        self.cur.execute(query, (track_id,))
+        original_track_name, = row
+
+        if original_track_name == argstr:
+            msg.reply('No change.')
+            return True
+
+        query = '''UPDATE track
+                   SET name = ?
+                   WHERE id = ?
+                   LIMIT 1;'''
+        self.cur.execute(query, (argstr, track_id))
+        self.db.commit()
+
+        msg.reply('Title updated.')
         return True
 
 
     @hook
     def song_last_trigger(self, msg):
         context = msg.reply_to
-        if self.last_tracks.get(context) is None:
+        if not self.last_tracks.get(context):
             msg.reply('No last track.')
             return True
 
-        query = '''SELECT artist.id, track.id, artist.name, track.name, track.youtube
+        track_id = self.last_tracks[context][-1]
+
+        query = '''SELECT track.id, artist.name, track.name, track.youtube
                    FROM track
                    JOIN artist ON artist_id = artist.id
                    WHERE track.id = ?
                    LIMIT 1;'''
-        self.cur.execute(query, (self.last_tracks[context][-1],))
+        self.cur.execute(query, (track_id,))
         row = self.cur.fetchone()
 
-        artist_id, track_id, artist, track, youtube = row
-        if youtube:
+        track_id, artist, track, youtube = row
+        if youtube is not None:
             msg.reply('%s - %s - https://youtu.be/%s' % (artist, track, youtube))
         else:
             msg.reply('%s - %s' % (artist, track))
@@ -200,10 +310,46 @@ class Plugin(BasePlugin):
             self.db.commit()
         except:
             print_exc()
-            msg.reply('failed to read file')
+            msg.reply('Failed to read file.')
             return True
 
         msg.reply('Loaded %d songs sucessfully.' % (count,))
+        return True
+
+
+    @hook
+    def song_search_trigger(self, msg, args, argstr):
+        context = msg.reply_to
+        query = '''SELECT track.id, track.youtube, artist.name || ' - ' || track.name AS song
+                   FROM track
+                   JOIN artist ON artist_id = artist.id
+                   WHERE song LIKE ?
+                   ORDER BY RANDOM()
+                   LIMIT 5;'''
+        self.cur.execute(query, ('%%%s%%' % (argstr,),))
+        rows = self.cur.fetchall()
+        if not rows:
+            msg.reply('No tracks found.')
+            return True
+
+        for row in rows:
+            track_id, youtube, song = row
+            if youtube is not None:
+                msg.reply('%s - https://youtu.be/%s' % (song, youtube))
+            else:
+                msg.reply(song)
+
+        query = '''SELECT COUNT(*)
+                   FROM track;'''
+        self.cur.execute(query)
+        count, = self.cur.fetchone()
+        keep = int(count * KEEP_RATIO)
+
+        if context not in self.last_tracks:
+            self.last_tracks[context] = []
+        self.last_tracks[context].append(track_id)
+        self.last_tracks[context] = self.last_tracks[context][-keep:]
+
         return True
 
 
@@ -226,13 +372,15 @@ class Plugin(BasePlugin):
     @hook
     def song_who_trigger(self, msg):
         context = msg.reply_to
-        if self.last_tracks.get(context) is None:
+        if not self.last_tracks.get(context):
             msg.reply('No last track.')
             return True
 
+        track_id = self.last_tracks[context][-1]
+
         query = '''SELECT nick FROM track
                    WHERE id = ?;'''
-        self.cur.execute(query, (self.last_tracks[context][-1],))
+        self.cur.execute(query, (track_id,))
         nick, = self.cur.fetchone()
         if not nick:
             nick = 'anonymous'
@@ -244,7 +392,7 @@ class Plugin(BasePlugin):
     @hook
     def song_youtube_trigger(self, msg, args, argstr):
         context = msg.reply_to
-        if self.last_tracks.get(context) is None:
+        if not self.last_tracks.get(context):
             msg.reply('No last track.')
             return True
 
@@ -254,11 +402,13 @@ class Plugin(BasePlugin):
             msg.reply('That is not a valid youtube URL!')
             return True
 
+        track_id = self.last_tracks[context][-1]
+
         youtube_id = m.group(1)
         query = '''UPDATE track
                    SET youtube = ?
                    WHERE id = ?;'''
-        self.cur.execute(query, (youtube_id, self.last_tracks[context][-1]))
+        self.cur.execute(query, (youtube_id, track_id))
         self.db.commit()
         return True
 
@@ -267,13 +417,15 @@ class Plugin(BasePlugin):
     @hook
     def song_youtube_delete_trigger(self, msg):
         context = msg.reply_to
-        if self.last_tracks.get(context) is None:
+        if not self.last_tracks.get(context):
             msg.reply('No last track.')
             return True
+
+        track_id = self.last_tracks[context][-1]
 
         query = '''UPDATE track
                    SET youtube = NULL
                    WHERE id = ?;'''
-        self.cur.execute(query, (self.last_tracks[context][-1],))
+        self.cur.execute(query, (track_id,))
         self.db.commit()
         return True

@@ -149,8 +149,11 @@ Choose a random song from a song database.
     !song
     !song add <artist> - <title>
     !song delete
+    !song fix artist <artist>
+    !song fix title <title>
     !song last
     !song load <data-file>
+    !song search <query>
     !song stats
     !song who
     !song youtube <youtube-url>
