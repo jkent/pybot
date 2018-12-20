@@ -216,7 +216,7 @@ class Plugin(BasePlugin):
                        FROM track
                        WHERE artist_id = ?
                        LIMIT 1;'''
-            self.cur.execute(query, (original_artist_id))
+            self.cur.execute(query, (original_artist_id,))
             row = self.cur.fetchone()
             count, = row
 
@@ -250,6 +250,7 @@ class Plugin(BasePlugin):
                    WHERE id = ?
                    LIMIT 1;'''
         self.cur.execute(query, (track_id,))
+        row = self.cur.fetchone()
         original_track_name, = row
 
         if original_track_name == argstr:
