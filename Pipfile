@@ -9,8 +9,6 @@ verify_ssl = true
 
 six = "~= 1.11"
 requests = "~= 2.18"
-"discord.py" = "~= 0.16"
-slackclient = "~= 1.1"
 
 
 [dev-packages]
