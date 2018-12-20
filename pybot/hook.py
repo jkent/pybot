@@ -9,9 +9,7 @@ import traceback
 from message import Message
 
 url_re = re.compile(
-  'https?://[^ /]+\.[^ /]+(?:/[^ ]*)?'  +
-  '|'                                   +
-  '(?<![^ ])[^ /]+\.[^ /]+/[^ ]*'
+  'https?://[^ /]+\.[^ /]+(?:/[^ ]*)?'
 )
 
 domain_re = re.compile('https?://(?:www\.)?([^ /]+\.[^ /]+)')
@@ -220,8 +218,6 @@ class HookManager:
         elif msg.channel:
             for match in url_re.finditer(msg.param[1]):
                 url = match.group(0)
-                if not url.startswith(('http:', 'https:')):
-                    url = 'http://' + url
                 self.call_url(msg, url)
 
     def call_trigger(self, msg):
