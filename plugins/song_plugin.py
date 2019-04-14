@@ -402,6 +402,7 @@ class Plugin(BasePlugin):
                    WHERE id = ?;'''
         self.cur.execute(query, (youtube_id, track_id))
         self.db.commit()
+        msg.reply('Youtube link set!')
         return True
 
 
