@@ -67,7 +67,6 @@ class PluginManager(object):
         backup_modules = dict(sys.modules)
         try:
             module = importlib.import_module('plugins.' + name)
-            print(reloader.get_dependencies(module))
         except:
             sys.modules = backup_modules
             return None, self._error(name, 'module load failure', True)
