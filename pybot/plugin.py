@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 # vim: set ts=4 et
 
+import importlib
+import os
+import reloader
 import sys
 import traceback
-from six.moves import reload_module
 
 from decorators import hook, priority, level
 
 __all__ = ['BasePlugin', 'hook', 'priority', 'level']
-
-PLUGIN_MODULE = '%s_plugin'
 
 
 class BasePlugin(object):
@@ -60,17 +60,19 @@ class PluginManager(object):
         return message
 
     def _load_module(self, name):
-        modname = PLUGIN_MODULE % name
-        was_loaded = modname in sys.modules
+        was_loaded = name in sys.modules
 
-        self.bot.core.scan_plugins()
+        sys.path.insert(1, os.path.join(self.bot.core.plugin_dir, name))
 
         backup_modules = dict(sys.modules)
         try:
-            module = __import__(modname, globals(), locals(), ['Plugin'], 0)
+            module = importlib.import_module('plugins.' + name)
+            print(reloader.get_dependencies(module))
         except:
             sys.modules = backup_modules
             return None, self._error(name, 'module load failure', True)
+        finally:
+            sys.path.pop(1)
 
         return module, None
 
@@ -78,20 +80,23 @@ class PluginManager(object):
         module, error = self._load_module(name)
         if error: return None, error
 
+        sys.path.insert(1, os.path.join(self.bot.core.plugin_dir, name))
+
         try:
-            module = reload_module(module)
+            reloader.reload(module)
         except:
             return None, self._error(name, 'module reload failure', True)
+        finally:
+            sys.path.pop(1)
 
         return module, None
 
     def _unload_module(self, name):
-        modname = PLUGIN_MODULE % name
-        if modname not in sys.modules:
+        if name not in sys.modules:
             return
 
-        if modname in sys.modules:
-            del sys.modules[modname]
+        if name in sys.modules:
+            del sys.modules[name]
 
         return None
 
