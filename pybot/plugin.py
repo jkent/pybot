@@ -62,16 +62,12 @@ class PluginManager(object):
     def _load_module(self, name):
         was_loaded = name in sys.modules
 
-        sys.path.insert(1, os.path.join(self.bot.core.plugin_dir, name))
-
         backup_modules = dict(sys.modules)
         try:
             module = importlib.import_module('plugins.' + name)
         except:
             sys.modules = backup_modules
             return None, self._error(name, 'module load failure', True)
-        finally:
-            sys.path.pop(1)
 
         return module, None
 
@@ -79,14 +75,10 @@ class PluginManager(object):
         module, error = self._load_module(name)
         if error: return None, error
 
-        sys.path.insert(1, os.path.join(self.bot.core.plugin_dir, name))
-
         try:
             reloader.reload(module)
         except:
             return None, self._error(name, 'module reload failure', True)
-        finally:
-            sys.path.pop(1)
 
         return module, None
 

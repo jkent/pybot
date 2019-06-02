@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 # vim: set ts=4 et
 
-from plugin import *
-import expression
 import os
 import re
 import sqlite3
 
+from plugin import *
+from . import expression
 
 VAR_TYPE_INT     = 0
 VAR_TYPE_FLOAT   = 1
