@@ -99,7 +99,7 @@ class Plugin(BasePlugin):
         return self.load_workbook(target, 'Default')
 
     def exc_handler(self, name, args, exc, workbook, expr):
-        self.lastmsg.reply('Error: ' + exc.message)
+        self.lastmsg.reply('Error: ' + str(exc))
         if expr:
             self.lastmsg.reply('  ' + expr)
             self.lastmsg.reply(' ' * (exc.pos + 2) + '^')
@@ -112,7 +112,7 @@ class Plugin(BasePlugin):
                 (workbook['id'], name, args, expr, ''))
             self.db.commit()
         except expression.DeclarationError as exc:
-            msg.reply('Error: ' + exc.message)
+            msg.reply('Error: ' + str(exc))
         except expression.ExpressionError as exc:
             self.exc_handler('', [], exc, workbook, expr)
 
@@ -124,7 +124,7 @@ class Plugin(BasePlugin):
                 (workbook['id'], name))
             self.db.commit()
         except expression.DeclarationError as exc:
-            msg.reply('Error: ' + exc.message)
+            msg.reply('Error: ' + str(exc))
 
     def define_var(self, msg, workbook, name, expr):
         try:
@@ -145,7 +145,7 @@ class Plugin(BasePlugin):
                 name, type_, str(value)))
             self.db.commit()
         except expression.DeclarationError as exc:
-            msg.reply('Error: ' + exc.message)
+            msg.reply('Error: ' + str(exc))
         except expression.ExpressionError as exc:
             self.exc_handler('', [], exc, workbook, expr)
 
@@ -157,7 +157,7 @@ class Plugin(BasePlugin):
                 (workbook['id'], name))
             self.db.commit()
         except expression.DeclarationError as exc:
-            msg.reply('Error: ' + exc.message)
+            msg.reply('Error: ' + str(exc))
 
     @hook
     def math_trigger(self, msg, args, argstr):
@@ -193,7 +193,7 @@ class Plugin(BasePlugin):
             self.exc_handler('', [], exc, workbook, expr)
             return
         except Exception as exc:
-            msg.reply('Error: ' + exc.message)
+            msg.reply('Error: ' + str(exc))
             return
         msg.reply(str(value))
 

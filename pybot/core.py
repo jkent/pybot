@@ -17,7 +17,7 @@ class Core(object):
         self.in_shutdown = False
 
         self.init_paths()
-        reloader.enable()
+        reloader.enable(blacklist=['bot', 'client', 'core', 'decorators', 'hook', 'interface', 'message', 'plugin'])
 
     def init_paths(self):
         self.root = os.path.dirname(os.path.abspath(__file__))
