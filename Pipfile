@@ -7,6 +7,7 @@ verify_ssl = true
 reloader = "*"
 requests = "*"
 six = "*"
+sqlalchemy = "*"
 tweepy = "*"
 
 [dev-packages]
