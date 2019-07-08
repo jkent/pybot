@@ -1,11 +1,11 @@
-jkent-pybot
-===========
+pybot
+=====
 
 This is a modular, plugin-based IRC bot written in Python.  Plugins can be dynamically loaded and unloaded at runtime.  A design goal is the abillity to develop plugins without being able to crash the bot.
 
 Plugins have a simple, easy to pick up API.  All events, commands, and triggers use a simple decorator convention.
 
-Clone with:  `git clone --recursive https://github.com/jkent/jkent-pybot.git`
+Clone with:  `git clone --recursive https://github.com/jkent/pybot.git`
 
 ### Dependencies
 
