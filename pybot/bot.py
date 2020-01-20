@@ -90,6 +90,7 @@ class Bot(Client):
     def join(self, channels, keys=None):
         if isinstance(channels, str):
             channels = (channels,)
+        channels = map(str.lower, channels)
         if channels:
             channel_s = ','.join(channels)
             if keys:
@@ -136,7 +137,7 @@ class Bot(Client):
 
     @hook
     def _353_command(self, msg):
-        channel = msg.param[2]
+        channel = msg.param[2].lower()
         if channel in self.channels and self.channels[channel]['joined']:
             nicks = self.channels[channel]['nicks']
             for nick in msg.param[-1].split():
@@ -147,17 +148,18 @@ class Bot(Client):
 
     @hook
     def join_command(self, msg):
-        channel = msg.param[0]
+        channel = msg.param[0].lower()
         if msg.source == self.nick:
             if channel not in self.channels:
                 self.channels[channel] = {}
+            self.channels[channel]['name'] = msg.param[0]
             self.channels[channel]['joined'] = True
         elif channel in self.channels:
             self.channels[channel]['nicks'].add(msg.source)
 
     @hook
     def kick_command(self, msg):
-        channel = msg.param[0]
+        channel = msg.param[0].lower()
         if msg.param[1] == self.nick:
             if channel in self.channels:
                 self.channels[channel]['joined'] = False
@@ -168,7 +170,7 @@ class Bot(Client):
 
     @hook
     def nick_command(self, msg):
-        new_nick = msg.param[0]
+        new_nick = msg.param[0].lower()
         if msg.source == self.nick:
             self.nick = new_nick
         for _, props in list(self.channels.items()):
@@ -179,7 +181,7 @@ class Bot(Client):
     @hook
     @priority(0)
     def part_command(self, msg):
-        channel = msg.param[0]
+        channel = msg.param[0].lower()
         if msg.source == self.nick:
             if channel in self.channels:
                 self.channels[channel]['joined'] = False

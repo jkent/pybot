@@ -45,10 +45,10 @@ class Plugin(BasePlugin):
     
     @hook
     def any_url(self, msg, domain, url):
-        try:
-            user_agent = self.bot.config.get(self.name, 'user-agent')
-        except:
-            user_agent = 'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; Googlebot/2.1; +http://www.google.com/bot.html) Safari/537.36'
+        default_ua = 'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; " \
+                "compatible; Googlebot/2.1; +http://www.google.com/bot.html) " \
+                "Safari/537.36'
+        user_agent = self.bot.config.get(self.name, 'user-agent', fallback=default_ua)
 
         headers = {
             'User-Agent': user_agent 
@@ -56,7 +56,7 @@ class Plugin(BasePlugin):
 
         try:
             r = requests.get(url, stream=True, headers=headers, timeout=10)
-        except requests.exceptions.ReadTimeout as e:
+        except requests.exceptions.ReadTimeout:
             msg.reply('URL Timeout')
             return
 
