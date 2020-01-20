@@ -45,8 +45,13 @@ class Plugin(BasePlugin):
     
     @hook
     def any_url(self, msg, domain, url):
+        try:
+            user_agent = self.bot.config.get(self.name, 'user-agent')
+        except:
+            user_agent = 'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; Googlebot/2.1; +http://www.google.com/bot.html) Safari/537.36'
+
         headers = {
-            'User-Agent': 'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; compatible; Googlebot/2.1; +http://www.google.com/bot.html) Safari/537.36'
+            'User-Agent': user_agent 
         }
 
         try:
