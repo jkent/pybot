@@ -52,7 +52,7 @@ class Plugin(BasePlugin):
         if not msg.channel:
             return
 
-        m = re.match('^(?:can|should) (i|%s)(\'s|s)?.*\?$' % '|'.join([re.escape(nick) for nick in self.bot.channels[msg.channel]['nicks']]), msg.param[-1], re.I)
+        m = re.match('^(?:can|should) (i|we|%s)(\'s|s)?.*\?$' % '|'.join([re.escape(nick) for nick in self.bot.channels[msg.channel]['nicks']]), msg.param[-1], re.I)
         if not m:
             return
 
