@@ -9,7 +9,7 @@ import traceback
 from message import Message
 
 url_re = re.compile(
-  'https?://[^ /]+\.[^ /]+(?:/[^ ]*)?'
+  '(!)?https?://[^ /]+\.[^ /]+(?:/[^ ]*)?'
 )
 
 domain_re = re.compile('https?://(?:www\.)?([^ /]+\.[^ /]+)')
@@ -217,6 +217,8 @@ class HookManager:
             self.call_trigger(msg)
         elif msg.channel:
             for match in url_re.finditer(msg.param[1]):
+                if match.group(1):
+                    continue
                 url = match.group(0)
                 self.call_url(msg, url)
 
