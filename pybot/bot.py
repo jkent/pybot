@@ -90,7 +90,7 @@ class Bot(Client):
     def join(self, channels, keys=None):
         if isinstance(channels, str):
             channels = (channels,)
-        channels = map(str.lower, channels)
+        channels = list(map(str.lower, channels))
         if channels:
             channel_s = ','.join(channels)
             if keys:
@@ -139,6 +139,8 @@ class Bot(Client):
     def _353_command(self, msg):
         channel = msg.param[2].lower()
         if channel in self.channels and self.channels[channel]['joined']:
+            #if 'nicks' not in self.channels[channel]:
+            #    self.channels[channel]['nicks'] = set()
             nicks = self.channels[channel]['nicks']
             for nick in msg.param[-1].split():
                 if nick.startswith(('~', '&', '@', '%', '+')):
