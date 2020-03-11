@@ -58,7 +58,7 @@ class Message(object):
 
         if self.cmd in ('PRIVMSG', 'NOTICE'):
             if self.param[0].startswith(('&', '#', '+', '!')):
-                self.channel = self.param[0]
+                self.channel = self.param[0].lower()
                 self.reply_to = self.param[0]
             else:
                 self.reply_to = self.source
