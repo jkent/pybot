@@ -40,7 +40,7 @@ class Plugin(BasePlugin):
                 "Well, I wouldn't go with {1}.",
                 "Are you sure you want to go with {1}?",
                 "I like {1}.",
-                "{1}. Definately {1}.",
+                "{1}. Definitely {1}.",
             ]
 
         response = random.choice(responses)
