@@ -8,6 +8,7 @@ from html.parser import HTMLParser
 
 from plugin import *
 
+
 def tweet_cleaner(text):
     hp = HTMLParser()
     return hp.unescape(text.replace('\n', ' ').replace('\r', ''))
@@ -92,4 +93,3 @@ class Plugin(BasePlugin):
         except tweepy.TweepError as e:
             print(e)
             msg.reply('Update failed.')
-

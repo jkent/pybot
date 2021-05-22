@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 # vim: set ts=4 et
 
-import reloader
+import os
 from select import select
 from time import time
-import os
-import sys
+
+import reloader
 
 from bot import Bot
 
@@ -70,8 +70,7 @@ class Core(object):
             return
 
         self.in_shutdown = True
-        
+
         for obj in self.selectable:
             if obj.connected and isinstance(obj, Bot):
                 obj.hooks.call_event('shutdown', reason)
-

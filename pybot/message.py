@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 # vim: set ts=4 et
 
-from datetime import datetime
 import re
+from datetime import datetime
 
 
 message_re = re.compile(
@@ -62,7 +62,7 @@ class Message(object):
                 self.reply_to = self.param[0]
             else:
                 self.reply_to = self.source
-        
+
         if self.cmd == 'PRIVMSG':
             self._detect_trigger()
 

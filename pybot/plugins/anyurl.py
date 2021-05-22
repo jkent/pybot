@@ -2,8 +2,9 @@
 # vim: set ts=4 et
 
 import cgi
+from html.parser import HTMLParser
+
 import requests
-from six.moves.html_parser import HTMLParser
 
 from plugin import *
 
@@ -20,7 +21,7 @@ class TitleParser(HTMLParser):
         HTMLParser.__init__(self)
         self.match = False
         self.title = ''
-    
+
     def handle_starttag(self, tag, attrs):
         if tag == 'meta':
             og_title = False
@@ -31,9 +32,9 @@ class TitleParser(HTMLParser):
                 for attr in attrs:
                     if attr[0] == 'content':
                         self.title = attr[1]
-        
+
         self.match = True if not self.title and tag == 'title' else False
-        
+
     def handle_data(self, data):
         if self.match:
             self.title = data.strip()
@@ -42,7 +43,7 @@ class TitleParser(HTMLParser):
 
 class Plugin(BasePlugin):
     default_priority = 1
-    
+
     @hook
     def any_url(self, msg, domain, url):
         default_ua = 'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; " \
@@ -51,7 +52,7 @@ class Plugin(BasePlugin):
         user_agent = self.bot.config.get(self.name, 'user-agent', fallback=default_ua)
 
         headers = {
-            'User-Agent': user_agent 
+            'User-Agent': user_agent
         }
 
         try:
@@ -70,7 +71,7 @@ class Plugin(BasePlugin):
 
         parser = TitleParser()
 
-        for line in r.iter_lines(chunk_size=1024, decode_unicode=True):            
+        for line in r.iter_lines(chunk_size=1024, decode_unicode=True):
             parser.feed(line)
             if parser.title:
                 break

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # vim: set ts=4 et
 
-from six.moves.configparser import ConfigParser
+from configparser import ConfigParser
 from textwrap import wrap
 from time import time
 
@@ -10,6 +10,7 @@ from decorators import hook, priority
 from hook import HookManager, TimestampHook
 from plugin import PluginManager
 
+
 class Bot(Client):
     def __init__(self, core, configfile):
         self.core = core
@@ -17,14 +18,14 @@ class Bot(Client):
         self.configfile = configfile
         self.config = ConfigParser()
         self.config.read(configfile)
-        
+
         host = self.config.get('base', 'host')
         port = self.config.getint('base', 'port')
         try:
             ssl = self.config.getboolean('base', 'ssl')
         except:
             ssl = False
-        
+
         Client.__init__(self, (host, port), ssl)
         self.hooks = HookManager(self)
         self.plugins = PluginManager(self)

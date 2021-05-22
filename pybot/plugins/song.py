@@ -2,7 +2,6 @@
 # vim: set ts=4 et
 
 import os
-import random
 import re
 import sqlite3
 from traceback import print_exc
@@ -98,7 +97,7 @@ class Plugin(BasePlugin):
             if row is None:
                 msg.reply('No songs yet!')
                 return
-                
+
             track_id, artist, track, youtube = row
 
             if context not in self.last_tracks or track_id not in self.last_tracks[context]:

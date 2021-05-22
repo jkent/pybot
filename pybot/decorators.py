@@ -3,6 +3,7 @@
 
 from hook import EventHook, CommandHook, TriggerHook, UrlHook
 
+
 def hook(*args):
     call = len(args) == 1 and hasattr(args[0], '__call__')
     def decorate(f):
@@ -47,7 +48,7 @@ def hook(*args):
             if not cls:
                 raise Exception("type must be one of event, command, or trigger")
 
-            hooks.append(cls(name))    
+            hooks.append(cls(name))
         f._hooks = hooks
         return f
     return decorate(args[0]) if call else decorate
@@ -67,4 +68,3 @@ def level(value):
         f._level = value
         return f
     return decorate
-

@@ -1,7 +1,10 @@
 .vscode/
 .settings/
 __pycache__/
-*.py[cod]
 /config.ini
 /data
-/plugins/*/
+/plugins
+/venv
+*.py[cod]
+Pipfile
+Pipfile.lock

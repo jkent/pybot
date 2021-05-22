@@ -2,12 +2,13 @@
 # vim: set ts=4 et
 
 import importlib
-import os
-import reloader
 import sys
 import traceback
 
-from decorators import hook, priority, level
+import reloader
+
+from decorators import hook, level, priority
+
 
 __all__ = ['BasePlugin', 'hook', 'priority', 'level']
 
@@ -120,7 +121,7 @@ class PluginManager(object):
             self.bot.hooks.uninstall_owner(plugin)
         except:
             return self._error(name, 'unhook error', True)
-        
+
         return None
 
     def load(self, name):
@@ -145,7 +146,7 @@ class PluginManager(object):
         self.plugins[name] = plugin
 
         self.bot.hooks.call_event('plugin loaded', name)
-        
+
     def reload(self, name, force=False):
         if name not in self.plugins:
             return self._error(name, 'not loaded')
@@ -159,7 +160,7 @@ class PluginManager(object):
         except:
             if not force: return self._error(name, 'on_reload error', True)
         if abort and not force: return self._error(name, 'plugin prohibits reloading')
-            
+
         _, error = self._reload_module(name)
         if error: return error
 
@@ -200,11 +201,11 @@ class PluginManager(object):
         except:
             if not force: return self._error(name, 'on_unload error', True)
         if abort and not force: return self._error(name, 'plugin prohibits unloading')
-        
+
         self._unload_plugin(plugin)
 
         del self.plugins[name]
-        
+
         error = self._unload_module(name)
         if error: return error
 

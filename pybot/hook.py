@@ -8,6 +8,7 @@ import traceback
 
 from message import Message
 
+
 url_re = re.compile(
   '(!)?https?://[^ /]+\.[^ /]+(?:/[^ ]*)?'
 )
@@ -51,7 +52,7 @@ class Hook(object):
 
         if not hasattr(self.__func__, '_priority'):
             self.__func__._priority = getattr(self.owner, 'default_priority', 500)
-        
+
         if not hasattr(self.__func__, '_level'):
             self.__func__._level = getattr(self.owner, 'default_level', 1)
 
@@ -94,7 +95,7 @@ class HookManager:
 
         if not hasattr(hook, 'fn') or not hasattr(hook, 'owner'):
             raise Exception('hook not bound')
-        
+
         default_priority = getattr(hook.owner, 'default_priority', 100)
         default_level = getattr(hook.owner, 'default_level', 1)
         hook.priority = getattr(hook.fn, '_priority', default_priority)
@@ -153,7 +154,7 @@ class HookManager:
             left = 0
         else:
             left = bisect.bisect_left(l, model)
-        
+
         right = bisect.bisect_right(l, model)
 
         hook_seq = l[left:right]
@@ -177,14 +178,14 @@ class HookManager:
         self.call(hooks, *args)
         if event == 'recv':
             msg = Message(args[0], self.bot)
-            self.call_command(msg)        
+            self.call_command(msg)
 
     def call_command(self, msg):
         if msg.cmd in ('NOTICE', 'PRIVMSG'):
             self.apply_permissions(msg)
         if msg.cmd == 'PRIVMSG':
             self.process_privmsg(msg)
-        
+
         hooks = self.find(CommandHook(msg.cmd))
         self.call(hooks, msg)
 
@@ -211,7 +212,7 @@ class HookManager:
                     continue
                 current_level = msg.permissions.get(plugin, level)
                 msg.permissions[plugin] = min(level, current_level)
-    
+
     def process_privmsg(self, msg):
         if msg.trigger:
             self.call_trigger(msg)
@@ -229,7 +230,7 @@ class HookManager:
             parts = tuple(msg.trigger.split(None, depth))
             hooks = self.find(TriggerHook(parts[:depth]))
 
-            n = len(hooks)           
+            n = len(hooks)
             hooks[:] = [h for h in hooks if
                         h.fn._level <= msg.permissions.get(h.fn.__self__.name, msg.permissions.get('ANY', 0))]
 
@@ -246,17 +247,17 @@ class HookManager:
 
         if not authorized:
             msg.reply("You don't have permission to use that trigger")
- 
+
     def call_timestamp(self, timestamp):
         hooks = self.find(TimestampHook(timestamp))
         self.call(hooks, timestamp)
- 
+
     def call_url(self, msg, url):
         match = domain_re.match(url)
         if not match:
             return
         domain = match.group(1)
-        
+
         hooks = self.find(UrlHook(domain))
         if self.call(hooks, msg, domain, url):
             return True

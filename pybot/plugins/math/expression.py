@@ -2,11 +2,12 @@
 # -*- coding: utf-8 -*-
 """Expression parser and compiler."""
 
-import string
-import inspect
 import collections
+import inspect
 import math
 import random
+import string
+
 
 TOKEN_NUM = 1
 TOKEN_VAR = 2
@@ -587,4 +588,3 @@ if __name__ == '__main__':
     except ExpressionError as exc:
         expr_exc_handler('', [], exc, env, expr)
         sys.exit(1)
-

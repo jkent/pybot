@@ -6,7 +6,9 @@ import re
 import sqlite3
 
 from plugin import *
+
 from . import expression
+
 
 VAR_TYPE_INT     = 0
 VAR_TYPE_FLOAT   = 1

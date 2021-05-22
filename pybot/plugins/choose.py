@@ -75,4 +75,3 @@ class Plugin(BasePlugin):
 
         response = random.choice(responses)
         msg.reply(response)
-    
