@@ -7,7 +7,8 @@ from time import time
 
 import reloader
 
-from bot import Bot
+from . import config
+from .bot import Bot
 
 
 class Core(object):
@@ -17,19 +18,19 @@ class Core(object):
         self.in_shutdown = False
 
         self.init_paths()
-        reloader.enable(blacklist=['bot', 'client', 'core', 'decorators', 'hook', 'interface', 'message', 'plugin'])
+        reloader.enable(blacklist=['bot', 'client', 'core', 'decorators',
+                'hook', 'interface', 'message', 'plugin'])
+        config.load(self)
 
     def init_paths(self):
         self.root = os.path.dirname(os.path.abspath(__file__))
         self.parent = os.path.abspath(os.path.join(self.root, '..'))
         self.plugin_dir = os.path.join(self.root, 'plugins')
         self.data_path = os.path.join(self.parent, 'data')
+        self.config_path = os.path.join(self.parent, 'config.yaml')
 
-    def add_bot(self, configfile):
-        configfile = os.path.join(self.parent, configfile)
-        if not os.path.exists(configfile):
-            raise Exception("Config file not found")
-        bot = Bot(self, configfile)
+    def add_bot(self, network):
+        bot = Bot(self, network)
         self.selectable.append(bot)
 
     def run(self):

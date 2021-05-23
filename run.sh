@@ -7,4 +7,4 @@ fi
 . venv/bin/activate
 pip install -r requirements.txt
 
-python pybot
+exec python pybot.py

@@ -1,0 +1,12 @@
+undergnd:
+  host: us2.irc.jkent.net
+  ssl: true
+
+  plugins:
+    base:
+      nickname: pybot
+      channels: ['#dev']
+    config:
+    perms:
+      superuser: Jeff!jkent@ug-D500E72E.client.mchsi.com
+    plugin:

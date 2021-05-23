@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # vim: set ts=4 et
 
-from hook import EventHook, CommandHook, TriggerHook, UrlHook
+from .hook import EventHook, CommandHook, TriggerHook, UrlHook
 
 
 def hook(*args):

@@ -7,7 +7,7 @@ import traceback
 
 import reloader
 
-from decorators import hook, level, priority
+from .decorators import hook, level, priority
 
 
 __all__ = ['BasePlugin', 'hook', 'priority', 'level']
@@ -28,27 +28,6 @@ class BasePlugin(object):
     def on_reload(self):
         pass
 
-    def config_get(self, name, fallback=None):
-        try:
-            return self.bot.config.get(self.name, name)
-        except:
-            if fallback != None:
-                return fallback
-            print("config section '%s': option '%s' is not set" % (self.name, name))
-            raise
-
-    def config_getint(self, name, fallback=None):
-        try:
-            return self.bot.config.getint(name)
-        except:
-            if fallback != None:
-                return fallback
-            print("config section '%s': option '%s' is not set" % (self.name, name))
-            raise
-
-    def config_set(self, name, value):
-        self.bot.config.set(self.name, name, value)
-
 class PluginManager(object):
     def __init__(self, bot):
         self.bot = bot
@@ -65,7 +44,7 @@ class PluginManager(object):
 
         backup_modules = dict(sys.modules)
         try:
-            module = importlib.import_module('plugins.' + name)
+            module = importlib.import_module('.plugins.' + name, 'pybot')
         except:
             sys.modules = backup_modules
             return None, self._error(name, 'module load failure', True)

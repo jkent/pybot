@@ -3,9 +3,9 @@
 
 from datetime import datetime, timedelta
 import re
-from sqlalchemy import or_, and_
+from sqlalchemy import or_, and_, func
 
-from plugin import *
+from pybot.plugin import *
 from . import models
 from .models import *
 
@@ -28,7 +28,8 @@ class Plugin(BasePlugin):
             msg.reply('Expected: <addressee> <text>')
             return True
 
-        optout = self.db.query(Preference).filter_by(nick=addressee, key='optout').first()
+        optout = self.db.query(Preference).filter_by(nick=addressee,
+                key='optout').first()
         if optout and optout.value.lower() == 'true':
             msg.reply('Recipient has opted out of messages.')
             return True
@@ -57,7 +58,8 @@ class Plugin(BasePlugin):
 
             text = re.sub(cmd, '', text)
 
-        if not self.db.query(Block).filter_by(nick=addressee, block=msg.source).first():
+        if not self.db.query(Block).filter_by(nick=addressee,
+                block=msg.source).first():
             message = Message(msg.source, addressee, text, channel, delta)
             self.db.add(message)
             self.db.commit()
@@ -73,17 +75,19 @@ class Plugin(BasePlugin):
             return True
 
         count = 0
-        query = self.db.query(Message).filter_by(addressee=msg.source)
+        query = self.db.query(Message) \
+                .filter(func.lower(Message.addressee)==func.lower(msg.source))
         for message in query:
             count += 1
             self.db.delete(message)
-    
+
         if count:
             self.db.commit()
-            msg.reply('Ack\'d %d message%s.' % (count, 's' if count > 1 else ''))
+            msg.reply('Ack\'d %d message%s.' %
+                    (count, 's' if count > 1 else ''))
         else:
             msg.reply('No messages to ack.')
-        
+
         return True
 
 
@@ -95,10 +99,13 @@ class Plugin(BasePlugin):
 
         query = self.db.query(Message).filter_by(nick=msg.source)
         for message in query:
-            text = '(%d) %s: %s' % (message.id, message.addressee, message.text)
+            text = '(%d) %s: %s' % (message.id, message.addressee,
+                    message.text)
             msg.reply(text, direct=True)
 
-        query = self.db.query(Message).filter_by(addressee=msg.source, presented=True)
+        query = self.db.query(Message) \
+                .filter_by(presented=True) \
+                .filter(func.lower(Message.addressee)==func.lower(msg.source))
         for message in query:
             text = '(%d) <%s> %s' % (message.id, message.nick, message.text)
             msg.reply(text, direct=True)
@@ -119,7 +126,9 @@ class Plugin(BasePlugin):
             return True
 
         message = self.db.query(Message).filter_by(id=id) \
-            .filter(or_(Message.nick == msg.source, and_(Message.addressee == msg.source, Message.presented == True))).first()
+                .filter(or_(func.lower(Message.nick) == func.lower(msg.source),
+                and_(func.lower(Message.addressee) == func.lower(msg.source),
+                Message.presented == True))).first()
         if message:
             self.db.delete(message)
             msg.reply('Message deleted.')
@@ -135,15 +144,18 @@ class Plugin(BasePlugin):
             msg.reply('Expected: <in | out>')
             return True
 
-        optout = self.db.query(Preference).filter_by(nick=msg.source, key='optout').first()
+        optout = self.db.query(Preference) \
+                .filter_by(key='optout') \
+                .filter(func.lower(Preference.nick)==func.lower(msg.source)) \
+                .first()
         if not optout:
             optout = Preference(msg.source, 'optout', 'False')
-        
+
         optout.value = 'False'
         if args[1].lower() == 'out':
             optout.value = 'True'
 
-        self.db.add(optout)        
+        self.db.add(optout)
         self.db.commit()
         return True
 
@@ -160,7 +172,7 @@ class Plugin(BasePlugin):
             msg.reply('Blocked %s.' % (args[1],))
         except:
             msg.reply('Already blocked.')
-        
+
         return True
 
 
@@ -170,13 +182,16 @@ class Plugin(BasePlugin):
             msg.reply('Expected: <nick>')
             return True
 
-        block = self.db.query(Block).filter_by(nick=msg.source, block=args[1]).first()
+        block = self.db.query(Block) \
+                .filter_by(block=args[1]) \
+                .filter(func.lower(Block.nick)==func.lower(msg.source)) \
+                .first()
         if block:
             self.db.delete(block)
             msg.reply('Unblocked %s.' % (args[1],))
         else:
             msg.reply('Not blocked.')
-        
+
         return True
 
 
@@ -184,8 +199,9 @@ class Plugin(BasePlugin):
     def privmsg_command(self, msg):
         now = datetime.utcnow()
 
-        query = self.db.query(Message).filter_by(addressee=msg.source) \
-            .filter(Message.next_notify < now)
+        query = self.db.query(Message) \
+                .filter(func.lower(Message.addressee)==func.lower(msg.source)) \
+                .filter(Message.next_notify < now)
 
         presented = False
 
@@ -203,6 +219,6 @@ class Plugin(BasePlugin):
             message.presented = True
             message.next_notify = now + timedelta(seconds=RETRY_INTERVAL)
             self.db.add(message)
-        
+
         if presented:
             self.db.commit()

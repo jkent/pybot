@@ -1,30 +1,26 @@
 # -*- coding: utf-8 -*-
 # vim: set ts=4 et
 
-from configparser import ConfigParser
 from textwrap import wrap
 from time import time
 
-from client import Client
-from decorators import hook, priority
-from hook import HookManager, TimestampHook
-from plugin import PluginManager
+from . import config
+from .client import Client
+from .decorators import hook, priority
+from .hook import HookManager, TimestampHook
+from .plugin import PluginManager
 
 
 class Bot(Client):
-    def __init__(self, core, configfile):
+    def __init__(self, core, network):
         self.core = core
+        self.network = network
 
-        self.configfile = configfile
-        self.config = ConfigParser()
-        self.config.read(configfile)
-
-        host = self.config.get('base', 'host')
-        port = self.config.getint('base', 'port')
-        try:
-            ssl = self.config.getboolean('base', 'ssl')
-        except:
-            ssl = False
+        host = config.config[self.network].get('host')
+        port = config.config[self.network].get('port')
+        ssl = config.config[self.network].get('ssl', 'false')
+        if port == None:
+            port = 6697 if ssl else 6667
 
         Client.__init__(self, (host, port), ssl)
         self.hooks = HookManager(self)
@@ -34,14 +30,14 @@ class Bot(Client):
 
         self.nick = None
         self.channels = {}
-        superuser = self.config.get('base', 'superuser')
-        self.allow_rules = {'*': {'ANY': 1}, superuser: {'ANY': 1000}}
+        self.allow_rules = {'*': {'ANY': 1}}
         self.deny_rules = {}
-        self._name = '_bot'
 
-        autoload = self.config.get('base', 'autoload').split()
-        for name in autoload:
-            self.plugins.load(name)
+        for plugin, options in config.config[self.network].get('plugins', {}) \
+                .items():
+            autoload = True if not options else options.get('autoload', True)
+            if autoload:
+                self.plugins.load(plugin)
 
         self.connect()
 
@@ -101,7 +97,8 @@ class Bot(Client):
                 self.send('JOIN %s %s' % (channel_s, key_s))
                 pairs = list(zip(channels, keys))
                 for item in pairs:
-                    self.channels[item[0]] = {'key': item[1], 'joined': False, 'nicks': set()}
+                    self.channels[item[0]] = {'key': item[1], 'joined': False,
+                            'nicks': set()}
             else:
                 self.send('JOIN %s' % channel_s)
                 for channel in channels:

@@ -4,7 +4,7 @@
 import random
 import re
 
-from plugin import *
+from pybot.plugin import *
 
 
 class Plugin(BasePlugin):

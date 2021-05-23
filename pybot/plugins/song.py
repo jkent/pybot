@@ -6,7 +6,7 @@ import re
 import sqlite3
 from traceback import print_exc
 
-from plugin import *
+from pybot.plugin import *
 
 
 KEEP_RATIO = 0.1

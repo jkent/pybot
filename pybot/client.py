@@ -5,7 +5,7 @@ import errno
 import socket
 import ssl
 
-from interface import SelectableInterface
+from .interface import SelectableInterface
 
 
 class Client(SelectableInterface):
@@ -91,7 +91,7 @@ class Client(SelectableInterface):
             if e.errno == ssl.SSL_ERROR_WANT_WRITE:
                 return
             raise
-        return n        
+        return n
 
     def _read(self, bufsize=1024):
         try:

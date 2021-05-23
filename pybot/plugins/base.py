@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 # vim: set ts=4 et
 
-from plugin import *
-
+from pybot import config
+from pybot.plugin import *
 
 BOT_PING_TIME = 120
 BOT_PING_TIMEOUT = 60
@@ -12,7 +12,8 @@ class Plugin(BasePlugin):
     def __init__(self, *args):
         BasePlugin.__init__(self, *args)
         self.connecting = False
-        self.autojoin = self.config_get('autojoin', '').split()
+        self.channels = config.config[self.bot.network].get('plugins', {}) \
+                .get('base', {}).get('channels', [])
         self.send_ping_hook = None
         self.ping_timeout_hook = None
 
@@ -22,29 +23,34 @@ class Plugin(BasePlugin):
 
     @hook
     def connect_event(self):
-        password = self.config_get('connect_password', '')
+        password = config.config[self.bot.network].get('plugins', {}) \
+                .get('base', {}).get('connect_password')
         if password:
             self.bot.send('PASS %s %s %s' % (password, '0210', 'IRC|'))
-        
-        nickname = self.config_get('nickname')
+
+        nickname = config.config[self.bot.network].get('plugins', {}) \
+                .get('base', {}).get('nickname')
         self.bot.send('NICK %s' % nickname)
 
-        username = self.config_get('username')
-        realname = self.config_get('realname')
+        username = config.config[self.bot.network].get('plugins', {}) \
+                .get('base', {}).get('username', 'pybot')
+        realname = config.config[self.bot.network].get('plugins', {}) \
+                .get('base', {}).get('realname',
+                'Python IRC bot - http://git.io/M1XRlw')
         self.bot.send('USER %s * 0 :%s' % (username, realname))
 
     @hook
     def disconnect_event(self):
         if self.bot.core.in_shutdown:
             return
-        if not self.autojoin:
+        if not self.channels:
             for channel, props in self.bot.channels.items():
                 if not props['joined']:
                     continue
                 if 'key' in props:
-                    self.autojoin.append((channel, props['key']))
+                    self.channels.append((channel, props['key']))
                 else:
-                    self.autojoin.append(channel)
+                    self.channels.append(channel)
         self.schedule_reconnect()
 
     def schedule_reconnect(self):
@@ -72,16 +78,17 @@ class Plugin(BasePlugin):
 
     @hook
     def _001_command(self, msg):
-        password = self.config_get('nickserv_password', '')
+        password = config.config[self.bot.network].get('plugins', {}) \
+                .get('base', {}).get('nickserv_password')
         if password:
             self.bot.privmsg('NickServ', 'identify %s' % (password))
         self.connecting = False
-        for channel in self.autojoin:
+        for channel in self.channels:
             if isinstance(channel, tuple):
                 self.bot.join(channel[0], channel[1])
             else:
                 self.bot.join(channel)
-        del self.autojoin[:]
+        del self.channels[:]
 
     @hook
     def recv_event(self):
@@ -93,12 +100,14 @@ class Plugin(BasePlugin):
             self.bot.hooks.uninstall(self.ping_timeout_hook)
             self.ping_timeout_hook = None
 
-        self.send_ping_hook = self.bot.set_timeout(self.send_ping, BOT_PING_TIME)
+        self.send_ping_hook = self.bot.set_timeout(self.send_ping,
+                BOT_PING_TIME)
 
     def send_ping(self):
         self.send_ping_hook = None
         self.bot.send('PING :%s' % self.bot.server)
-        self.ping_timeout_hook = self.bot.set_timeout(self.ping_timeout, BOT_PING_TIMEOUT)
+        self.ping_timeout_hook = self.bot.set_timeout(self.ping_timeout,
+                BOT_PING_TIMEOUT)
 
     def ping_timeout(self):
         self.ping_timeout_hook = None

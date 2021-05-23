@@ -6,7 +6,7 @@ import requests
 import tweepy
 from html.parser import HTMLParser
 
-from plugin import *
+from pybot.plugin import *
 
 
 def tweet_cleaner(text):
@@ -31,10 +31,14 @@ def url_expander(sentence, msg):
 
 class Plugin(BasePlugin):
     def on_load(self, reloading):
-        apik = self.bot.config.get(self.name, 'apikey')
-        apis = self.bot.config.get(self.name, 'secret')
-        autht = self.bot.config.get(self.name, 'auth_t')
-        authts = self.bot.config.get(self.name, 'auth_ts')
+        apik = config.config[self.bot.network].get('twitter', {}) \
+                .get('apikey')
+        apis = config.config[self.bot.network].get('twitter', {}) \
+                .get('secret')
+        autht = config.config[self.bot.network].get('twitter', {}) \
+                .get('auth_token')
+        authts = config.config[self.bot.network].get('twitter', {}) \
+                .get('auth_secret')
 
         auth = tweepy.OAuthHandler(apik, apis)
         auth.set_access_token(autht, authts)
@@ -43,7 +47,8 @@ class Plugin(BasePlugin):
 
     @hook('twitter.com')
     def twitter_url(self, msg, args, argstr):
-        regx = re.compile(r'https?://twitter.com/[a-zA-Z0-9_\-]+/status/(?P<id>[0-9]+)')
+        regx = re.compile(r'https?://twitter.com/[a-zA-Z0-9_\-]+/status/' \
+                r'(?P<id>[0-9]+)')
         m = re.match(regx, argstr)
 
         if not m:
@@ -74,12 +79,14 @@ class Plugin(BasePlugin):
 
     @hook
     def twitter_help_trigger(self, msg, args, argstr):
-        msg.reply('Usage: twitter [search|user] <text> Returns most recent or specified by URL Tweet text.')
+        msg.reply('Usage: twitter [search|user] <text> Returns most recent ' \
+            'or specified by URL Tweet text.')
 
     @hook
     def twitter_search_trigger(self, msg, args, argstr):
         try:
-            cursor = tweepy.Cursor(self._api.search, q=argstr, rpp=1, tweet_mode='extended')
+            cursor = tweepy.Cursor(self._api.search, q=argstr, rpp=1,
+                    tweet_mode='extended')
 
             for c in cursor.items(1):
                 uname = c.author.name

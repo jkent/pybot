@@ -5,8 +5,8 @@ import cgi
 from html.parser import HTMLParser
 
 import requests
-
-from plugin import *
+from pybot import config
+from pybot.plugin import *
 
 
 content_types = (
@@ -47,9 +47,10 @@ class Plugin(BasePlugin):
     @hook
     def any_url(self, msg, domain, url):
         default_ua = 'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; " \
-                "compatible; Googlebot/2.1; +http://www.google.com/bot.html) " \
+                "compatible; pybot/1.0.3; +https://github.com/jkent/pybot) " \
                 "Safari/537.36'
-        user_agent = self.bot.config.get(self.name, 'user-agent', fallback=default_ua)
+        user_agent = config.config[self.bot.network].get('plugins', {}) \
+                .get('anyurl', {}).get('user-agent', default_ua)
 
         headers = {
             'User-Agent': user_agent

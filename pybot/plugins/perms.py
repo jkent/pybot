@@ -5,14 +5,16 @@ import json
 import os
 import sqlite3
 
-from plugin import *
+import pybot.config as config
+from pybot.plugin import *
 
 
 class Plugin(BasePlugin):
     default_level = 1000
 
     def on_load(self, reload):
-        self.db = sqlite3.connect(os.path.join(self.bot.core.data_path, 'perms.db'))
+        self.db = sqlite3.connect(os.path.join(self.bot.core.data_path,
+                'perms.db'))
         self.cur = self.db.cursor()
         self.cur.execute('''CREATE TABLE IF NOT EXISTS allow
                      (mask TEXT PRIMARY KEY, rules TEXT)''')
@@ -34,26 +36,29 @@ class Plugin(BasePlugin):
         if count == 0:
             self.bot.allow_rules['*'] = {'ANY': 1}
         else:
-            for mask, rules in self.cur.execute('SELECT mask, rules FROM allow'):
+            for mask, rules in self.cur.execute('SELECT mask, rules ' \
+                    'FROM allow'):
                 self.bot.allow_rules[mask] = json.loads(rules)
 
-            for mask, rules in self.cur.execute('SELECT mask, rules FROM deny'):
+            for mask, rules in self.cur.execute('SELECT mask, rules FROM ' \
+                    'deny'):
                 self.bot.deny_rules[mask] = json.loads(rules)
 
-        try:
-            superuser = self.bot.config.get('base', 'superuser')
+        superuser = config.config[self.bot.network].get('plugins', {}) \
+                .get('perms', {}).get('superuser')
+        if superuser:
             self.bot.allow_rules[superuser] = {'ANY': 1000}
-        except:
-            pass
 
     def save_rules(self):
         for mask, rules in list(self.bot.allow_rules.items()):
             rules = json.dumps(rules)
-            self.cur.execute('INSERT OR REPLACE INTO allow (mask, rules) VALUES (?, ?)', (mask, rules))
+            self.cur.execute('INSERT OR REPLACE INTO allow (mask, rules) ' \
+                    'VALUES (?, ?)', (mask, rules))
 
         for mask, rules in list(self.bot.deny_rules.items()):
             rules = json.dumps(rules)
-            self.cur.execute('INSERT OR REPLACE INTO deny (mask, rules) VALUES (?, ?)', (mask, rules))
+            self.cur.execute('INSERT OR REPLACE INTO deny (mask, rules) ' \
+                    'VALUES (?, ?)', (mask, rules))
 
         self.db.commit()
 

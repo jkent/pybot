@@ -5,7 +5,7 @@ import os
 import re
 import sqlite3
 
-from plugin import *
+from pybot.plugin import *
 
 from . import expression
 

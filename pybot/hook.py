@@ -6,7 +6,7 @@ import inspect
 import re
 import traceback
 
-from message import Message
+from .message import Message
 
 
 url_re = re.compile(

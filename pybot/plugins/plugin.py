@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # vim: set ts=4 et
 
-from plugin import *
+from pybot.plugin import *
 
 
 class Plugin(BasePlugin):

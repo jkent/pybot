@@ -1,7 +1,7 @@
 pybot
 =====
 
-This is a modular, plugin-based IRC bot written in Python.  Plugins can be dynamically loaded and unloaded at runtime.  A design goal is the abillity to develop plugins without being able to crash the bot.
+This is a modular, plugin-based IRC bot written in Python.  Plugins can bedynamically loaded and unloaded at runtime.  A design goal is the abillity to develop plugins without being able to crash the bot.
 
 Plugins have a simple, easy to pick up API.  All events, commands, and triggers use a simple decorator convention.
 
@@ -13,9 +13,11 @@ Pybot is designed and tested to run under Python 3. It is not thoroughly tested 
 
 ### Configuring
 
-You need to copy `config.ini.sample` to `config.ini` and edit it to your liking.
+You need to copy `config.yaml.example` to `config.yaml` and edit it to your liking.
 
-The below examples in the **Plugins** section assume `directed_triggers = False`.  Directed triggers start with the bot's name, followed by a colon or comma, and finally the command and any arguments.  The other option, classic triggers, take a ! followed by the command and any arguments.  The default option is to use directed triggers, so multiple bots can peacefully coexist.
+The below examples in the **Plugins** section assume `directed_triggers` is `False`.  Directed triggers start with the bot's name, followed by a colon or comma, and finally the command and any arguments.  The other option, classic triggers, take a ! followed by the command and any arguments.  The default option is to use directed triggers, so multiple bots can peacefully coexist.
+
+TODO: document all configuration options.
 
 ### Running
 
@@ -35,7 +37,7 @@ This plugin handles some of the core behaviors of the bot, such as setting the n
 
 #### choose
 
-A fun yet frustrating plugin that gives random responses. 
+A fun yet frustrating plugin that gives random responses.
 
     should I|<nick> <question>?
     !choose a or b, c.
@@ -43,25 +45,20 @@ A fun yet frustrating plugin that gives random responses.
 
 #### config
 
-This plugin allows live editing of the config.ini file.  Usage is limited to level 1000.
+This plugin allows configuration reloading.  Usage is limited to level 1000.
 
     !config reload
-    !config save
-    !config set <section> <option> <value>
-    !config unset <section> <option>
-    !config list <section>
 
 
 #### debug
 
-This plugin prints all IRC traffic and module events while loaded.  Usage is limited to level 900.
+This plugin prints all IRC traffic and module events while loaded.
 
-    !raw <message> - send a raw IRC message
+Raw lets you send a raw IRC message, and requires permission level 900 and up.
 
+    !raw <message>
 
-#### eval
-
-This is a dangerous plugin that allows arbitrary execution of python code.  Usage is limited to level 1000.
+Eval is a dangerous feature that allows arbitrary execution of python code, and usage requires permission level 1000 and up.
 
     !eval <code>
 
@@ -79,11 +76,17 @@ The math plugin is a nifty calculator that has support for functions and variabl
     !math describe <funcname> [description]
 
 
-#### notes
+#### message
 
-Leave a message for someone when the bot next sees them talk.
+An offline/delayed message facility.
 
-    !tell <nick> <message>
+    !message send <nick> <message> [as dm] [in timespec]
+    !message ack
+    !message del <num>
+    !message list [nick]
+    !message block <nick>
+    !message unblock <nick>
+    !message opt <in | out>
 
 
 #### perms
@@ -152,7 +155,7 @@ Usage:
 Here's a simple "Hello world" style plugin:
 
     import * from plugin
-    
+
     class Plugin(BasePlugin):
         @hook
         def hello_trigger(self, msg, args, argstr):
