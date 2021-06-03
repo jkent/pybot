@@ -35,6 +35,7 @@ def parse_params(params):
         l.append(param)
     return l
 
+
 def parse_message(message):
     match = message_re.match(message)
     if match:
@@ -46,6 +47,7 @@ def parse_message(message):
         d = {'prefix': None, 'source': None, 'user': None, 'host': None,
              'command': '', 'param': []}
     return d
+
 
 class Message(object):
     def __init__(self, line, bot=None):
@@ -68,6 +70,7 @@ class Message(object):
         if self.cmd == 'PRIVMSG':
             self._detect_trigger()
 
+
     def _detect_trigger(self):
         text = self.param[-1]
 
@@ -84,6 +87,7 @@ class Message(object):
         else:
             if text.startswith('!'):
                 self.trigger = text[1:]
+
 
     def reply(self, text, direct=False):
         if not self.bot:

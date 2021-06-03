@@ -47,6 +47,7 @@ class Plugin(BasePlugin):
         choice = random.choice(choices) if choices else None
         msg.reply(response.format(msg.source, choice))
 
+
     @hook
     def privmsg_command(self, msg):
         if not msg.channel:

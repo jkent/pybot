@@ -53,6 +53,7 @@ def hook(*args):
         return f
     return decorate(args[0]) if call else decorate
 
+
 def priority(value):
     if not isinstance(value, int):
         raise Exception("priority decorator requires an integer value")
@@ -60,6 +61,7 @@ def priority(value):
         f._priority = value
         return f
     return decorate
+
 
 def level(value):
     if not isinstance(value, int):

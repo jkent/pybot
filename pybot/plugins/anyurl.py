@@ -22,6 +22,7 @@ class TitleParser(HTMLParser):
         self.match = False
         self.title = ''
 
+
     def handle_starttag(self, tag, attrs):
         if tag == 'meta':
             og_title = False
@@ -35,6 +36,7 @@ class TitleParser(HTMLParser):
 
         self.match = True if not self.title and tag == 'title' else False
 
+
     def handle_data(self, data):
         if self.match:
             self.title = data.strip()
@@ -43,6 +45,7 @@ class TitleParser(HTMLParser):
 
 class Plugin(BasePlugin):
     default_priority = 1
+
 
     @hook
     def any_url(self, msg, domain, url):

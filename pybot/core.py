@@ -22,6 +22,7 @@ class Core(object):
                 'hook', 'interface', 'message', 'plugin'])
         config.load(self)
 
+
     def init_paths(self):
         self.root = os.path.dirname(os.path.abspath(__file__))
         self.parent = os.path.abspath(os.path.join(self.root, '..'))
@@ -29,9 +30,11 @@ class Core(object):
         self.data_path = os.path.join(self.parent, 'data')
         self.config_path = os.path.join(self.parent, 'config.yaml')
 
+
     def add_bot(self, network):
         bot = Bot(self, network)
         self.selectable.append(bot)
+
 
     def run(self):
         self.running = True
@@ -49,6 +52,7 @@ class Core(object):
                 if shutdown:
                     self.running = False
 
+
     def tick(self):
         timestamp = time()
         for obj in self.selectable:
@@ -64,6 +68,7 @@ class Core(object):
 
         for obj in writeable:
             obj.do_write()
+
 
     def shutdown(self, reason=''):
         if self.in_shutdown:

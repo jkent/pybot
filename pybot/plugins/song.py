@@ -13,7 +13,7 @@ KEEP_RATIO = 0.1
 
 
 class Plugin(BasePlugin):
-    def on_load(self, reload):
+    def on_load(self):
         self.db = sqlite3.connect(os.path.join(self.bot.core.data_path, 'song.db'))
         self.cur = self.db.cursor()
         query = '''CREATE TABLE IF NOT EXISTS artist (
@@ -44,7 +44,7 @@ class Plugin(BasePlugin):
         self.last_tracks = {}
 
 
-    def on_unload(self, reload):
+    def on_unload(self):
         self.db.close()
 
 
@@ -152,7 +152,7 @@ class Plugin(BasePlugin):
         return True
 
 
-    @level(900)
+    @level(500)
     @hook
     def song_delete_trigger(self, msg):
         context = msg.reply_to

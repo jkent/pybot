@@ -16,14 +16,18 @@ class Client(SelectableInterface):
         self.sendbuf = b''
         self.recvbuf = b''
 
+
     def fileno(self):
         return self.sock.fileno()
+
 
     def can_read(self):
         return self.connected
 
+
     def can_write(self):
         return self.connected and bool(self.sendbuf)
+
 
     def do_write(self):
         if not self.connected:
@@ -31,6 +35,7 @@ class Client(SelectableInterface):
 
         n = self._write(self.sendbuf)
         self.sendbuf = self.sendbuf[n:]
+
 
     def do_read(self):
         if not self.connected:
@@ -60,6 +65,7 @@ class Client(SelectableInterface):
                 line = line.decode('latin-1')
             self.hooks.call_event('recv', line)
 
+
     def connect(self):
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         if self.use_ssl:
@@ -70,10 +76,12 @@ class Client(SelectableInterface):
         self.connected = True
         self.hooks.call_event('connect')
 
+
     def disconnect(self):
         self.sock.close()
         self.connected = False
         self.hooks.call_event('disconnect')
+
 
     def _write(self, data):
         try:
@@ -93,6 +101,7 @@ class Client(SelectableInterface):
             raise
         return n
 
+
     def _read(self, bufsize=1024):
         try:
             data = self.sock.recv(bufsize)
@@ -110,6 +119,7 @@ class Client(SelectableInterface):
                 return
             raise
         return data
+
 
     def send(self, line):
         self.hooks.call_event('send', line)

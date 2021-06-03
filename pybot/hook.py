@@ -20,6 +20,7 @@ class Hook(object):
         self.sort = sort
         self.extra = extra
 
+
     def __call__(self, *args):
         if not hasattr(self, 'fn'):
             Exception('attempt to call an unbound hook')
@@ -31,8 +32,10 @@ class Hook(object):
             print('%s hook error:' % type(self))
             traceback.print_exc()
 
+
     def __lt__(self, other):
         return self.sort < other.sort
+
 
     def bind(self, fn, owner=None):
         if owner:
@@ -56,13 +59,16 @@ class Hook(object):
         if not hasattr(self.__func__, '_level'):
             self.__func__._level = getattr(self.owner, 'default_level', 1)
 
+
 class EventHook(Hook):
     def __init__(self, event):
         Hook.__init__(self, event)
 
+
 class CommandHook(Hook):
     def __init__(self, command):
         Hook.__init__(self, command.upper())
+
 
 class TriggerHook(Hook):
     def __init__(self, trigger):
@@ -72,13 +78,16 @@ class TriggerHook(Hook):
             l = trigger
         Hook.__init__(self, (len(l),) + tuple(l))
 
+
 class TimestampHook(Hook):
     def __init__(self, timestamp, extra={}):
         Hook.__init__(self, timestamp, extra)
 
+
 class UrlHook(Hook):
     def __init__(self, domain):
         Hook.__init__(self, domain)
+
 
 class HookManager:
     def __init__(self, bot):
@@ -88,6 +97,7 @@ class HookManager:
         self.trigger_hooks = []
         self.timestamp_hooks = []
         self.url_hooks = []
+
 
     def install(self, hook):
         if not isinstance(hook, Hook):
@@ -114,12 +124,14 @@ class HookManager:
 
         bisect.insort_right(l, hook)
 
+
     def install_owner(self, owner):
         for _, method in inspect.getmembers(owner, inspect.ismethod):
             hooks = getattr(method.__func__, '_hooks', [])
             for hook in hooks:
                 hook.bind(method, owner)
                 self.install(hook)
+
 
     def uninstall(self, hook):
         d = {EventHook: self.event_hooks,
@@ -132,6 +144,7 @@ class HookManager:
 
         l.remove(hook)
 
+
     def uninstall_owner(self, owner):
         for l in [self.event_hooks,
                   self.command_hooks,
@@ -140,6 +153,7 @@ class HookManager:
                   self.url_hooks]:
 
             l[:] = (h for h in l if h.owner != owner)
+
 
     def find(self, model):
         d = {EventHook: self.event_hooks,
@@ -161,6 +175,7 @@ class HookManager:
         hook_seq.sort(key=lambda h: -h.fn._priority)
         return hook_seq
 
+
     def call(self, hook_seq, *args):
         for hook in hook_seq:
             if isinstance(hook, TimestampHook):
@@ -173,12 +188,14 @@ class HookManager:
             if hook(*args):
                 return True
 
+
     def call_event(self, event, *args):
         hooks = self.find(EventHook(event))
         self.call(hooks, *args)
         if event == 'recv':
             msg = Message(args[0], self.bot)
             self.call_command(msg)
+
 
     def call_command(self, msg):
         if msg.cmd in ('NOTICE', 'PRIVMSG'):
@@ -188,6 +205,7 @@ class HookManager:
 
         hooks = self.find(CommandHook(msg.cmd))
         self.call(hooks, msg)
+
 
     def apply_permissions(self, msg):
         msg.permissions = {}
@@ -213,6 +231,7 @@ class HookManager:
                 current_level = msg.permissions.get(plugin, level)
                 msg.permissions[plugin] = min(level, current_level)
 
+
     def process_privmsg(self, msg):
         if msg.trigger:
             self.call_trigger(msg)
@@ -222,6 +241,7 @@ class HookManager:
                     continue
                 url = match.group(0)
                 self.call_url(msg, url)
+
 
     def call_trigger(self, msg):
         authorized = True
@@ -248,9 +268,11 @@ class HookManager:
         if not authorized:
             msg.reply("You don't have permission to use that trigger")
 
+
     def call_timestamp(self, timestamp):
         hooks = self.find(TimestampHook(timestamp))
         self.call(hooks, timestamp)
+
 
     def call_url(self, msg, url):
         match = domain_re.match(url)

@@ -5,14 +5,14 @@ import json
 import os
 import sqlite3
 
-import pybot.config as config
 from pybot.plugin import *
 
 
 class Plugin(BasePlugin):
     default_level = 1000
 
-    def on_load(self, reload):
+
+    def on_load(self):
         self.db = sqlite3.connect(os.path.join(self.bot.core.data_path,
                 'perms.db'))
         self.cur = self.db.cursor()
@@ -23,9 +23,11 @@ class Plugin(BasePlugin):
         self.db.commit()
         self.load_rules()
 
-    def on_unload(self, reload):
+
+    def on_unload(self):
         self.save_rules()
         self.db.close()
+
 
     def load_rules(self):
         self.bot.allow_rules = {}
@@ -44,10 +46,10 @@ class Plugin(BasePlugin):
                     'deny'):
                 self.bot.deny_rules[mask] = json.loads(rules)
 
-        superuser = config.config[self.bot.network].get('plugins', {}) \
-                .get('perms', {}).get('superuser')
+        superuser = self.config.get('superuser')
         if superuser:
             self.bot.allow_rules[superuser] = {'ANY': 1000}
+
 
     def save_rules(self):
         for mask, rules in list(self.bot.allow_rules.items()):
@@ -61,6 +63,7 @@ class Plugin(BasePlugin):
                     'VALUES (?, ?)', (mask, rules))
 
         self.db.commit()
+
 
     @hook
     def perms_list_trigger(self, msg, args, argstr):
@@ -77,6 +80,7 @@ class Plugin(BasePlugin):
             for plugin, level in list(rules.items()):
                 line += ' %s=%s' % (plugin, level)
             msg.reply(line)
+
 
     @hook
     def perms_allow_trigger(self, msg, args, argstr):
@@ -113,6 +117,7 @@ class Plugin(BasePlugin):
                     msg.reply('invalid syntax, "plugin=level" format required')
                     return
                 rules[plugin] = level
+
 
     @hook
     def perms_deny_trigger(self, msg, args, argstr):

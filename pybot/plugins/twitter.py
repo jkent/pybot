@@ -13,6 +13,7 @@ def tweet_cleaner(text):
     hp = HTMLParser()
     return hp.unescape(text.replace('\n', ' ').replace('\r', ''))
 
+
 def url_expander(sentence, msg):
     regex_tco = re.compile(r'https?://t.co/.*')
     urls = []
@@ -30,18 +31,11 @@ def url_expander(sentence, msg):
 
 
 class Plugin(BasePlugin):
-    def on_load(self, reloading):
-        apik = config.config[self.bot.network].get('twitter', {}) \
-                .get('apikey')
-        apis = config.config[self.bot.network].get('twitter', {}) \
-                .get('secret')
-        autht = config.config[self.bot.network].get('twitter', {}) \
-                .get('auth_token')
-        authts = config.config[self.bot.network].get('twitter', {}) \
-                .get('auth_secret')
-
-        auth = tweepy.OAuthHandler(apik, apis)
-        auth.set_access_token(autht, authts)
+    def on_load(self):
+        auth = tweepy.OAuthHandler(self.config.get('apikey'),
+                self.config.get('secret'))
+        auth.set_access_token(self.config.get('auth_token'),
+                self.config.get('auth_secret'))
         self._api = tweepy.API(auth)
 
 
@@ -66,6 +60,7 @@ class Plugin(BasePlugin):
 
         return True
 
+
     @hook
     def twitter_user_trigger(self, msg, args, argstr):
         try:
@@ -77,10 +72,12 @@ class Plugin(BasePlugin):
             print(e)
             msg.reply('No user by that name.')
 
+
     @hook
     def twitter_help_trigger(self, msg, args, argstr):
         msg.reply('Usage: twitter [search|user] <text> Returns most recent ' \
             'or specified by URL Tweet text.')
+
 
     @hook
     def twitter_search_trigger(self, msg, args, argstr):
