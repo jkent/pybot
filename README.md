@@ -9,7 +9,7 @@ Clone with:  `git clone --recursive https://github.com/jkent/pybot.git`
 
 ### Dependencies
 
-Pybot is designed and tested to run under Python 3. It is not thoroughly tested under python 2, but it may work for you. It is also recommended to use `pipenv` to manage dependencies.
+Pybot is designed and tested to run under Python 3. Python 2 is no longer supported.  Dependencies are listed in `requirements.txt`.
 
 ### Configuring
 
@@ -21,7 +21,7 @@ TODO: document all configuration options.
 
 ### Running
 
-Pybot is a python package.  Using pipenv, you would run like `pipenv run python pybot`.
+Pybot can be run as either a package or using its pybot.py script.  It also comes with a shell dcript, `run.sh` that will setup a python virtual environment and dependencies for you.
 
 ### Plugins
 
