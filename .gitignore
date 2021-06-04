@@ -1,7 +1,7 @@
 .vscode/
 .settings/
 __pycache__/
-/config.ini
+/config.yaml
 /data
 /plugins
 /venv
