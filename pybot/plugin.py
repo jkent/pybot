@@ -7,6 +7,7 @@ import traceback
 from inspect import signature
 
 import reloader
+reloader.enable()
 
 from . import config
 from .decorators import hook, level, priority
