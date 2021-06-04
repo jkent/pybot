@@ -14,11 +14,13 @@ RETRY_INTERVAL = 3600
 
 
 class Plugin(BasePlugin):
-    def on_load(self, reload):
+    def on_load(self):
         self.db = models.init(self.bot)
 
-    def on_unload(self, reload):
+
+    def on_unload(self):
         self.db.close()
+
 
     @hook
     def message_send_trigger(self, msg, args, argstr):
@@ -66,6 +68,7 @@ class Plugin(BasePlugin):
 
         msg.reply('Message queued!')
         return True
+
 
     @hook
     @hook('ack')

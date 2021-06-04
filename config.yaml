@@ -10,3 +10,5 @@ undergnd:
     perms:
       superuser: Jeff!jkent@ug-D500E72E.client.mchsi.com
     plugin:
+    slack_bridge:
+      bot_token: xoxb-589156455558-2141837734452-kzlOI3FUdkHrVasuOZzutX1b

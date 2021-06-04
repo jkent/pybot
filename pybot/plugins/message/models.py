@@ -23,6 +23,7 @@ class Message(Base):
     text = Column(String, nullable=False)
     presented = Column(Boolean, nullable=False)
 
+
     def __init__(self, nick, addressee, text, channel=None, delta=None):
         self.nick = nick
         self.addressee = addressee
@@ -32,6 +33,7 @@ class Message(Base):
         if delta:
             self.next_notify += delta
         self.presented = False
+
 
     def __repr__(self):
         return '<Message(id=%d)>' % (self.id,)
@@ -43,10 +45,12 @@ class Preference(Base):
     key = Column(String, primary_key=True)
     value = Column(String)
 
+
     def __init__(self, nick, key, value):
         self.nick = nick
         self.key = key
         self.value = value
+
 
     def __repr__(self):
         return '<Preference(nick=\'%s\', key=\'%s\'>' % (self.nick, self.key)
@@ -57,9 +61,11 @@ class Block(Base):
     nick = Column(String, primary_key=True)
     block = Column(String, primary_key=True)
 
+
     def __init__(self, nick, block):
         self.nick = nick
         self.block = block
+
 
     def __repr__(self):
         return '<Block(nick=\'%s\', block=\'%s\'>' % (self.nick, self.block)

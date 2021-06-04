@@ -78,20 +78,24 @@ class ExpressionError(Exception):
         super(ExpressionError, self).__init__(message)
         self.pos = pos
 
+
 class ParseError(ExpressionError):
     """Exception that is thrown during expression parsing."""
     def __init__(self, pos, message):
         super(ParseError, self).__init__(pos, message)
+
 
 class CompileError(ExpressionError):
     """Exception that is thrown during expression compliation."""
     def __init__(self, pos, message):
         super(CompileError, self).__init__(pos, message)
 
+
 class ComputeError(ExpressionError):
     """Exception that is thrown during expression computation."""
     def __init__(self, pos, message):
         super(ComputeError, self).__init__(pos, message)
+
 
 class DeclarationError(Exception):
     """Exception that is thrown during func declaration."""
@@ -124,6 +128,7 @@ def parse_expr(expr, offset=0):
     token_start = None
     last = 0
 
+
     def add_value():
         """Adds a value type (except for func) to the tokens list."""
 
@@ -155,6 +160,7 @@ def parse_expr(expr, offset=0):
 
         tokens.append((type_, token, offset + token_start))
         return type_
+
 
     def add_func(pos):
         """Adds a func type to the tokens list."""

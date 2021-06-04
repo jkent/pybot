@@ -45,8 +45,10 @@ class Plugin(BasePlugin):
         self.workbooks = {}
         self.target_to_workbook = {}
 
-    def on_unload(self, reload):
+
+    def on_unload(self):
         self.db.close()
+
 
     def load_workbook(self, target, name):
         if ':' not in name:
@@ -94,17 +96,20 @@ class Plugin(BasePlugin):
 
         return workbook
 
+
     def get_workbook(self, target):
         if target in self.target_to_workbook:
             return self.target_to_workbook[target]
 
         return self.load_workbook(target, 'Default')
 
+
     def exc_handler(self, name, args, exc, workbook, expr):
         self.lastmsg.reply('Error: ' + str(exc))
         if expr:
             self.lastmsg.reply('  ' + expr)
             self.lastmsg.reply(' ' * (exc.pos + 2) + '^')
+
 
     def define_func(self, msg, workbook, name, args, expr):
         try:
@@ -118,6 +123,7 @@ class Plugin(BasePlugin):
         except expression.ExpressionError as exc:
             self.exc_handler('', [], exc, workbook, expr)
 
+
     def undefine_func(self, msg, workbook, name):
         try:
             expression.undefine_func(workbook, name)
@@ -127,6 +133,7 @@ class Plugin(BasePlugin):
             self.db.commit()
         except expression.DeclarationError as exc:
             msg.reply('Error: ' + str(exc))
+
 
     def define_var(self, msg, workbook, name, expr):
         try:
@@ -151,6 +158,7 @@ class Plugin(BasePlugin):
         except expression.ExpressionError as exc:
             self.exc_handler('', [], exc, workbook, expr)
 
+
     def undefine_var(self, msg, workbook, name):
         try:
             expression.undefine_var(workbook, name)
@@ -160,6 +168,7 @@ class Plugin(BasePlugin):
             self.db.commit()
         except expression.DeclarationError as exc:
             msg.reply('Error: ' + str(exc))
+
 
     @hook
     def math_trigger(self, msg, args, argstr):
@@ -199,6 +208,7 @@ class Plugin(BasePlugin):
             return
         msg.reply(str(value))
 
+
     @hook
     def math_workbook_trigger(self, msg, args, argstr):
         if len(args) <= 1:
@@ -210,6 +220,7 @@ class Plugin(BasePlugin):
         self.load_workbook(msg.reply_to, args[1])
         return True
 
+
     @hook
     def math_varlist_trigger(self, msg, args, argstr):
         workbook = self.get_workbook(msg.reply_to)
@@ -218,6 +229,7 @@ class Plugin(BasePlugin):
         msg.reply(', '.join(names))
         return True
 
+
     @hook
     def math_funclist_trigger(self, msg, args, argstr):
         workbook = self.get_workbook(msg.reply_to)
@@ -225,6 +237,7 @@ class Plugin(BasePlugin):
         names.sort()
         msg.reply(', '.join(names))
         return True
+
 
     @hook
     def math_describe_trigger(self, msg, args, argstr):
