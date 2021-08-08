@@ -131,6 +131,12 @@ Choose a random song from a song database.
     !song youtube delete
 
 
+#### topic
+    Allow users to set the topic with a minimum age.
+
+    !topic <topic>
+
+
 #### twitter
 
 Parse URLs, get latest user tweet, and search keywords on Twitter.

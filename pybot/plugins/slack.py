@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 # vim: set ts=4 et
 
-from hashlib import md5
-import re
 import os
+import re
 import sqlite3
+from hashlib import md5
 
 from pybot.plugin import *
 from slack_sdk.rtm_v2 import RTMClient
@@ -73,10 +73,11 @@ class Plugin(BasePlugin):
 
         @self.rtm.on('message')
         def slack_message(client: RTMClient, event: dict):
+
             slack_name = self.irc_name_from_slack_id(event['user'])
             text = event['text']
 
-            m = re.search(r'<@[UW][0-9A-Z]{8}> has joined the channel')
+            m = re.search(r'<@[UW][0-9A-Z]{8}> has joined the channel', text)
             if m:
                 return
 

@@ -5,7 +5,6 @@ from .core import Core
 
 def main():
     core = Core()
-    core.add_bot('undergnd')
     core.run()
 
 if __name__ == '__main__':

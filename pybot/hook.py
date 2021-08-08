@@ -214,7 +214,7 @@ class HookManager:
             if not re.match(regex, msg.prefix):
                 continue
 
-            for plugin,     level in list(rules.items()):
+            for plugin, level in list(rules.items()):
                 current_level = msg.permissions.get(plugin, level)
                 msg.permissions[plugin] = max(level, current_level)
 

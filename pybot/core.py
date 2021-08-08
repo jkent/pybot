@@ -13,6 +13,7 @@ from .bot import Bot
 
 class Core(object):
     def __init__(self):
+        self.bots = {}
         self.selectable = []
         self.running = False
         self.in_shutdown = False
@@ -20,7 +21,25 @@ class Core(object):
         self.init_paths()
         reloader.enable(blacklist=['bot', 'client', 'core', 'decorators',
                 'hook', 'interface', 'message', 'plugin'])
+        self.reload()
+
+
+    def reload(self):
         config.load(self)
+
+        current_bots = self.bots.keys()
+        new_bots = config.config.keys()
+
+        remove = [network for network in self.bots.keys() \
+                if network not in new_bots]
+        add = [network for network in new_bots if network not in current_bots]
+
+        for network in remove:
+            bot = self.bots[network]
+            bot.hooks.call_event('shutdown', 'configuration reload')
+
+        for network in add:
+            self.add_bot(network)
 
 
     def init_paths(self):
@@ -33,7 +52,13 @@ class Core(object):
 
     def add_bot(self, network):
         bot = Bot(self, network)
+        self.bots[network] = bot
         self.selectable.append(bot)
+
+
+    def remove_bot(self, network):
+        bot = self.bots[network]
+        self.selectable.remove(bot)
 
 
     def run(self):

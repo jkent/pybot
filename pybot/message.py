@@ -57,7 +57,7 @@ class Message(object):
         self.time = datetime.utcnow()
         self.channel = None
         self.trigger = None
-        self.level = 0
+        self.permissions = {}
         self.__dict__.update(parse_message(line))
 
         if self.cmd in ('PRIVMSG', 'NOTICE'):

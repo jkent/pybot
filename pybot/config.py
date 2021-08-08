@@ -30,5 +30,7 @@ def autoload_list(bot):
 def plugin_options(bot, plugin):
     global config
 
-    return config[bot.network].get('plugins', OrderedDict()).get(plugin,
-            OrderedDict())
+    plugin = config[bot.network].get('plugins', OrderedDict()).get(plugin)
+    if plugin:
+        return plugin
+    return OrderedDict()
