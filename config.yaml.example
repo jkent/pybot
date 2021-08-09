@@ -3,10 +3,15 @@ undergnd:
   ssl: true
 
   plugins:
+    anyurl:
+      blacklist:
+        - github.com
     base:
       nickname: pybot
       channels: ['#dev']
+    github:
     perms:
       superuser: Jeff!jkent@ug-D500E72E.client.mchsi.com
     plugin:
     topic:
+      min_level: 1

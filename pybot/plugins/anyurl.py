@@ -3,8 +3,9 @@
 
 import cgi
 from html.parser import HTMLParser
-
+import re
 import requests
+
 from pybot import config
 from pybot.plugin import *
 
@@ -46,9 +47,14 @@ class TitleParser(HTMLParser):
 class Plugin(BasePlugin):
     default_priority = 1
 
-
     @hook
     def any_url(self, msg, domain, url):
+        blacklist_domains = self.config.get('blacklist')
+        if blacklist_domains:
+            for entry in blacklist_domains:
+                if entry == domain or 'www.' + entry == domain:
+                    return
+
         default_ua = 'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; " \
                 "compatible; pybot/1.0.3; +https://github.com/jkent/pybot) " \
                 "Safari/537.36'

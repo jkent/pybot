@@ -278,7 +278,7 @@ class HookManager:
         match = domain_re.match(url)
         if not match:
             return
-        domain = match.group(1)
+        domain = match.group(1).lower()
 
         hooks = self.find(UrlHook(domain))
         if self.call(hooks, msg, domain, url):
