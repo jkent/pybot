@@ -65,7 +65,7 @@ Eval is a dangerous feature that allows arbitrary execution of python code, and 
 
 #### github
 
-This plugin will show information about GitHub users and repos when linked in a channel.
+This plugin will show information about GitHub users and repos when a url is linked within a channel.  jrspruitt was the original author, rewritten by jkent.
 
 
 #### math
