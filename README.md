@@ -63,6 +63,11 @@ Eval is a dangerous feature that allows arbitrary execution of python code, and 
     !eval <code>
 
 
+#### github
+
+This plugin will show information about GitHub users and repos when linked in a channel.
+
+
 #### math
 
 The math plugin is a nifty calculator that has support for functions and variables.  Its state is saved in a database as workbooks which can be switched out as needed.
