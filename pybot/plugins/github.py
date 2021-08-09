@@ -31,7 +31,6 @@ class Plugin(BasePlugin):
 
         m = re.match(url_re, url)
         if not m:
-            print('no match')
             return
 
         user = m.group('user')

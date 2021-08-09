@@ -49,10 +49,10 @@ class Plugin(BasePlugin):
 
     @hook
     def any_url(self, msg, domain, url):
-        blacklist_domains = self.config.get('blacklist')
-        if blacklist_domains:
-            for entry in blacklist_domains:
-                if entry == domain or 'www.' + entry == domain:
+        blacklist = self.config.get('blacklist')
+        if blacklist:
+            for regex in blacklist:
+                if re.match(regex, url, re.IGNORECASE):
                     return
 
         default_ua = 'Mozilla/5.0 AppleWebKit/537.36 (KHTML, like Gecko; " \
