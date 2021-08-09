@@ -17,11 +17,27 @@ You need to copy `config.yaml.example` to `config.yaml` and edit it to your liki
 
 The below examples in the **Plugins** section assume `directed_triggers` is `False`.  Directed triggers start with the bot's name, followed by a colon or comma, and finally the command and any arguments.  The other option, classic triggers, take a ! followed by the command and any arguments.  The default option is to use directed triggers, so multiple bots can peacefully coexist.
 
-TODO: document all configuration options.
+  * config.yaml:
+
+        my_network:
+          host: localhost
+          port: 6667
+          ssl: false
+
+          plugins:
+            base:
+              connect_password: null
+              nickname: pybot
+              username: pybot
+              realname: Python IRC bot - http://git.io/M1XRlw
+              nickserv_password: null
+              channels:
+                  - '#dev'
+
 
 ### Running
 
-Pybot can be run as either a package or using its pybot.py script.  It also comes with a shell dcript, `run.sh` that will setup a python virtual environment and dependencies for you.
+Pybot can be run as either a package or using its pybot.py script.  It also comes with a shell script, `run.sh` that will setup a python virtual environment and dependencies for you.
 
 ### Plugins
 
@@ -29,78 +45,110 @@ Pybot can be run as either a package or using its pybot.py script.  It also come
 
 This plugin will fetch and reply with the og:title or title of a HTML document.
 
+  * Configuration:
+
+        anyurl:
+          blacklist:
+            - '^https://www.google.com/.*$'
+
 
 #### base
 
 This plugin handles some of the core behaviors of the bot, such as setting the nick, joining channels, and auto-reconnect.  Its required, please don't unload it unless you know what you're doing.
+
+  * Configuration:
+
+        base:
+          nickname: pybot
+          channels:
+            - #dev
+            - #UnderGND
 
 
 #### choose
 
 A fun yet frustrating plugin that gives random responses.
 
-    should I|<nick> <question>?
-    !choose a or b, c.
+  * Usage:
+
+        should I|<nick> <question>?
+        !choose a or b, c.
 
 
 #### config
 
 This plugin allows configuration reloading.  Usage is limited to level 1000.
 
-    !config reload
+  * Usage:
+
+        !config reload
 
 
 #### debug
 
 This plugin prints all IRC traffic and module events while loaded.
 
-Raw lets you send a raw IRC message, and requires permission level 900 and up.
+  * Usage:
 
-    !raw <message>
+        !raw <message>
+        !eval <code>
 
-Eval is a dangerous feature that allows arbitrary execution of python code, and usage requires permission level 1000 and up.
-
-    !eval <code>
+Raw lets you send a raw IRC message, and requires permission level 900 and up. Eval is a dangerous feature that allows arbitrary execution of python code, and usage requires permission level 1000 and up.
 
 
 #### github
 
 This plugin will show information about GitHub users and repos when a url is linked within a channel.  jrspruitt was the original author, rewritten by jkent.
 
+  * Usage:
+
+        <url>
+
 
 #### math
 
 The math plugin is a nifty calculator that has support for functions and variables.  Its state is saved in a database as workbooks which can be switched out as needed.
 
-    !math [expr]
-    !math var=[expr]
-    !math func([var[, ...]])=[expr]
-    !math workbook [name]
-    !math varlist
-    !math funclist
-    !math describe <funcname> [description]
+  * Usage:
+
+        !math [expr]
+        !math var=[expr]
+        !math func([var[, ...]])=[expr]
+        !math workbook [name]
+        !math varlist
+        !math funclist
+        !math describe <funcname> [description]
 
 
 #### message
 
 An offline/delayed message facility.
 
-    !message send <nick> <message> [as dm] [in timespec]
-    !message ack
-    !message del <num>
-    !message list [nick]
-    !message block <nick>
-    !message unblock <nick>
-    !message opt <in | out>
+  * Usage:
+
+        !message send <nick> <message> [as dm] [in timespec]
+        !message ack
+        !message del <num>
+        !message list [nick]
+        !message block <nick>
+        !message unblock <nick>
+        !message opt <in | out>
 
 
 #### perms
 
 Manage bot permissions.  Usage is limited to level 1000.
 
-    !perms list
-    !perms allow [-]<mask> [<plugin>=<n>]
-    !perms deny [-]<mask> [<plugin>=<n>]
+  * Config:
+
+        perms:
+          superuser: me!root@localhost
+
+  * Usage:
+
+        !perms list
+        !perms allow [-]<mask> [<plugin>=<n>]
+        !perms deny [-]<mask> [<plugin>=<n>]
 
 Where plugin is the name of a plugin and n is the level to set.  Plugin can be the special constant ANY.
 
@@ -109,10 +157,12 @@ Where plugin is the name of a plugin and n is the level to set.  Plugin can be t
 
 Load, unload, reload plugins at runtime.  Usage is limited to level 1000.
 
-    !plugin load <name>
-    !plugin reload [!]<name>
-    !plugin unload [!]<name>
-    !plugin list
+  * Usage:
+
+        !plugin load <name>
+        !plugin reload [!]<name>
+        !plugin unload [!]<name>
+        !plugin list
 
 
 For reload and unload, the "bang" means force.  Use with caution.
@@ -122,24 +172,36 @@ For reload and unload, the "bang" means force.  Use with caution.
 
 Choose a random song from a song database.
 
-    !song
-    !song add <artist> - <title>
-    !song delete
-    !song fix artist <artist>
-    !song fix title <title>
-    !song last
-    !song load <data-file>
-    !song search <query>
-    !song stats
-    !song who
-    !song youtube <youtube-url>
-    !song youtube delete
+  * Usage:
+
+        !song
+        !song add <artist> - <title>
+        !song delete
+        !song fix artist <artist>
+        !song fix title <title>
+        !song last
+        !song load <data-file>
+        !song search <query>
+        !song stats
+        !song who
+        !song youtube <youtube-url>
+        !song youtube delete
 
 
 #### topic
-    Allow users to set the topic with a minimum age.
 
-    !topic <topic>
+Allow users to set the topic with a minimum age.
+
+  * Configuration:
+
+        topic:
+          min_age: 24h
+          min_level: 100
+          bypass_level: 900
+
+  * Usage:
+
+        !topic <topic>
 
 
 #### twitter
@@ -147,17 +209,19 @@ Choose a random song from a song database.
 Parse URLs, get latest user tweet, and search keywords on Twitter.
 Configuration requires Twitter account and application setup:
 
-     [twitter]
-     apikey=<api key>
-     secret=<api secret>
-     auth_t=<api access token>
-     auth_ts=<api access token secret>
+  * Configuration:
 
-Usage:
+        twitter:
+        apikey: <api key>
+        secret: <api secret>
+        auth_token: <auth token>
+        auth_secret: <auth secret>
 
-     <url>
-     !twitter user <@user_id>
-     !twitter search <keyword>
+  * Usage:
+
+        <url>
+        !twitter user <@user_id>
+        !twitter search <keyword>
 
 
 ## For Developers
@@ -165,12 +229,12 @@ Usage:
 ### Plugins
 Here's a simple "Hello world" style plugin:
 
-    import * from plugin
+    from pybot.plugin import *
 
     class Plugin(BasePlugin):
         @hook
         def hello_trigger(self, msg, args, argstr):
-            msg.reply('Hello %s!' % argstr)
+            msg.reply('Hello %s!' % (argstr,))
 
 You would call the trigger on IRC via either:
 

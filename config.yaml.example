@@ -5,10 +5,11 @@ undergnd:
   plugins:
     anyurl:
       blacklist:
-        - '^https?://(?:www\.)?github.com/[a-zA-Z0-9_-]+(?:/[a-zA-Z0-9_-]+)?/?$'
+        - '^https?://(?:www\.)?github.com/[a-z0-9_-]+(?:/[a-z0-9_-]+)?/?$'
     base:
       nickname: pybot
-      channels: ['#dev']
+      channels:
+        - '#dev'
     github:
     perms:
       superuser: Jeff!jkent@ug-D500E72E.client.mchsi.com

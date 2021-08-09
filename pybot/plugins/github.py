@@ -7,7 +7,7 @@ import requests
 from pybot.plugin import *
 
 
-url_re = re.compile(r'^https?://(?:www\.)?github.com/(?P<user>[a-zA-Z0-9_-]+)(?:/(?P<repo>[a-zA-Z0-9_-]+)(?:.git)?)?/?$')
+url_re = re.compile(r'^https?://(?:www\.)?github.com/(?P<user>[a-z0-9_-]+)(?:/(?P<repo>[a-z0-9_-]+)(?:.git)?)?/?$', re.IGNORECASE)
 repo_api_url = 'https://api.github.com/repos/{user}/{repo}'
 commits_api_url = 'https://api.github.com/repos/{user}/{repo}/commits?per_page=1'
 user_api_url = 'https://api.github.com/users/{user}'
