@@ -1,10 +1,10 @@
 #!/bin/sh
 
 if [ ! -d venv ]; then
-    virtualenv venv
+    python3 -m virtualenv venv
 fi
 
 . venv/bin/activate
-pip install -r requirements.txt
+python3 -m pip install -r requirements.txt
 
-exec python pybot.py
+exec python3 pybot.py

@@ -94,8 +94,8 @@ An offline/delayed message facility.
 Manage bot permissions.  Usage is limited to level 1000.
 
     !perms list
-    !perms allow [-][<plugin>=<n>]
-    !perms deny [-][<plugin>=<n>]
+    !perms allow [-]<mask> [<plugin>=<n>]
+    !perms deny [-]<mask> [<plugin>=<n>]
 
 Where plugin is the name of a plugin and n is the level to set.  Plugin can be the special constant ANY.
 

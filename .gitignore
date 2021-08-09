@@ -3,7 +3,8 @@
 __pycache__/
 /config.yaml
 /data
-/plugins
+/plugins/*
+!/plugins/__init__.py
 /venv
 *.py[cod]
 Pipfile

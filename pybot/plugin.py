@@ -53,10 +53,14 @@ class PluginManager(object):
 
         backup_modules = dict(sys.modules)
         try:
-            module = importlib.import_module('.plugins.' + name, 'pybot')
+            module = importlib.import_module('plugins.' + name, '')
         except:
-            sys.modules = backup_modules
-            return None, self._error(name, 'module load failure', True)
+            try:
+                module = importlib.import_module('.plugins.' + name, 'pybot')
+            except:
+                sys.modules = backup_modules
+                return None, self._error(name, 'module load failure', True)
+
 
         return module, None
 

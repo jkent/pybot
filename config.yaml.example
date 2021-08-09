@@ -6,7 +6,7 @@ undergnd:
     base:
       nickname: pybot
       channels: ['#dev']
-    config:
     perms:
       superuser: Jeff!jkent@ug-D500E72E.client.mchsi.com
     plugin:
+    topic:
