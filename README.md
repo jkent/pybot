@@ -201,7 +201,10 @@ Allow users to set the topic with a minimum age.
 
   * Usage:
 
-        !topic <topic>
+        !topic apply
+        !topic set <topic>
+
+If permissions or min_age not met, apply can be used to override and apply the last proposed topic by anyone with bypass_level or higher.
 
 
 #### twitter

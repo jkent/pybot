@@ -52,11 +52,13 @@ class Plugin(BasePlugin):
     def plugin_unloaded_event(self, name):
         print('unloaded plugin %s' % name)
 
+
     @level(1000)
     @hook
     def reload_trigger(self, msg, args, argstr):
         self.bot.core.reload()
         msg.reply('Reloaded')
+
 
     @level(1000)
     @hook
