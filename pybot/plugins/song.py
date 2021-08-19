@@ -130,7 +130,6 @@ class Plugin(BasePlugin):
             return True
 
         track_id, track_added = self.add_track(artist, title, msg.source)
-        print(track_id, track_added)
         self.db.commit()
 
         query = '''SELECT COUNT(*)
@@ -380,7 +379,7 @@ class Plugin(BasePlugin):
         return True
 
 
-    @hook
+    @hook(('song youtube', 'song yt'))
     def song_youtube_trigger(self, msg, args, argstr):
         context = msg.reply_to
         if not self.last_tracks.get(context):
@@ -406,7 +405,7 @@ class Plugin(BasePlugin):
 
 
     @level(900)
-    @hook
+    @hook(('song youtube delete', 'song yt delete'))
     def song_youtube_delete_trigger(self, msg):
         context = msg.reply_to
         if not self.last_tracks.get(context):

@@ -184,8 +184,8 @@ Choose a random song from a song database.
         !song search <query>
         !song stats
         !song who
-        !song youtube <youtube-url>
-        !song youtube delete
+        !song [youtube|yt] <youtube-url>
+        !song [youtube|yt] delete
 
 
 #### topic
