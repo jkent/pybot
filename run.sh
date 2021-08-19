@@ -1,5 +1,7 @@
 #!/bin/sh
 
+cd -P -- "$(dirname -- "$0")"
+
 if [ ! -d venv ]; then
     python3 -m virtualenv venv
 fi
