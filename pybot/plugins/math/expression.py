@@ -28,6 +28,7 @@ OPS_LTR = {
     '**': (8, lambda a, b: lambda env: a(env) ** b(env)),
     '*':  (6, lambda a, b: lambda env: a(env) *  b(env)),
     '/':  (6, lambda a, b: lambda env: a(env) /  b(env)),
+    '//': (6, lambda a, b: lambda env: a(env) // b(env)),
     '%':  (6, lambda a, b: lambda env: a(env) %  b(env)),
     '+':  (5, lambda a, b: lambda env: a(env) +  b(env)),
     '-':  (5, lambda a, b: lambda env: a(env) -  b(env)),
@@ -243,7 +244,7 @@ def parse_expr(expr, offset=0):
                 token_start = None
 
             if not last & TOKEN_VALUE:
-                raise ParseError(offset + pos, 'value expected1')
+                raise ParseError(offset + pos, 'value expected')
 
             tokens.append((TOKEN_OP_LTR, expr[pos:pos+2], offset + pos))
             last = TOKEN_OP_LTR
@@ -267,7 +268,7 @@ def parse_expr(expr, offset=0):
                 token_start = None
 
             if not last & TOKEN_VALUE:
-                raise ParseError(offset + pos, 'value expected2')
+                raise ParseError(offset + pos, 'value expected')
 
             tokens.append((TOKEN_OP_LTR, expr[pos], offset + pos))
             last = TOKEN_OP_LTR
@@ -296,7 +297,7 @@ def parse_expr(expr, offset=0):
 
             paren -= 1
             if paren < 0:
-                raise ParseError(tokens[-1][2], 'unexpected parenthesis')
+                raise ParseError(offset + pos, 'unexpected parenthesis')
 
             if last & TOKEN_OPERATOR:
                 raise ParseError(offset + pos, 'value expected')
@@ -317,7 +318,7 @@ def parse_expr(expr, offset=0):
         last = add_value()
 
     if not tokens or (last & TOKEN_OPERATOR):
-        raise ParseError(offset + pos - 1, 'value expected!')
+        raise ParseError(offset + pos, 'value expected!')
 
     if paren > 0:
         raise ParseError(offset + pos, 'closing parenthesis expected')
@@ -562,7 +563,7 @@ def undefine_var(env, name):
 def expr_exc_handler(name, args, exc, env, expr):
     """Sample expr exception handler."""
 
-    print('Error: ' + exc.message)
+    print('Error: ' + str(exc))
     if expr:
         print('  ' + expr)
         print(' ' * (exc.pos + 2) + '^')
