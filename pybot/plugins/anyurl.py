@@ -71,7 +71,7 @@ class Plugin(BasePlugin):
             msg.reply('URL Timeout')
             return
 
-        content_type, params = cgi.parse_header(r.headers['Content-Type'])
+        content_type, params = cgi.parse_header(r.headers.get('Content-Type', ''))
         if not content_type in content_types:
             return
 
